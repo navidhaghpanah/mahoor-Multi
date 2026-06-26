@@ -1,10 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  --mahoor-navy: #1a3c6e;
+  --mahoor-dark: #030D1E;
+  --mahoor-card: #0C2C54;
+  --mahoor-border: #1E293B;
+  --mahoor-gold: #D4AF37;
+}
+
 @layer base {
   body {
-    background-color: #0B0F19;
+    background-color: #030D1E;
     color: #FFFFFF;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 

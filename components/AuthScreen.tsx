@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Phone, ArrowLeft, Loader2, Home } from "lucide-react";
+import { Phone, ArrowLeft, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface AuthScreenProps {
   onLogin: (user: any) => void;
@@ -76,12 +77,13 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
         className="w-full max-w-sm z-10 flex flex-col items-center"
       >
-        <div className="w-20 h-20 bg-[#0C2C54] border border-[#D4AF37]/30 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(212,175,55,0.15)]">
-          <Home className="w-10 h-10 text-[#D4AF37]" />
+        <div className="w-28 h-28 rounded-2xl overflow-hidden border-2 border-[#D4AF37]/30 mb-6 shadow-[0_0_40px_rgba(212,175,55,0.15)] bg-[#0C2C54]">
+          <Image src="/logo.jpg" alt="لوگو ماهور" width={112} height={112} className="w-full h-full object-cover" />
         </div>
-        
-        <h1 className="text-3xl font-bold text-white mb-2">املاک ماهور</h1>
-        <p className="text-[#a0b0c0] mb-10 text-center">ورود به پنل مشاورین شمال کشور</p>
+
+        <h1 className="text-3xl font-bold text-white mb-1">املاک ماهور</h1>
+        <p className="text-[#D4AF37] text-sm font-medium mb-2">MAHOOR REAL ESTATE</p>
+        <p className="text-[#a0b0c0] mb-10 text-center text-sm">ورود به پنل مشاورین شمال کشور</p>
 
         <AnimatePresence mode="wait">
           {step === "phone" ? (
