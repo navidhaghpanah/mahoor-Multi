@@ -22,7 +22,7 @@ export function ClientAppRouter() {
   const renderTab = () => {
     switch (activeTab) {
       case "listings": return <TabListings />;
-      case "add": return <TabAddListing />;
+      case "add": return <TabAddListing user={user} />;
       case "channels": return <TabChannels />;
       case "analytics": return <TabAnalytics />;
       case "profile": return <TabProfile user={user} onLogout={() => setUser(null)} />;

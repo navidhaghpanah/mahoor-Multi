@@ -1,100 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, Filter, MapPin, Bed, Car, Ruler, Heart, Phone,
-  Home, Building2, TreePine, Store, ChevronDown, X,
+  Home, Building2, TreePine, Store, ChevronDown, X, Map, Loader2,
 } from "lucide-react";
+import { subscribeToListings, type Listing } from "../lib/listings";
+import { MapModal } from "./MapModal";
 
-const LISTINGS = [
+const STATIC_LISTINGS: Listing[] = [
   {
-    id: 1, type: "sale", propType: "apartment",
+    id: "s1", deal: "sale", propType: "apartment",
     title: "آپارتمان ۱۲۰ متری نوساز - ۳ خواب",
-    price: "۲.۵ میلیارد تومان", priceLabel: "قیمت کل",
-    location: "خیابان امام، محمودآباد",
-    size: 120, beds: 3, hasParking: true, hasElevator: true,
-    agent: "عزیزپور", agentPhone: "09111134767",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop",
-    badge: "فروشی", badgeColor: "bg-red-500",
+    price: "۲.۵ میلیارد تومان", location: "خیابان امام، محمودآباد",
+    size: 120, beds: 3, phone: "09111134767",
+    imageUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop",
+    advisorName: "عزیزپور", advisorPhone: "09111134767",
+    status: "approved", lat: 36.6343, lng: 52.2607,
   },
   {
-    id: 2, type: "sale", propType: "villa",
+    id: "s2", deal: "sale", propType: "villa",
     title: "ویلای دوبلکس ساحلی - ۲۰۰ متر زمین",
-    price: "۵.۸ میلیارد تومان", priceLabel: "قیمت کل",
-    location: "نسیم، محمودآباد",
-    size: 180, beds: 4, hasParking: true, hasElevator: false,
-    agent: "مهندس آزاد", agentPhone: "09113276667",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
-    badge: "فروشی", badgeColor: "bg-red-500",
+    price: "۵.۸ میلیارد تومان", location: "نسیم، محمودآباد",
+    size: 180, beds: 4, phone: "09113276667",
+    imageUrl: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
+    advisorName: "مهندس آزاد", advisorPhone: "09113276667",
+    status: "approved", lat: 36.6360, lng: 52.2580,
   },
   {
-    id: 3, type: "rent", propType: "apartment",
+    id: "s3", deal: "rent", propType: "apartment",
     title: "آپارتمان ۸۵ متری مبله - ۲ خواب",
-    price: "۵ میلیون", priceLabel: "ماهانه",
-    location: "خیابان ساحل، محمودآباد",
-    size: 85, beds: 2, hasParking: false, hasElevator: true,
-    agent: "رضایی", agentPhone: "09195183950",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=250&fit=crop",
-    badge: "اجاره‌ای", badgeColor: "bg-blue-500",
+    price: "۵ میلیون / ماهانه", location: "خیابان ساحل، محمودآباد",
+    size: 85, beds: 2, phone: "09195183950",
+    imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=250&fit=crop",
+    advisorName: "رضایی", advisorPhone: "09195183950",
+    status: "approved", lat: 36.6320, lng: 52.2620,
   },
   {
-    id: 4, type: "mortgage", propType: "apartment",
+    id: "s4", deal: "mortgage", propType: "apartment",
     title: "آپارتمان ۱۰۵ متری رهن کامل - ۳ خواب",
-    price: "۴۰۰ میلیون", priceLabel: "رهن کامل",
-    location: "مرکز شهر، محمودآباد",
-    size: 105, beds: 3, hasParking: true, hasElevator: true,
-    agent: "عزیزپور", agentPhone: "09111134767",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=250&fit=crop",
-    badge: "رهن کامل", badgeColor: "bg-green-600",
+    price: "۴۰۰ میلیون", location: "مرکز شهر، محمودآباد",
+    size: 105, beds: 3, phone: "09111134767",
+    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=250&fit=crop",
+    advisorName: "عزیزپور", advisorPhone: "09111134767",
+    status: "approved", lat: 36.6333, lng: 52.2597,
   },
   {
-    id: 5, type: "presale", propType: "apartment",
+    id: "s5", deal: "presale", propType: "apartment",
     title: "برج مسکونی لاکچری - پیش‌فروش ویژه",
-    price: "۱۸ میلیون / متر", priceLabel: "هر متر",
-    location: "فاز جدید، محمودآباد",
-    size: 90, beds: 2, hasParking: true, hasElevator: true,
-    agent: "مهندس آزاد", agentPhone: "09113276667",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=250&fit=crop",
-    badge: "پیش‌فروش", badgeColor: "bg-purple-600",
+    price: "۱۸ میلیون / متر", location: "فاز جدید، محمودآباد",
+    size: 90, beds: 2, phone: "09113276667",
+    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=250&fit=crop",
+    advisorName: "مهندس آزاد", advisorPhone: "09113276667",
+    status: "approved", lat: 36.6350, lng: 52.2640,
   },
   {
-    id: 6, type: "sale", propType: "land",
+    id: "s6", deal: "sale", propType: "land",
     title: "زمین ۳۰۰ متری سند دار - موقعیت عالی",
-    price: "۹۰۰ میلیون", priceLabel: "قیمت کل",
-    location: "حومه، محمودآباد",
-    size: 300, beds: 0, hasParking: false, hasElevator: false,
-    agent: "رضایی", agentPhone: "09195183950",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop",
-    badge: "فروشی", badgeColor: "bg-red-500",
+    price: "۹۰۰ میلیون", location: "حومه، محمودآباد",
+    size: 300, beds: 0, phone: "09195183950",
+    imageUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop",
+    advisorName: "رضایی", advisorPhone: "09195183950",
+    status: "approved", lat: 36.6300, lng: 52.2650,
   },
 ];
 
-const DEAL_TYPES = [
-  { id: "all", label: "همه" },
-  { id: "sale", label: "فروشی" },
-  { id: "rent", label: "اجاره" },
-  { id: "mortgage", label: "رهن" },
-  { id: "presale", label: "پیش‌فروش" },
-];
+const BADGE: Record<string, { label: string; color: string }> = {
+  sale:     { label: "فروشی",    color: "bg-red-500" },
+  rent:     { label: "اجاره‌ای", color: "bg-blue-500" },
+  mortgage: { label: "رهن کامل", color: "bg-green-600" },
+  presale:  { label: "پیش‌فروش", color: "bg-purple-600" },
+};
+
+const DEAL_TYPES = ["all", "sale", "rent", "mortgage", "presale"];
+const DEAL_LABELS: Record<string, string> = { all:"همه", sale:"فروشی", rent:"اجاره", mortgage:"رهن", presale:"پیش‌فروش" };
 
 const PROP_TYPES = [
-  { id: "all", label: "همه", Icon: Home },
-  { id: "apartment", label: "آپارتمان", Icon: Building2 },
-  { id: "villa", label: "ویلا", Icon: Home },
-  { id: "land", label: "زمین", Icon: TreePine },
-  { id: "commercial", label: "تجاری", Icon: Store },
+  { id: "all",       label: "همه",       Icon: Home },
+  { id: "apartment", label: "آپارتمان",  Icon: Building2 },
+  { id: "villa",     label: "ویلا",      Icon: Home },
+  { id: "land",      label: "زمین",      Icon: TreePine },
+  { id: "commercial",label: "تجاری",     Icon: Store },
 ];
 
 export function TabListings() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch]       = useState("");
   const [dealFilter, setDealFilter] = useState("all");
   const [propFilter, setPropFilter] = useState("all");
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [firestoreListings, setFirestoreListings] = useState<Listing[]>([]);
+  const [mapListing, setMapListing] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = LISTINGS.filter((l) => {
-    const matchDeal = dealFilter === "all" || l.type === dealFilter;
+  useEffect(() => {
+    const unsub = subscribeToListings((data) => {
+      setFirestoreListings(data);
+      setLoading(false);
+    });
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => { unsub(); clearTimeout(timer); };
+  }, []);
+
+  const allListings = [
+    ...firestoreListings,
+    ...STATIC_LISTINGS.filter((s) => !firestoreListings.find((f) => f.id === s.id)),
+  ];
+
+  const filtered = allListings.filter((l) => {
+    const matchDeal = dealFilter === "all" || l.deal === dealFilter;
     const matchProp = propFilter === "all" || l.propType === propFilter;
     const matchSearch =
       !search ||
@@ -103,7 +118,7 @@ export function TabListings() {
     return matchDeal && matchProp && matchSearch;
   });
 
-  const toggleFav = (id: number) =>
+  const toggleFav = (id: string) =>
     setFavorites((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -113,12 +128,17 @@ export function TabListings() {
   return (
     <div className="flex flex-col gap-6 pb-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">آگهی‌های ملکی</h1>
-        <p className="text-[#a0b0c0] text-sm">محمودآباد و اطراف — {filtered.length} ملک یافت شد</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">آگهی‌های ملکی</h1>
+          <p className="text-[#a0b0c0] text-sm">
+            {loading ? "در حال بارگذاری..." : `${filtered.length} ملک یافت شد`}
+          </p>
+        </div>
+        {loading && <Loader2 className="w-5 h-5 text-[#D4AF37] animate-spin" />}
       </div>
 
-      {/* Search + Filter Toggle */}
+      {/* Search Bar */}
       <div className="flex gap-3">
         <div className="flex-1 relative">
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
@@ -164,15 +184,13 @@ export function TabListings() {
                 <div className="flex flex-wrap gap-2">
                   {DEAL_TYPES.map((d) => (
                     <button
-                      key={d.id}
-                      onClick={() => setDealFilter(d.id)}
+                      key={d}
+                      onClick={() => setDealFilter(d)}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        dealFilter === d.id
-                          ? "bg-[#D4AF37] text-black"
-                          : "bg-[#1E293B] text-gray-300 hover:bg-[#1E293B]/80"
+                        dealFilter === d ? "bg-[#D4AF37] text-black" : "bg-[#1E293B] text-gray-300 hover:bg-[#1E293B]/80"
                       }`}
                     >
-                      {d.label}
+                      {DEAL_LABELS[d]}
                     </button>
                   ))}
                 </div>
@@ -180,23 +198,18 @@ export function TabListings() {
               <div>
                 <p className="text-xs text-gray-400 font-semibold mb-2 uppercase tracking-wider">نوع ملک</p>
                 <div className="flex flex-wrap gap-2">
-                  {PROP_TYPES.map((p) => {
-                    const Icon = p.Icon;
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => setPropFilter(p.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                          propFilter === p.id
-                            ? "bg-[#D4AF37] text-black"
-                            : "bg-[#1E293B] text-gray-300 hover:bg-[#1E293B]/80"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {p.label}
-                      </button>
-                    );
-                  })}
+                  {PROP_TYPES.map(({ id, label, Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => setPropFilter(id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        propFilter === id ? "bg-[#D4AF37] text-black" : "bg-[#1E293B] text-gray-300 hover:bg-[#1E293B]/80"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
               {(dealFilter !== "all" || propFilter !== "all") && (
@@ -221,94 +234,129 @@ export function TabListings() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map((listing, i) => (
-            <motion.div
-              key={listing.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-[#0C2C54]/50 border border-[#1E293B] rounded-2xl overflow-hidden hover:border-[#D4AF37]/30 hover:-translate-y-1 transition-all duration-300 group"
-            >
-              {/* Image */}
-              <div className="relative h-[200px] overflow-hidden bg-[#1E293B]">
-                <img
-                  src={listing.image}
-                  alt={listing.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <span className={`absolute top-3 right-3 ${listing.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-full`}>
-                  {listing.badge}
-                </span>
-                <button
-                  onClick={() => toggleFav(listing.id)}
-                  className={`absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                    favorites.has(listing.id)
-                      ? "bg-red-500 text-white"
-                      : "bg-black/40 text-white/70 hover:bg-black/60"
-                  }`}
-                >
-                  <Heart className={`w-4 h-4 ${favorites.has(listing.id) ? "fill-current" : ""}`} />
-                </button>
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 text-white text-xs">
-                  <MapPin className="w-3 h-3" />
-                  <span>{listing.location}</span>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="p-4">
-                <h3 className="font-bold text-white text-sm mb-2 leading-relaxed">{listing.title}</h3>
-                <p className="text-[#D4AF37] text-lg font-bold mb-1">
-                  {listing.price}
-                  <span className="text-xs text-gray-400 font-normal mr-1">/ {listing.priceLabel}</span>
-                </p>
-
-                {/* Features */}
-                <div className="flex gap-4 pt-3 border-t border-[#1E293B] mt-3 flex-wrap">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                    <Ruler className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    {listing.size} متر
-                  </div>
-                  {listing.beds > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                      <Bed className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      {listing.beds} خواب
+          {filtered.map((listing, i) => {
+            const badge = BADGE[listing.deal] ?? { label: listing.deal, color: "bg-gray-600" };
+            const favId = listing.id ?? i.toString();
+            return (
+              <motion.div
+                key={listing.id ?? i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                className="bg-[#0C2C54]/50 border border-[#1E293B] rounded-2xl overflow-hidden hover:border-[#D4AF37]/30 hover:-translate-y-1 transition-all duration-300 group"
+              >
+                {/* Image */}
+                <div className="relative h-[200px] overflow-hidden bg-[#1E293B]">
+                  {listing.imageUrl ? (
+                    <img
+                      src={listing.imageUrl}
+                      alt={listing.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Building2 className="w-12 h-12 text-gray-600" />
                     </div>
                   )}
-                  {listing.hasParking && (
-                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                      <Car className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      پارکینگ
-                    </div>
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <span className={`absolute top-3 right-3 ${badge.color} text-white text-xs font-bold px-3 py-1 rounded-full`}>
+                    {badge.label}
+                  </span>
+
+                  {/* Map + Fav buttons */}
+                  <div className="absolute top-3 left-3 flex gap-1.5">
+                    <button
+                      onClick={() => setMapListing(listing)}
+                      className="w-8 h-8 rounded-full bg-black/40 text-white/80 hover:bg-[#D4AF37] hover:text-black flex items-center justify-center transition-all"
+                      title="نمایش روی نقشه"
+                    >
+                      <Map className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toggleFav(favId)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                        favorites.has(favId) ? "bg-red-500 text-white" : "bg-black/40 text-white/70 hover:bg-black/60"
+                      }`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${favorites.has(favId) ? "fill-current" : ""}`} />
+                    </button>
+                  </div>
+
+                  <div className="absolute bottom-3 right-3 flex items-center gap-1 text-white text-xs">
+                    <MapPin className="w-3 h-3" />
+                    <span>{listing.location}</span>
+                  </div>
                 </div>
 
-                {/* Agent */}
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#1E293B]">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a3c6e] to-[#D4AF37]/40 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                      {listing.agent[0]}
+                {/* Body */}
+                <div className="p-4">
+                  <h3 className="font-bold text-white text-sm mb-2 leading-relaxed line-clamp-2">
+                    {listing.title}
+                  </h3>
+                  <p className="text-[#D4AF37] text-lg font-bold mb-1">
+                    {listing.price}
+                  </p>
+                  {listing.desc && (
+                    <p className="text-gray-400 text-xs mb-2 line-clamp-2">{listing.desc}</p>
+                  )}
+
+                  {/* Features */}
+                  <div className="flex gap-4 pt-3 border-t border-[#1E293B] mt-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                      <Ruler className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      {listing.size} متر
                     </div>
-                    <div>
-                      <p className="text-white text-xs font-semibold">{listing.agent}</p>
-                      <p className="text-gray-500 text-[10px]">کارشناس ملکی</p>
-                    </div>
+                    {listing.beds > 0 && (
+                      <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                        <Bed className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        {listing.beds} خواب
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setMapListing(listing)}
+                      className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-white transition-colors"
+                    >
+                      <Map className="w-3.5 h-3.5" />
+                      نقشه
+                    </button>
                   </div>
-                  <a
-                    href={`tel:${listing.agentPhone}`}
-                    className="flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600 border border-green-600/40 hover:border-green-600 text-green-400 hover:text-white px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    تماس
-                  </a>
+
+                  {/* Agent */}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#1E293B]">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a3c6e] to-[#D4AF37]/40 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        {(listing.advisorName ?? "م")[0]}
+                      </div>
+                      <div>
+                        <p className="text-white text-xs font-semibold">{listing.advisorName ?? "کارشناس ماهور"}</p>
+                        <p className="text-gray-500 text-[10px]">کارشناس ملکی</p>
+                      </div>
+                    </div>
+                    <a
+                      href={`tel:${listing.advisorPhone ?? listing.phone}`}
+                      className="flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600 border border-green-600/40 hover:border-green-600 text-green-400 hover:text-white px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      تماس
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       )}
+
+      {/* Map Modal */}
+      <MapModal
+        isOpen={!!mapListing}
+        onClose={() => setMapListing(null)}
+        location={mapListing?.location ?? ""}
+        lat={mapListing?.lat}
+        lng={mapListing?.lng}
+        title={mapListing?.title}
+      />
     </div>
   );
 }
