@@ -16,6 +16,8 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(120);
+  const [otpToken, setOtpToken] = useState("");
+  const [recipientName, setRecipientName] = useState("");
 
   useEffect(() => {
     let interval: any;
@@ -25,33 +27,44 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.length < 10) return;
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'خطا در ارسال کد');
+      setOtpToken(data.token);
+      setRecipientName(data.name ?? "");
       setStep("otp");
       setTimer(120);
-    }, 1000);
+      setOtp("");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length < 4) return;
+    if (otp.length < 6) return;
     setLoading(true);
     setError("");
-    
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
+        body: JSON.stringify({ phone, code: otp, token: otpToken }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "خطا در ورود پیامکی");
-      
+      if (!res.ok) throw new Error(data.error || 'کد اشتباه است');
       onLogin(data.user);
     } catch (err: any) {
       setError(err.message);
@@ -121,33 +134,54 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
               onSubmit={handleVerify}
               className="w-full relative"
             >
-              <p className="text-sm text-[#a0b0c0] mb-4 text-center">کد ارسال شده به {phone} را وارد کنید</p>
-              
+              <div className="text-center mb-5">
+                {recipientName && (
+                  <p className="text-white font-semibold text-sm mb-1">{recipientName}</p>
+                )}
+                <p className="text-sm text-[#a0b0c0]">
+                  کد ۶ رقمی ارسال شده به{" "}
+                  <span className="text-white font-mono" dir="ltr">{phone}</span>{" "}
+                  را وارد کنید
+                </p>
+              </div>
+
               <div className="relative mb-6">
-                <input 
-                  type="text" 
-                  maxLength={4}
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="-   -   -   -" 
-                  className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-4 py-4 text-white text-center text-2xl tracking-[1em] focus:outline-none focus:border-[#D4AF37]"
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="- - - - - -"
+                  className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-4 py-4 text-white text-center text-2xl tracking-[0.6em] focus:outline-none focus:border-[#D4AF37]"
                   dir="ltr"
+                  autoFocus
                 />
               </div>
-              
+
               {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
 
-              <button 
+              <button
                 type="submit"
-                disabled={loading || otp.length < 4}
+                disabled={loading || otp.length < 6}
                 className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "تایید کد"}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "تأیید و ورود"}
               </button>
-              
+
               <div className="flex justify-between mt-4">
-                 <button type="button" onClick={() => setStep("phone")} className="text-sm text-gray-400 hover:text-white">ویرایش شماره</button>
-                 <span className="text-sm text-[#D4AF37] font-mono">{formatTime(timer)}</span>
+                <button type="button" onClick={() => { setStep("phone"); setError(""); }}
+                  className="text-sm text-gray-400 hover:text-white transition-colors">
+                  ویرایش شماره
+                </button>
+                {timer > 0 ? (
+                  <span className="text-sm text-[#D4AF37] font-mono">{formatTime(timer)}</span>
+                ) : (
+                  <button type="button" onClick={handleSendOtp}
+                    className="text-sm text-[#D4AF37] hover:underline transition-colors">
+                    ارسال مجدد کد
+                  </button>
+                )}
               </div>
             </motion.form>
           )}
