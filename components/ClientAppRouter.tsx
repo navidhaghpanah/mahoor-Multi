@@ -7,6 +7,7 @@ import { TabListings } from "./TabListings";
 import { TabAddListing } from "./TabAddListing";
 import { TabChannels } from "./TabChannels";
 import { TabAnalytics } from "./TabAnalytics";
+import { TabAdmin } from "./TabAdmin";
 import { TabProfile } from "./TabProfile";
 import { AiAssistant } from "./AiAssistant";
 
@@ -25,6 +26,7 @@ export function ClientAppRouter() {
       case "add": return <TabAddListing user={user} />;
       case "channels": return <TabChannels />;
       case "analytics": return <TabAnalytics />;
+      case "admin": return <TabAdmin />;
       case "profile": return <TabProfile user={user} onLogout={() => setUser(null)} />;
       default: return <TabListings />;
     }

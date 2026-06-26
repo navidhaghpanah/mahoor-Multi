@@ -23,7 +23,7 @@ export interface Listing {
   desc?: string;
   advisorName?: string;
   advisorPhone?: string;
-  status: "pending" | "approved";
+  status: "pending" | "approved" | "rejected";
   createdAt?: any;
 }
 
@@ -71,6 +71,10 @@ export async function uploadImage(
 
 export async function deleteListing(id: string) {
   await deleteDoc(doc(db, COLLECTION, id));
+}
+
+export async function updateListingStatus(id: string, status: "approved" | "rejected") {
+  await updateDoc(doc(db, COLLECTION, id), { status });
 }
 
 /* Geocode an address to lat/lng using Nominatim (OpenStreetMap) */

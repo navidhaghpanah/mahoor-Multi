@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Home, PlusSquare, Share2, BarChart2, User, Sparkles } from "lucide-react";
+import { Home, PlusSquare, Share2, BarChart2, User, Sparkles, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 
@@ -18,7 +18,10 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user }: A
     { id: "listings", label: "آگهی‌ها", icon: Home },
     { id: "add", label: "ثبت آگهی", icon: PlusSquare },
     { id: "channels", label: "درگاه‌ها", icon: Share2 },
-    ...(user?.isManager ? [{ id: "analytics", label: "آمار و تحلیل", icon: BarChart2 }] : []),
+    ...(user?.isManager ? [
+      { id: "analytics", label: "آمار و تحلیل", icon: BarChart2 },
+      { id: "admin", label: "مدیریت آگهی", icon: ShieldCheck },
+    ] : []),
     { id: "profile", label: "پروفایل", icon: User },
   ];
 

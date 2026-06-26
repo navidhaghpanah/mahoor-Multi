@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /mahoor_listings/{listing} {
+      // Anyone can read listings (public browsing)
+      allow read: if true;
+
+      // Allow creating a listing with required fields
+      allow create: if request.resource.data.keys().hasAll([
+        'title', 'deal', 'propType', 'price', 'phone', 'location', 'status'
+      ]) && request.resource.data.status == 'pending';
+
+      // Allow updates (image URL set after upload, status changes by manager)
+      allow update: if true;
+
+      // Allow delete (agent deletes own listing, manager can delete any)
+      allow delete: if true;
+    }
+  }
+}
