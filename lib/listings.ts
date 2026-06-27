@@ -1,12 +1,5 @@
 "use client";
 
-import { db, storage } from "./firebase";
-import {
-  collection, addDoc, getDocs, onSnapshot,
-  query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc,
-} from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-
 export interface Listing {
   id?: string;
   title: string;
@@ -27,59 +20,97 @@ export interface Listing {
   createdAt?: any;
 }
 
-const COLLECTION = "mahoor_listings";
+/* Fetch all listings once from the Neon-backed API route. */
+export async function fetchListings(): Promise<Listing[]> {
+  try {
+    const res = await fetch("/api/listings", { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.listings ?? []) as Listing[];
+  } catch {
+    return [];
+  }
+}
 
+/*
+ * Keep the same callback-based API the components expect.
+ * Firebase used real-time onSnapshot; here we poll the API every 15s
+ * and return an unsubscribe function.
+ */
 export function subscribeToListings(cb: (listings: Listing[]) => void) {
-  const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
-  return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Listing)));
+  let active = true;
+
+  const load = async () => {
+    const listings = await fetchListings();
+    if (active) cb(listings);
+  };
+
+  load();
+  const interval = setInterval(load, 15000);
+
+  return () => {
+    active = false;
+    clearInterval(interval);
+  };
+}
+
+export async function addListing(
+  listing: Omit<Listing, "id" | "createdAt">
+): Promise<string> {
+  const res = await fetch("/api/listings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(listing),
   });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "خطا در ثبت آگهی");
+  return data.id as string;
 }
 
-export async function addListing(listing: Omit<Listing, "id" | "createdAt">): Promise<string> {
-  const docRef = await addDoc(collection(db, COLLECTION), {
-    ...listing,
-    status: "pending",
-    createdAt: serverTimestamp(),
-  });
-  return docRef.id;
-}
-
-export async function updateListingImage(id: string, imageUrl: string) {
-  await updateDoc(doc(db, COLLECTION, id), { imageUrl });
-}
-
+/*
+ * Image handling without Firebase Storage:
+ * convert the selected file to a Base64 data URL so it can be sent
+ * inside the listing payload and stored in the image_url text column.
+ */
 export async function uploadImage(
   file: File,
-  listingId: string,
+  _listingId: string,
   onProgress?: (pct: number) => void
 ): Promise<string> {
-  const storageRef = ref(storage, `listings/${listingId}/${Date.now()}_${file.name}`);
   return new Promise((resolve, reject) => {
-    const task = uploadBytesResumable(storageRef, file);
-    task.on(
-      "state_changed",
-      (snap) => onProgress?.(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
-      reject,
-      async () => {
-        const url = await getDownloadURL(task.snapshot.ref);
-        resolve(url);
+    const reader = new FileReader();
+    reader.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
       }
-    );
+    };
+    reader.onload = () => {
+      onProgress?.(100);
+      resolve(reader.result as string);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 
-export async function deleteListing(id: string) {
-  await deleteDoc(doc(db, COLLECTION, id));
+/* Kept for API compatibility (image is now saved on create). */
+export async function updateListingImage(_id: string, _imageUrl: string) {
+  /* no-op: the image is included in the initial addListing payload */
 }
 
 /* Geocode an address to lat/lng using Nominatim (OpenStreetMap) */
-export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+export async function geocodeAddress(
+  address: string
+): Promise<{ lat: number; lng: number } | null> {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address + " ایران")}&format=json&limit=1`;
+    const url =
+      "https://nominatim.openstreetmap.org/search?q=" +
+      encodeURIComponent(address + " ایران") +
+      "&format=json&limit=1";
     const res = await fetch(url, { headers: { "Accept-Language": "fa" } });
     const data = await res.json();
-    if (data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    if (data.length > 0)
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
   } catch {}
   return null;
 }
