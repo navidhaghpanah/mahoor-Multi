@@ -6,43 +6,43 @@ import {
   Home, Building2, TreePine, Store, Send, CheckCircle2,
   MapPin, ImagePlus, X, Loader2, Map, Info,
 } from "lucide-react";
-import { addListing, uploadImage, updateListingImage, geocodeAddress } from "../lib/listings";
+import { addListing, uploadImage, geocodeAddress } from "../lib/listings";
 import { MapModal } from "./MapModal";
 
 const DEAL_TYPES = ["فروش", "اجاره", "رهن کامل", "رهن و اجاره", "پیش‌فروش"];
 const PROP_TYPES = [
   { label: "آپارتمان", Icon: Building2 },
-  { label: "ویلا",     Icon: Home },
-  { label: "زمین",     Icon: TreePine },
-  { label: "تجاری",    Icon: Store },
+  { label: "ویلا", Icon: Home },
+  { label: "زمین", Icon: TreePine },
+  { label: "تجاری", Icon: Store },
 ];
 const CHANNELS = [
-  { id: "whatsapp", label: "واتساپ",  color: "#25D366" },
-  { id: "divar",    label: "دیوار",   color: "#d42b2b" },
-  { id: "sheypoor", label: "شیپور",   color: "#f97316" },
-  { id: "telegram", label: "تلگرام",  color: "#229ED9" },
+  { id: "whatsapp", label: "واتساپ", color: "#25D366" },
+  { id: "divar", label: "دیوار", color: "#d42b2b" },
+  { id: "sheypoor", label: "شیپور", color: "#f97316" },
+  { id: "telegram", label: "تلگرام", color: "#229ED9" },
 ];
 
 export function TabAddListing({ user }: { user?: any }) {
-  const [deal, setDeal]         = useState("فروش");
+  const [deal, setDeal] = useState("فروش");
   const [propType, setPropType] = useState("آپارتمان");
-  const [title, setTitle]       = useState("");
-  const [size, setSize]         = useState("");
-  const [price, setPrice]       = useState("");
-  const [beds, setBeds]         = useState("");
-  const [phone, setPhone]       = useState(user?.phoneNumber ?? "");
-  const [desc, setDesc]         = useState("");
+  const [title, setTitle] = useState("");
+  const [size, setSize] = useState("");
+  const [price, setPrice] = useState("");
+  const [beds, setBeds] = useState("");
+  const [phone, setPhone] = useState(user?.phoneNumber ?? "");
+  const [desc, setDesc] = useState("");
   const [location, setLocation] = useState("");
-  const [lat, setLat]           = useState<number | undefined>();
-  const [lng, setLng]           = useState<number | undefined>();
-  const [imageFile, setImageFile]   = useState<File | null>(null);
+  const [lat, setLat] = useState<number | undefined>();
+  const [lng, setLng] = useState<number | undefined>();
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedChannels, setSelectedChannels] = useState<string[]>(["whatsapp"]);
-  const [success, setSuccess]   = useState(false);
-  const [loading, setLoading]   = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
-  const [mapOpen, setMapOpen]   = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,44 +88,37 @@ export function TabAddListing({ user }: { user?: any }) {
     setLoading(true);
 
     try {
-      const dealToType: Record<string, string> = {
-        "فروش": "sale", "اجاره": "rent", "رهن کامل": "mortgage",
-        "رهن و اجاره": "mortgage", "پیش‌فروش": "presale",
-      };
-      const propToType: Record<string, string> = {
-        "آپارتمان": "apartment", "ویلا": "villa",
-        "زمین": "land", "تجاری": "commercial",
-      };
+      // Convert the selected image to a Base64 data URL (no Firebase Storage).
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        try {
+          imageUrl = await uploadImage(imageFile, "", setUploadProgress);
+        } catch {
+          console.warn("Image conversion failed, listing saved without image");
+        }
+      }
 
-      const listingId = await addListing({
-        title, deal: dealToType[deal] ?? deal,
-        propType: propToType[propType] ?? propType,
+      await addListing({
+        title,
+        deal,
+        propType,
         price, size: parseInt(size) || 0,
         beds: parseInt(beds) || 0, phone, location,
-        lat, lng, desc,
+        lat, lng, desc, imageUrl,
         advisorName: user?.fullName ?? "کارشناس ماهور",
         advisorPhone: phone,
         status: "pending",
       });
 
-      if (imageFile) {
-        try {
-          const url = await uploadImage(imageFile, listingId, setUploadProgress);
-          await updateListingImage(listingId, url);
-        } catch {
-          console.warn("Image upload failed, listing saved without image");
-        }
-      }
-
       const msg =
         `🏠 *آگهی جدید - املاک ماهور*\n\n` +
         `📋 عنوان: ${title}\n🔑 نوع: ${deal} / ${propType}\n` +
-        (size  ? `📐 متراژ: ${size} متر\n`    : "") +
-        (beds  ? `🛏 خواب: ${beds}\n`          : "") +
-        (price ? `💰 قیمت: ${price}\n`         : "") +
+        (size ? `📐 متراژ: ${size} متر\n` : "") +
+        (beds ? `🛏 خواب: ${beds}\n` : "") +
+        (price ? `💰 قیمت: ${price}\n` : "") +
         (location ? `📍 موقعیت: ${location}\n` : "") +
         `📞 تماس: ${phone}\n` +
-        (desc  ? `📝 توضیحات: ${desc}` : "");
+        (desc ? `📝 توضیحات: ${desc}` : "");
 
       if (selectedChannels.includes("whatsapp")) {
         window.open("https://wa.me/989111134767?text=" + encodeURIComponent(msg), "_blank");
