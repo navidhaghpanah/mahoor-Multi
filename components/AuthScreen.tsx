@@ -13,6 +13,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
   const [phone, setPhone] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [otp, setOtp] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(120);
@@ -30,7 +31,11 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
     if (phone.length < 10) return;
     setLoading(true);
     setError("");
+    // Generate a 4-digit verification code locally (demo mode, no real SMS).
+    const newCode = String(Math.floor(1000 + Math.random() * 9000));
     setTimeout(() => {
+      setGeneratedCode(newCode);
+      setOtp("");
       setLoading(false);
       setStep("otp");
       setTimer(120);
@@ -40,9 +45,15 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length < 4) return;
+
+    if (otp !== generatedCode) {
+      setError("کد وارد شده صحیح نیست");
+      return;
+    }
+
     setLoading(true);
     setError("");
-    
+
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -51,7 +62,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "خطا در ورود پیامکی");
-      
+
       onLogin(data.user);
     } catch (err: any) {
       setError(err.message);
@@ -73,7 +84,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
         <div className="absolute bottom-[-20%] left-[-20%] w-[60vw] h-[60vw] rounded-full bg-[#D4AF37]/5 blur-[150px]"></div>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
         className="w-full max-w-sm z-10 flex flex-col items-center"
       >
@@ -87,25 +98,25 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
 
         <AnimatePresence mode="wait">
           {step === "phone" ? (
-            <motion.form 
+            <motion.form
               key="phone-form"
               initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
               onSubmit={handleSendOtp}
               className="w-full relative"
             >
               <div className="relative mb-6">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="شماره موبایل (مثلا 09113276647)" 
+                  placeholder="شماره موبایل (مثلا 09113276647)"
                   className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-12 py-4 text-white text-left placeholder:text-right placeholder:text-gray-500 focus:outline-none focus:border-[#D4AF37]/50"
                   dir="ltr"
                 />
                 <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               </div>
               {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
-              <button 
+              <button
                 type="submit"
                 disabled={loading || phone.length < 10}
                 className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
@@ -115,39 +126,46 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
               </button>
             </motion.form>
           ) : (
-            <motion.form 
+            <motion.form
               key="otp-form"
               initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
               onSubmit={handleVerify}
               className="w-full relative"
             >
               <p className="text-sm text-[#a0b0c0] mb-4 text-center">کد ارسال شده به {phone} را وارد کنید</p>
-              
-              <div className="relative mb-6">
-                <input 
-                  type="text" 
+
+              <div className="relative mb-4">
+                <input
+                  type="text"
                   maxLength={4}
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  placeholder="-   -   -   -" 
+                  placeholder="- - - -"
                   className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-4 py-4 text-white text-center text-2xl tracking-[1em] focus:outline-none focus:border-[#D4AF37]"
                   dir="ltr"
                 />
               </div>
-              
+
+              {generatedCode && (
+                <div className="mb-6 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-3 text-center">
+                  <p className="text-xs text-[#a0b0c0] mb-1">کد تایید شما (نمایش آزمایشی):</p>
+                  <p className="text-2xl font-bold text-[#D4AF37] tracking-[0.5em]" dir="ltr">{generatedCode}</p>
+                </div>
+              )}
+
               {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
 
-              <button 
+              <button
                 type="submit"
                 disabled={loading || otp.length < 4}
                 className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "تایید کد"}
               </button>
-              
+
               <div className="flex justify-between mt-4">
-                 <button type="button" onClick={() => setStep("phone")} className="text-sm text-gray-400 hover:text-white">ویرایش شماره</button>
-                 <span className="text-sm text-[#D4AF37] font-mono">{formatTime(timer)}</span>
+                <button type="button" onClick={() => setStep("phone")} className="text-sm text-gray-400 hover:text-white">ویرایش شماره</button>
+                <span className="text-sm text-[#D4AF37] font-mono">{formatTime(timer)}</span>
               </div>
             </motion.form>
           )}
