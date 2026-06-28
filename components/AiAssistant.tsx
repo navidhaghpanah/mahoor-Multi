@@ -21,15 +21,15 @@ export function AiAssistant({ isOpen, onClose }: { isOpen: boolean, onClose: () 
     setLoading(true);
 
     try {
-      // Send to gemini logic
       const res = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: userMsg })
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'ai', text: data.text }]);
-    } catch (e) {
+      const replyText = data.text ?? 'پاسخی دریافت نشد.';
+      setMessages(prev => [...prev, { role: 'ai', text: replyText }]);
+    } catch {
       setMessages(prev => [...prev, { role: 'ai', text: 'متاسفانه در ارتباط با سرور مشکلی پیش آمد.' }]);
     } finally {
       setLoading(false);
