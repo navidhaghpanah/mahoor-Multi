@@ -82,6 +82,7 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user }: A
           <p className="text-center text-[10px] text-gray-600 mt-3">
             &copy; {new Date().getFullYear()} &mdash; mahoorrlste.ir
           </p>
+          <p className="text-center text-[10px] text-gray-700 mt-1 tracking-widest font-semibold select-none">NH</p>
         </div>
       </aside>
 
@@ -107,6 +108,7 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user }: A
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 animate-in fade-in duration-500">
         {children}
+        <p className="text-center text-[10px] text-gray-700 mt-6 mb-1 tracking-widest font-semibold select-none md:hidden">NH</p>
       </main>
 
       {/* Mobile Bottom Tab Navigation */}

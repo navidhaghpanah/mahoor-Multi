@@ -78,7 +78,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#030D1E] flex flex-col items-center justify-center relative overflow-hidden px-6">
+    <div className="min-h-[100dvh] bg-[#030D1E] flex flex-col items-center justify-center relative overflow-hidden px-6 pb-6">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-[#D4AF37]/5 blur-[120px]"></div>
         <div className="absolute bottom-[-20%] left-[-20%] w-[60vw] h-[60vw] rounded-full bg-[#D4AF37]/5 blur-[150px]"></div>
@@ -171,6 +171,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
           )}
         </AnimatePresence>
       </motion.div>
+      <p className="absolute bottom-4 left-0 right-0 text-center text-[10px] text-gray-700 tracking-widest font-semibold select-none z-10">NH</p>
     </div>
   );
 }

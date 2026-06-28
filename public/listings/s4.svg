@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#030D1E"/>
+      <stop offset="100%" style="stop-color:#0B2845"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#bg4)"/>
+  <!-- Classic apartment exterior -->
+  <rect x="80" y="80" width="240" height="145" fill="#0A2040" stroke="#1E3A5F" stroke-width="2"/>
+  <!-- Facade decoration - columns -->
+  <rect x="90" y="80" width="8" height="145" fill="#0E2A50"/>
+  <rect x="150" y="80" width="8" height="145" fill="#0E2A50"/>
+  <rect x="242" y="80" width="8" height="145" fill="#0E2A50"/>
+  <rect x="302" y="80" width="8" height="145" fill="#0E2A50"/>
+  <!-- Cornices/floor lines -->
+  <rect x="80" y="118" width="240" height="4" fill="#1A3C6E"/>
+  <rect x="80" y="158" width="240" height="4" fill="#1A3C6E"/>
+  <rect x="80" y="80" width="240" height="6" fill="#D4AF37" opacity="0.3"/>
+  <!-- Windows floor 1 -->
+  <rect x="105" y="90" width="35" height="22" rx="2" fill="#D4AF37" opacity="0.5"/>
+  <rect x="165" y="90" width="66" height="22" rx="2" fill="#D4AF37" opacity="0.4"/>
+  <rect x="255" y="90" width="35" height="22" rx="2" fill="#D4AF37" opacity="0.7"/>
+  <!-- Windows floor 2 -->
+  <rect x="105" y="130" width="35" height="22" rx="2" fill="#D4AF37" opacity="0.8"/>
+  <rect x="165" y="130" width="30" height="22" rx="2" fill="#D4AF37" opacity="0.5"/>
+  <rect x="205" y="130" width="30" height="22" rx="2" fill="#D4AF37" opacity="0.3"/>
+  <rect x="255" y="130" width="35" height="22" rx="2" fill="#D4AF37" opacity="0.9"/>
+  <!-- Windows floor 3 -->
+  <rect x="105" y="168" width="35" height="22" rx="2" fill="#D4AF37" opacity="0.4"/>
+  <rect x="165" y="168" width="30" height="22" rx="2" fill="#D4AF37" opacity="0.7"/>
+  <rect x="205" y="168" width="30" height="22" rx="2" fill="#D4AF37" opacity="0.5"/>
+  <rect x="255" y="168" width="35" height="22" rx="2" fill="#D4AF37" opacity="0.6"/>
+  <!-- Entrance arch -->
+  <path d="M175 225 L175 195 Q200 175 225 195 L225 225 Z" fill="#071525"/>
+  <path d="M178 225 L178 196 Q200 179 222 196 L222 225 Z" fill="#040F1C"/>
+  <!-- Steps -->
+  <rect x="165" y="223" width="70" height="5" fill="#0A2040"/>
+  <rect x="160" y="228" width="80" height="5" fill="#0C2A50"/>
+  <!-- Hedge/bushes -->
+  <ellipse cx="110" cy="225" rx="30" ry="15" fill="#061A0A" opacity="0.7"/>
+  <ellipse cx="290" cy="225" rx="30" ry="15" fill="#061A0A" opacity="0.7"/>
+  <!-- Ground -->
+  <rect x="0" y="230" width="400" height="20" fill="#020C18"/>
+  <!-- Stars -->
+  <circle cx="55" cy="35" r="1.5" fill="#D4AF37" opacity="0.5"/>
+  <circle cx="350" cy="20" r="1" fill="white" opacity="0.4"/>
+  <circle cx="200" cy="25" r="1" fill="white" opacity="0.3"/>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#020C1E"/>
+      <stop offset="100%" style="stop-color:#0A2A4A"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#bg3)"/>
+  <!-- City skyline silhouette -->
+  <rect x="20" y="140" width="40" height="80" fill="#061524" opacity="0.7"/>
+  <rect x="30" y="120" width="20" height="20" fill="#061524" opacity="0.7"/>
+  <rect x="70" y="110" width="50" height="110" fill="#040F1E" opacity="0.8"/>
+  <rect x="330" y="130" width="50" height="90" fill="#040F1E" opacity="0.7"/>
+  <rect x="345" y="110" width="20" height="20" fill="#040F1E" opacity="0.7"/>
+  <!-- Main building -->
+  <rect x="130" y="60" width="140" height="160" fill="#0C2C54" stroke="#1A3A6A" stroke-width="2"/>
+  <!-- Horizontal floors -->
+  <line x1="130" y1="100" x2="270" y2="100" stroke="#1A3A6A" stroke-width="0.5"/>
+  <line x1="130" y1="140" x2="270" y2="140" stroke="#1A3A6A" stroke-width="0.5"/>
+  <line x1="130" y1="180" x2="270" y2="180" stroke="#1A3A6A" stroke-width="0.5"/>
+  <!-- Windows - floor 1 -->
+  <rect x="145" y="70" width="20" height="22" fill="#D4AF37" opacity="0.9"/>
+  <rect x="175" y="70" width="20" height="22" fill="#D4AF37" opacity="0.4"/>
+  <rect x="205" y="70" width="20" height="22" fill="#D4AF37" opacity="0.7"/>
+  <rect x="235" y="70" width="20" height="22" fill="#D4AF37" opacity="0.6"/>
+  <!-- Windows - floor 2 -->
+  <rect x="145" y="110" width="20" height="22" fill="#D4AF37" opacity="0.5"/>
+  <rect x="175" y="110" width="20" height="22" fill="#D4AF37" opacity="0.9"/>
+  <rect x="205" y="110" width="20" height="22" fill="#D4AF37" opacity="0.3"/>
+  <rect x="235" y="110" width="20" height="22" fill="#D4AF37" opacity="0.8"/>
+  <!-- Windows - floor 3 -->
+  <rect x="145" y="150" width="20" height="22" fill="#D4AF37" opacity="0.7"/>
+  <rect x="175" y="150" width="20" height="22" fill="#D4AF37" opacity="0.4"/>
+  <rect x="205" y="150" width="20" height="22" fill="#D4AF37" opacity="0.9"/>
+  <rect x="235" y="150" width="20" height="22" fill="#D4AF37" opacity="0.5"/>
+  <!-- Balconies -->
+  <rect x="143" y="92" width="24" height="6" fill="#1A3A6A"/>
+  <rect x="233" y="92" width="24" height="6" fill="#1A3A6A"/>
+  <rect x="143" y="132" width="24" height="6" fill="#1A3A6A"/>
+  <rect x="233" y="172" width="24" height="6" fill="#1A3A6A"/>
+  <!-- Door -->
+  <rect x="185" y="195" width="30" height="25" fill="#081828"/>
+  <!-- Ground -->
+  <rect x="0" y="218" width="400" height="32" fill="#030C18"/>
+  <!-- Stars -->
+  <circle cx="50" cy="25" r="1.5" fill="#D4AF37" opacity="0.6"/>
+  <circle cx="350" cy="30" r="1" fill="white" opacity="0.5"/>
+  <circle cx="100" cy="40" r="1" fill="white" opacity="0.3"/>
+</svg>

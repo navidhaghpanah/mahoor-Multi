@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { subscribeToListings, type Listing } from "../lib/listings";
 import { MapModal } from "./MapModal";
+import { ListingDetailModal } from "./ListingDetailModal";
 
 const STATIC_LISTINGS: Listing[] = [
   {
@@ -15,7 +16,7 @@ const STATIC_LISTINGS: Listing[] = [
     title: "آپارتمان ۱۲۰ متری نوساز - ۳ خواب",
     price: "۲.۵ میلیارد تومان", location: "خیابان امام، محمودآباد",
     size: 120, beds: 3, phone: "09111134767",
-    imageUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop",
+    imageUrl: "/listings/s1.svg",
     advisorName: "عزیزپور", advisorPhone: "09111134767",
     status: "approved", lat: 36.6343, lng: 52.2607,
   },
@@ -24,7 +25,7 @@ const STATIC_LISTINGS: Listing[] = [
     title: "ویلای دوبلکس ساحلی - ۲۰۰ متر زمین",
     price: "۵.۸ میلیارد تومان", location: "نسیم، محمودآباد",
     size: 180, beds: 4, phone: "09113276667",
-    imageUrl: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
+    imageUrl: "/listings/s2.svg",
     advisorName: "مهندس آزاد", advisorPhone: "09113276667",
     status: "approved", lat: 36.6360, lng: 52.2580,
   },
@@ -33,7 +34,7 @@ const STATIC_LISTINGS: Listing[] = [
     title: "آپارتمان ۸۵ متری مبله - ۲ خواب",
     price: "۵ میلیون / ماهانه", location: "خیابان ساحل، محمودآباد",
     size: 85, beds: 2, phone: "09195183950",
-    imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=250&fit=crop",
+    imageUrl: "/listings/s3.svg",
     advisorName: "رضایی", advisorPhone: "09195183950",
     status: "approved", lat: 36.6320, lng: 52.2620,
   },
@@ -42,7 +43,7 @@ const STATIC_LISTINGS: Listing[] = [
     title: "آپارتمان ۱۰۵ متری رهن کامل - ۳ خواب",
     price: "۴۰۰ میلیون", location: "مرکز شهر، محمودآباد",
     size: 105, beds: 3, phone: "09111134767",
-    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=250&fit=crop",
+    imageUrl: "/listings/s4.svg",
     advisorName: "عزیزپور", advisorPhone: "09111134767",
     status: "approved", lat: 36.6333, lng: 52.2597,
   },
@@ -51,7 +52,7 @@ const STATIC_LISTINGS: Listing[] = [
     title: "برج مسکونی لاکچری - پیش‌فروش ویژه",
     price: "۱۸ میلیون / متر", location: "فاز جدید، محمودآباد",
     size: 90, beds: 2, phone: "09113276667",
-    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=250&fit=crop",
+    imageUrl: "/listings/s5.svg",
     advisorName: "مهندس آزاد", advisorPhone: "09113276667",
     status: "approved", lat: 36.6350, lng: 52.2640,
   },
@@ -60,7 +61,7 @@ const STATIC_LISTINGS: Listing[] = [
     title: "زمین ۳۰۰ متری سند دار - موقعیت عالی",
     price: "۹۰۰ میلیون", location: "حومه، محمودآباد",
     size: 300, beds: 0, phone: "09195183950",
-    imageUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop",
+    imageUrl: "/listings/s6.svg",
     advisorName: "رضایی", advisorPhone: "09195183950",
     status: "approved", lat: 36.6300, lng: 52.2650,
   },
@@ -92,6 +93,7 @@ export function TabListings() {
   const [showFilters, setShowFilters] = useState(false);
   const [firestoreListings, setFirestoreListings] = useState<Listing[]>([]);
   const [mapListing, setMapListing] = useState<Listing | null>(null);
+  const [detailListing, setDetailListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -243,7 +245,8 @@ export function TabListings() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-[#0C2C54]/50 border border-[#1E293B] rounded-2xl overflow-hidden hover:border-[#D4AF37]/30 hover:-translate-y-1 transition-all duration-300 group"
+                className="bg-[#0C2C54]/50 border border-[#1E293B] rounded-2xl overflow-hidden hover:border-[#D4AF37]/30 hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                onClick={() => setDetailListing(listing)}
               >
                 {/* Image */}
                 <div className="relative h-[200px] overflow-hidden bg-[#1E293B]">
@@ -267,14 +270,14 @@ export function TabListings() {
                   {/* Map + Fav buttons */}
                   <div className="absolute top-3 left-3 flex gap-1.5">
                     <button
-                      onClick={() => setMapListing(listing)}
+                      onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
                       className="w-8 h-8 rounded-full bg-black/40 text-white/80 hover:bg-[#D4AF37] hover:text-black flex items-center justify-center transition-all"
                       title="نمایش روی نقشه"
                     >
                       <Map className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => toggleFav(favId)}
+                      onClick={(e) => { e.stopPropagation(); toggleFav(favId); }}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                         favorites.has(favId) ? "bg-red-500 text-white" : "bg-black/40 text-white/70 hover:bg-black/60"
                       }`}
@@ -314,7 +317,7 @@ export function TabListings() {
                       </div>
                     )}
                     <button
-                      onClick={() => setMapListing(listing)}
+                      onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
                       className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-white transition-colors"
                     >
                       <Map className="w-3.5 h-3.5" />
@@ -335,6 +338,7 @@ export function TabListings() {
                     </div>
                     <a
                       href={`tel:${listing.advisorPhone ?? listing.phone}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600 border border-green-600/40 hover:border-green-600 text-green-400 hover:text-white px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                     >
                       <Phone className="w-3.5 h-3.5" />
@@ -347,6 +351,13 @@ export function TabListings() {
           })}
         </div>
       )}
+
+      {/* Listing Detail Modal */}
+      <ListingDetailModal
+        listing={detailListing}
+        onClose={() => setDetailListing(null)}
+        onShowMap={(l) => setMapListing(l)}
+      />
 
       {/* Map Modal */}
       <MapModal
