@@ -53,7 +53,7 @@ export function AiAssistant({ isOpen, onClose }: { isOpen: boolean, onClose: () 
               </div>
               <div>
                  <h3 className="text-white font-bold text-sm">دستیار هوش مصنوعی</h3>
-                 <p className="text-[10px] text-[#D4AF37]">متصل به Gemini 1.5 Pro</p>
+                 <p className="text-[10px] text-[#D4AF37]">متصل به Gemini 2.5 Flash</p>
               </div>
             </div>
             <button onClick={onClose} className="text-gray-400 hover:text-white bg-[#1E293B] p-2 rounded-full transition-colors">
