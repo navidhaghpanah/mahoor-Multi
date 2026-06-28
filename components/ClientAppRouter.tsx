@@ -6,9 +6,9 @@ import { AppShell } from "./AppShell";
 import { TabListings } from "./TabListings";
 import { TabAddListing } from "./TabAddListing";
 import { TabChannels } from "./TabChannels";
-import { TabAnalytics } from "./TabAnalytics";
 import { TabProfile } from "./TabProfile";
 import { AiAssistant } from "./AiAssistant";
+import { ManagerApp } from "./ManagerApp";
 
 export function ClientAppRouter() {
   const [user, setUser] = useState<any>(null);
@@ -17,6 +17,11 @@ export function ClientAppRouter() {
 
   if (!user) {
     return <AuthScreen onLogin={(u) => setUser(u)} />;
+  }
+
+  // Manager gets a completely separate environment
+  if (user?.isManager) {
+    return <ManagerApp user={user} onLogout={() => setUser(null)} />;
   }
 
   const isInsider = !!user?.isInsider;
@@ -30,8 +35,6 @@ export function ClientAppRouter() {
       // Insider-only tabs — redirect public users to listings if they somehow reach them
       case "channels":
         return isInsider ? <TabChannels /> : <TabListings />;
-      case "analytics":
-        return (isInsider && user?.isManager) ? <TabAnalytics user={user} /> : <TabListings />;
       case "profile":
         return isInsider ? <TabProfile user={user} onLogout={() => { setUser(null); setActiveTab("listings"); }} /> : <TabListings />;
       default:
