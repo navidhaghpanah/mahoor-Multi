@@ -20,7 +20,7 @@ export interface Listing {
   createdAt?: any;
 }
 
-/* Fetch all listings once from the Neon-backed API route. */
+/* Fetch approved listings (public feed). */
 export async function fetchListings(): Promise<Listing[]> {
   try {
     const res = await fetch("/api/listings", { cache: "no-store" });
@@ -30,6 +30,27 @@ export async function fetchListings(): Promise<Listing[]> {
   } catch {
     return [];
   }
+}
+
+/* Fetch pending (unapproved) listings — for the manager approval queue. */
+export async function fetchPendingListings(): Promise<Listing[]> {
+  try {
+    const res = await fetch("/api/listings?status=pending", { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.listings ?? []) as Listing[];
+  } catch {
+    return [];
+  }
+}
+
+/* Approve a listing (manager action). */
+export async function approveListing(id: string): Promise<void> {
+  await fetch(`/api/listings/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ approve: true }),
+  });
 }
 
 /*

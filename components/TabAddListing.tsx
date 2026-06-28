@@ -142,7 +142,11 @@ export function TabAddListing({ user }: { user?: any }) {
     <div className="max-w-2xl mx-auto w-full pb-10">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">ثبت آگهی ملکی</h1>
-        <p className="text-[#a0b0c0] text-sm">آگهی خود را ثبت کرده و به درگاه‌ها ارسال کنید</p>
+        <p className="text-[#a0b0c0] text-sm">
+          {user?.isInsider
+            ? "آگهی خود را ثبت کرده و به درگاه‌ها ارسال کنید"
+            : "آگهی ملکی خود را ثبت کنید — پس از بررسی توسط مدیریت منتشر می‌شود"}
+        </p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -158,7 +162,11 @@ export function TabAddListing({ user }: { user?: any }) {
               <CheckCircle2 className="w-10 h-10 text-green-400" />
             </div>
             <h2 className="text-2xl font-bold text-white">آگهی ثبت شد!</h2>
-            <p className="text-[#a0b0c0] text-center text-sm">آگهی شما در انتظار تأیید مدیر است.</p>
+            <p className="text-[#a0b0c0] text-center text-sm">
+              {user?.isInsider
+                ? "آگهی شما منتشر شد و در فهرست آگهی‌ها نمایش داده می‌شود."
+                : "آگهی شما دریافت شد و پس از تأیید مدیر منتشر خواهد شد."}
+            </p>
           </motion.div>
         ) : (
           <motion.form

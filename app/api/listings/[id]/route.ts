@@ -12,6 +12,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
     const updates: Record<string, any> = {};
+    if (body.approve === true) updates.isManagerApproved = true;
     if (body.imageUrl !== undefined) updates.imageUrl = body.imageUrl;
     if (body.title !== undefined) updates.title = body.title;
     if (body.description !== undefined) updates.description = body.description;

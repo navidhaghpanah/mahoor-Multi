@@ -11,16 +11,24 @@ interface AppShellProps {
   onTabChange: (tabId: string) => void;
   onOpenAi: () => void;
   user: any;
+  isInsider: boolean;
 }
 
-export function AppShell({ children, activeTab, onTabChange, onOpenAi, user }: AppShellProps) {
-  const tabs = [
-    { id: "listings", label: "آگهی‌ها", icon: Home },
-    { id: "add", label: "ثبت آگهی", icon: PlusSquare },
-    { id: "channels", label: "درگاه‌ها", icon: Share2 },
-    ...(user?.isManager ? [{ id: "analytics", label: "آمار و تحلیل", icon: BarChart2 }] : []),
-    { id: "profile", label: "پروفایل", icon: User },
-  ];
+export function AppShell({ children, activeTab, onTabChange, onOpenAi, user, isInsider }: AppShellProps) {
+  // Insiders (advisors + manager) get the full panel.
+  // Public visitors get Listings + Add Listing only (AI via the header button).
+  const tabs = isInsider
+    ? [
+        { id: "listings", label: "آگهی‌ها", icon: Home },
+        { id: "add", label: "ثبت آگهی", icon: PlusSquare },
+        { id: "channels", label: "درگاه‌ها", icon: Share2 },
+        ...(user?.isManager ? [{ id: "analytics", label: "آمار و تحلیل", icon: BarChart2 }] : []),
+        { id: "profile", label: "پروفایل", icon: User },
+      ]
+    : [
+        { id: "listings", label: "آگهی‌ها", icon: Home },
+        { id: "add", label: "ثبت آگهی", icon: PlusSquare },
+      ];
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-[#030D1E] overflow-x-hidden md:pr-[260px] pb-[80px] md:pb-0">

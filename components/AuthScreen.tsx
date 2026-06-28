@@ -109,7 +109,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="شماره موبایل (مثلا 09113276647)"
+                  placeholder="شماره موبایل (مثلا 09121234567)"
                   className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-12 py-4 text-white text-left placeholder:text-right placeholder:text-gray-500 focus:outline-none focus:border-[#D4AF37]/50"
                   dir="ltr"
                 />

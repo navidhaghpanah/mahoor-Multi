@@ -19,24 +19,34 @@ export function ClientAppRouter() {
     return <AuthScreen onLogin={(u) => setUser(u)} />;
   }
 
+  const isInsider = !!user?.isInsider;
+
   const renderTab = () => {
     switch (activeTab) {
-      case "listings": return <TabListings />;
-      case "add": return <TabAddListing user={user} />;
-      case "channels": return <TabChannels />;
-      case "analytics": return <TabAnalytics />;
-      case "profile": return <TabProfile user={user} onLogout={() => setUser(null)} />;
-      default: return <TabListings />;
+      case "listings":
+        return <TabListings />;
+      case "add":
+        return <TabAddListing user={user} />;
+      // Insider-only tabs — redirect public users to listings if they somehow reach them
+      case "channels":
+        return isInsider ? <TabChannels /> : <TabListings />;
+      case "analytics":
+        return (isInsider && user?.isManager) ? <TabAnalytics user={user} /> : <TabListings />;
+      case "profile":
+        return isInsider ? <TabProfile user={user} onLogout={() => { setUser(null); setActiveTab("listings"); }} /> : <TabListings />;
+      default:
+        return <TabListings />;
     }
   };
 
   return (
     <>
-      <AppShell 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
+      <AppShell
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         onOpenAi={() => setIsAiOpen(true)}
         user={user}
+        isInsider={isInsider}
       >
         {renderTab()}
       </AppShell>
