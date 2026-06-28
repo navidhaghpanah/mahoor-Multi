@@ -98,6 +98,11 @@ export async function updateListingImage(_id: string, _imageUrl: string) {
   /* no-op: the image is included in the initial addListing payload */
 }
 
+/* Delete a listing by id via the Neon-backed API route. */
+export async function deleteListing(id: string) {
+  await fetch("/api/listings/" + id, { method: "DELETE" });
+}
+
 /* Geocode an address to lat/lng using Nominatim (OpenStreetMap) */
 export async function geocodeAddress(
   address: string
