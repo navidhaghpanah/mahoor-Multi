@@ -14,6 +14,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [otp, setOtp] = useState("");
   const [otpToken, setOtpToken] = useState("");   // HMAC-signed server token
+  const [otpCode, setOtpCode] = useState("");     // code returned by server for display
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(120);
@@ -40,6 +41,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'خطا در ارسال کد');
       setOtpToken(data.token);
+      setOtpCode(data.code ?? "");
       setOtp("");
       setStep("otp");
       setTimer(120);
@@ -133,6 +135,13 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
               className="w-full relative"
             >
               <p className="text-sm text-[#a0b0c0] mb-4 text-center">کد ارسال شده به {phone} را وارد کنید</p>
+
+              {otpCode && (
+                <div className="mb-4 rounded-xl bg-[#0C2C54] border border-[#D4AF37]/40 px-4 py-3 text-center">
+                  <p className="text-xs text-[#a0b0c0] mb-1">کد ورود شما</p>
+                  <p className="text-3xl font-mono font-bold tracking-[0.3em] text-[#D4AF37]">{otpCode}</p>
+                </div>
+              )}
 
               <div className="relative mb-4">
                 <input

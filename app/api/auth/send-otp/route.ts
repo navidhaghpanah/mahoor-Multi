@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Fire-and-forget (sendOtp never throws — errors are logged internally)
     void sendOtp(normalised, code);
 
-    return NextResponse.json({ token });
+    return NextResponse.json({ token, code });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
