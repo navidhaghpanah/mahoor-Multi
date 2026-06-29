@@ -2,6 +2,32 @@ import { db } from '../src/db/index';
 import { telegramSessions, realEstateAds, users } from '../src/db/schema';
 import { eq } from 'drizzle-orm';
 
+async function downloadPhoto(bot: string, fileId: string): Promise<string | null> {
+  const token = bot === 'bale'
+    ? process.env.BALE_BOT_TOKEN
+    : process.env.TELEGRAM_BOT_TOKEN;
+  const apiBase = bot === 'bale'
+    ? `https://tapi.bale.ai/bot${token}`
+    : `https://api.telegram.org/bot${token}`;
+  if (!token) return null;
+  try {
+    const meta = await fetch(`${apiBase}/getFile?file_id=${fileId}`).then(r => r.json());
+    if (!meta.ok) return null;
+    const filePath: string = meta.result.file_path;
+    const fileBase = bot === 'bale'
+      ? `https://tapi.bale.ai/file/bot${token}`
+      : `https://api.telegram.org/file/bot${token}`;
+    const imgRes = await fetch(`${fileBase}/${filePath}`);
+    if (!imgRes.ok) return null;
+    const buffer = Buffer.from(await imgRes.arrayBuffer());
+    const ext = filePath.split('.').pop()?.toLowerCase() ?? 'jpg';
+    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+    return `data:${mime};base64,${buffer.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
 const MASK_PHONES = ['09120996426', '09120997453'];
 
 type Step = 'idle' | 'deal_type' | 'prop_type' | 'title' | 'price' | 'location' | 'area' | 'rooms' | 'phone' | 'photo';
@@ -41,13 +67,13 @@ async function createListing(data: Data, bot: string): Promise<void> {
 
   await db.insert(realEstateAds).values({
     title:         data.title        ?? 'بدون عنوان',
-    description:   `نوع ملک: ${data.propType || '—'} | تماس: ${data.phone || '—'} | منبع: ${bot}`,
+    description:   `نوع ملک: ${data.propType || '—'}`,
     price:         parseInt((data.price ?? '').replace(/[^0-9]/g, ''), 10) || 0,
     type:          data.dealType     ?? 'نامشخص',
     location:      data.location     ?? '',
     areaSize:      parseInt(data.area  ?? '0', 10) || 0,
     rooms:         parseInt(data.rooms ?? '0', 10) || 0,
-    imageUrl:      data.imageUrl     ?? null,
+    imageUrl:      data.imageUrl     || null,
     submitterPhone: data.phone       ?? null,
     publishStatus: 'pending',
     advisorId,
@@ -146,7 +172,10 @@ export async function handleUpdate(
     }
 
     if (step === 'photo') {
-      if (photoFileId) data.imageUrl = `tg://file_id/${photoFileId}`;
+      if (photoFileId) {
+        const dataUrl = await downloadPhoto(bot, photoFileId);
+        if (dataUrl) data.imageUrl = dataUrl;
+      }
       if (photoFileId || callbackData === 'skip_photo' || text) {
         try {
           await createListing(data, bot);
