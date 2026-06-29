@@ -3,6 +3,7 @@ import { db } from '../../../../src/db/index';
 import { realEstateAds, users } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { postListingToTelegram } from '../../../../lib/telegram';
+import { postListingToBale } from '../../../../lib/bale';
 import { postListingToKenar } from '../../../../lib/kenar';
 
 // PATCH /api/listings/:id  -> update fields (e.g. imageUrl) on a listing
@@ -49,6 +50,7 @@ export async function PATCH(
               advisorPhone: advisor?.phoneNumber ?? '',
             };
             await postListingToTelegram(approvedPayload);
+            await postListingToBale(approvedPayload);
             await postListingToKenar({ ...approvedPayload, lat: null, lng: null });
           }
         } catch (e: any) {

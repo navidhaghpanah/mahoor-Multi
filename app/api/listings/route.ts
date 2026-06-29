@@ -3,6 +3,7 @@ import { db } from '../../../src/db/index';
 import { realEstateAds, users } from '../../../src/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { postListingToTelegram } from '../../../lib/telegram';
+import { postListingToBale } from '../../../lib/bale';
 import { postListingToKenar } from '../../../lib/kenar';
 
 export const dynamic = 'force-dynamic';
@@ -119,6 +120,7 @@ export async function POST(req: NextRequest) {
         advisorPhone: matchedAdvisorPhone,
       };
       void postListingToTelegram(publishPayload);
+      void postListingToBale(publishPayload);
       void postListingToKenar({ ...publishPayload, lat: body.lat ?? null, lng: body.lng ?? null });
     }
 
