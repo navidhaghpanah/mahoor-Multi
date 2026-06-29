@@ -9,7 +9,7 @@ import {
 import { addListing, uploadImage, geocodeAddress } from "../lib/listings";
 import { MapModal } from "./MapModal";
 
-const DEAL_TYPES = ["فروش", "اجاره", "رهن کامل", "رهن و اجاره", "پیش‌فروش"];
+const DEAL_TYPES = ["فروش", "اجاره", "رهن کامل", "رهن و اجاره", "پیش‌فروش", "اجاره شبانه"];
 const PROP_TYPES = [
   { label: "آپارتمان", Icon: Building2 },
   { label: "ویلا", Icon: Home },

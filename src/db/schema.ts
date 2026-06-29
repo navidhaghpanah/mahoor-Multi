@@ -31,6 +31,7 @@ export const realEstateAds = pgTable('real_estate_ads', {
   areaSize: integer('area_size').notNull(),
   rooms: integer('rooms').notNull(),
   imageUrl: text('image_url'),
+  submitterPhone: text('submitter_phone'),
   publishToDivar: boolean('publish_to_divar').default(false).notNull(),
   publishToSheypoor: boolean('publish_to_sheypoor').default(false).notNull(),
   publishToMahoor: boolean('publish_to_mahoor').default(true).notNull(),

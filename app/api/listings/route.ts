@@ -71,9 +71,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/listings → create a listing.
-// If the submitter's phone is registered as an insider (advisor/manager),
-// auto-approve (isManagerApproved = true). Otherwise set pending.
+// Masking advisors for public submissions — alternates between Haydar and Raei
+const MASK_PHONES = ['09120996426', '09120997453'];
+
+// POST /api/listings → create a listing. ALL submissions saved as pending regardless of role.
+// Manager-approve PATCH is the only path to published + Telegram/Bale hooks.
+// Public submitter's real phone is stored in submitterPhone for office reference;
+// the public-displayed contact is masked to a Mahoor advisor number.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -81,24 +85,34 @@ export async function POST(req: NextRequest) {
     const submitterPhone = String(body.advisorPhone || body.phone || '');
     let advisorId: number | null = null;
     let isInsider = false;
-    let matchedAdvisorName = '';
-    let matchedAdvisorPhone = '';
+    let storedSubmitterPhone: string | null = null;
 
-    // Try to match the submitter's phone to a registered user
+    // Try to match the submitter's phone to a registered insider
     if (submitterPhone) {
       const matched = await db.select().from(users).where(eq(users.phoneNumber, submitterPhone));
       if (matched.length > 0) {
-        advisorId           = matched[0].id;
-        isInsider           = true;
-        matchedAdvisorName  = matched[0].fullName;
-        matchedAdvisorPhone = matched[0].phoneNumber;
+        advisorId = matched[0].id;
+        isInsider = true;
       }
     }
 
-    // Public submission: still needs a valid advisorId FK — use the manager as nominal owner
-    if (advisorId == null) {
-      const anyUser = await db.select().from(users).limit(1);
-      if (anyUser.length > 0) advisorId = anyUser[0].id;
+    // Public submission: mask contact to alternating Mahoor advisor
+    if (!isInsider) {
+      storedSubmitterPhone = submitterPhone || null;
+      // Count existing public submissions to alternate the mask advisor
+      const countRows = await db
+        .select({ id: realEstateAds.id })
+        .from(realEstateAds)
+        .where(eq(realEstateAds.isManagerApproved, false));
+      const maskPhone = MASK_PHONES[countRows.length % MASK_PHONES.length];
+      const maskAdvisor = await db.select().from(users).where(eq(users.phoneNumber, maskPhone));
+      if (maskAdvisor.length > 0) {
+        advisorId = maskAdvisor[0].id;
+      } else {
+        // Fallback: any user
+        const anyUser = await db.select().from(users).limit(1);
+        if (anyUser.length > 0) advisorId = anyUser[0].id;
+      }
     }
 
     if (advisorId == null) {
@@ -118,29 +132,12 @@ export async function POST(req: NextRequest) {
         areaSize: Number(body.size) || 0,
         rooms: Number(body.beds) || 0,
         imageUrl: body.imageUrl ?? null,
-        publishStatus: isInsider ? 'published' : 'pending',
+        submitterPhone: storedSubmitterPhone,
+        publishStatus: 'pending',
         advisorId,
-        isManagerApproved: isInsider,   // insiders publish immediately
+        isManagerApproved: false,  // ALL listings require manager approval
       })
       .returning();
-
-    // Fire-and-forget publish hooks (Telegram + Divar/Kenar) for insider auto-approved listings
-    if (isInsider) {
-      const publishPayload = {
-        title:        body.title ?? 'بدون عنوان',
-        price:        priceNum,
-        type:         body.propType ?? body.deal ?? '',
-        location:     body.location ?? '',
-        areaSize:     Number(body.size) || 0,
-        rooms:        Number(body.beds) || 0,
-        imageUrl:     body.imageUrl ?? null,
-        advisorName:  matchedAdvisorName,
-        advisorPhone: matchedAdvisorPhone,
-      };
-      void postListingToTelegram(publishPayload);
-      void postListingToBale(publishPayload);
-      void postListingToKenar({ ...publishPayload, lat: body.lat ?? null, lng: body.lng ?? null });
-    }
 
     return NextResponse.json({ id: String(inserted[0].id) });
   } catch (error: any) {
