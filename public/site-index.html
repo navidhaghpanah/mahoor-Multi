@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="املاک ماهور محمودآباد - خرید، فروش، اجاره و رهن ملک در محمودآباد. با بیش از ۱۵ سال تجربه در خدمات ملکی.">
+<meta property="og:title" content="املاک ماهور - محمودآباد">
+<meta property="og:description" content="بزرگ‌ترین پایگاه ملکی محمودآباد | خرید، فروش، اجاره و رهن">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mahoorrlste.ir">
+<title>املاک ماهور - محمودآباد</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMHY3BLANQZ_4_ipEFhbw-CjvzGSi1Fk8",
+        authDomain: "mahoor-f45cb.firebaseapp.com",
+        projectId: "mahoor-f45cb",
+        storageBucket: "mahoor-f45cb.firebasestorage.app",
+        messagingSenderId: "711292419965",
+        appId: "1:711292419965:web:585423200bf7a2e130d614"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window._auth = auth; window._db = db;
+    window._fb = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, updateDoc };
+    onAuthStateChanged(auth, user => {
+        window._currentUser = user || null;
+        if (typeof window.onAuthReady === 'function') window.onAuthReady(user);
+    });
+</script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+    --primary: #0C2C54;
+    --secondary: #D4AF37;
+    --light: rgba(255,255,255,0.06);
+    --dark: #030D1E;
+    --text: #d0d8e4;
+    --border: rgba(212,175,55,0.18);
+    --shadow: 0 4px 20px rgba(0,0,0,0.5);
+    --gradient: linear-gradient(135deg, #0C2C54 0%, #1a4a7a 100%);
+}
+body { font-family:'Vazirmatn',sans-serif; background:#030D1E; color:var(--text); }
+.fas,.fab,.far { font-style:normal; }
+
+/* TOP BAR */
+.top-bar { background:#020a14; padding:6px 0; font-size:12px; color:#a0b0c0; border-bottom:1px solid rgba(212,175,55,0.15); }
+.top-bar-inner { max-width:1200px; margin:0 auto; padding:0 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px; }
+.top-bar a { color:#a0b0c0; text-decoration:none; margin-left:15px; }
+.top-bar a:hover { color:var(--secondary); }
+
+/* HEADER */
+header { background:var(--gradient); position:sticky; top:0; z-index:1000; box-shadow:0 2px 20px rgba(0,0,0,0.5); border-bottom:1px solid rgba(212,175,55,0.2); }
+.header-main { max-width:1200px; margin:0 auto; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; }
+.logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-icon { width:55px; height:55px; background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:28px; }
+.logo-text h1 { color:white; font-size:22px; font-weight:800; }
+.logo-text p { color:var(--secondary); font-size:12px; }
+nav { display:flex; gap:5px; }
+nav a { color:rgba(255,255,255,0.85); text-decoration:none; padding:8px 16px; border-radius:25px; font-size:14px; font-weight:500; transition:all 0.3s; }
+nav a:hover,nav a.active { background:var(--secondary); color:#030D1E; }
+.btn-post { background:var(--secondary); color:#030D1E; border:none; padding:10px 22px; border-radius:25px; font-family:'Vazirmatn',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:8px; }
+.btn-post:hover { background:#c9a020; transform:translateY(-2px); }
+
+/* HERO */
+.hero { background:var(--gradient); padding:60px 20px; text-align:center; position:relative; overflow:hidden; border-bottom:1px solid rgba(212,175,55,0.2); }
+.hero::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(ellipse,rgba(212,175,55,0.04) 0%,transparent 60%); }
+.hero h2 { color:white; font-size:36px; font-weight:800; margin-bottom:10px; position:relative; }
+.hero p { color:rgba(255,255,255,0.75); font-size:16px; margin-bottom:35px; position:relative; }
+.search-container { max-width:900px; margin:0 auto; position:relative; z-index:1; }
+.search-tabs { display:flex; gap:5px; margin-bottom:15px; justify-content:center; flex-wrap:wrap; }
+.search-tab { background:rgba(255,255,255,0.1); color:white; border:2px solid rgba(255,255,255,0.2); padding:8px 22px; border-radius:25px; cursor:pointer; font-family:'Vazirmatn',sans-serif; font-size:14px; font-weight:500; transition:all 0.3s; }
+.search-tab.active,.search-tab:hover { background:var(--secondary); border-color:var(--secondary); color:#030D1E; font-weight:700; }
+.search-box { background:#0C2C54; border:1px solid rgba(212,175,55,0.2); border-radius:20px; padding:20px; box-shadow:0 10px 40px rgba(0,0,0,0.4); display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:12px; align-items:center; }
+.search-box select,.search-box input { background:#030D1E; border:1.5px solid rgba(212,175,55,0.2); border-radius:12px; padding:12px 15px; font-family:'Vazirmatn',sans-serif; font-size:14px; color:var(--text); outline:none; transition:border-color 0.3s; width:100%; }
+.search-box select option { background:#030D1E; }
+.search-box select:focus,.search-box input:focus { border-color:var(--secondary); }
+.btn-search { background:var(--secondary); color:#030D1E; border:none; padding:12px 28px; border-radius:12px; font-family:'Vazirmatn',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.3s; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+.btn-search:hover { background:#c9a020; transform:translateY(-2px); }
+
+/* STATS */
+.stats { background:#0C2C54; padding:25px 20px; box-shadow:var(--shadow); border-bottom:1px solid var(--border); }
+.stats-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-around; flex-wrap:wrap; gap:20px; }
+.stat-item { text-align:center; }
+.stat-num { font-size:28px; font-weight:800; color:var(--secondary); }
+.stat-label { font-size:13px; color:#a0b0c0; }
+
+/* MAIN */
+.main-content { max-width:1200px; margin:30px auto; padding:0 20px; }
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.section-title { font-size:22px; font-weight:700; color:white; display:flex; align-items:center; gap:10px; }
+.section-title::after { content:''; display:block; width:4px; height:24px; background:var(--secondary); border-radius:2px; }
+.see-all { color:var(--secondary); text-decoration:none; font-size:14px; font-weight:500; display:flex; align-items:center; gap:5px; }
+.see-all:hover { color:white; }
+
+/* FILTER */
+.filter-bar { background:#0C2C54; border:1px solid var(--border); border-radius:15px; padding:15px 20px; margin-bottom:25px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; box-shadow:var(--shadow); }
+.filter-btn { background:rgba(255,255,255,0.05); border:1.5px solid var(--border); border-radius:25px; padding:7px 18px; font-family:'Vazirmatn',sans-serif; font-size:13px; cursor:pointer; transition:all 0.3s; color:var(--text); }
+.filter-btn.active,.filter-btn:hover { background:var(--secondary); color:#030D1E; border-color:var(--secondary); font-weight:700; }
+.filter-label { font-size:13px; font-weight:600; color:#a0b0c0; }
+
+/* PROPERTY GRID */
+.property-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; }
+.property-card { background:#0C2C54; border:1px solid var(--border); border-radius:18px; overflow:hidden; box-shadow:var(--shadow); transition:all 0.3s; cursor:pointer; position:relative; animation:fadeInUp 0.5s ease forwards; }
+.property-card.hidden { display:none; }
+.property-card:hover { transform:translateY(-8px); box-shadow:0 15px 40px rgba(0,0,0,0.6); border-color:rgba(212,175,55,0.4); }
+.card-badge { position:absolute; top:15px; right:15px; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; z-index:2; }
+.badge-sale { background:#e74c3c; color:white; }
+.badge-rent { background:#3498db; color:white; }
+.badge-mortgage { background:#27ae60; color:white; }
+.badge-pre-sale { background:#9b59b6; color:white; }
+.badge-daily-rent { background:#f39c12; color:white; }
+.card-img { width:100%; height:210px; position:relative; overflow:hidden; background:#030D1E; }
+.card-img img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s; }
+.card-img img.broken { display:none; }
+.card-img-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:48px; color:#D4AF37; opacity:0.3; }
+.property-card:hover .card-img img { transform:scale(1.08); }
+.card-overlay { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,0.7)); padding:20px 15px 10px; display:flex; justify-content:space-between; align-items:flex-end; }
+.card-location { color:white; font-size:13px; display:flex; align-items:center; gap:5px; }
+.card-favorite { background:rgba(255,255,255,0.15); border:none; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:white; transition:all 0.3s; }
+.card-body { padding:18px; }
+.card-title { font-size:16px; font-weight:700; color:white; margin-bottom:8px; line-height:1.5; }
+.card-price { font-size:18px; font-weight:800; color:var(--secondary); margin-bottom:15px; }
+.card-price span { font-size:13px; font-weight:400; color:#a0b0c0; }
+.card-features { display:flex; gap:15px; padding-top:12px; border-top:1px solid var(--border); flex-wrap:wrap; }
+.feature { display:flex; align-items:center; gap:5px; font-size:13px; color:#a0b0c0; }
+.feature i { color:var(--secondary); font-size:14px; }
+.card-agent { display:flex; align-items:center; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.agent-avatar { width:35px; height:35px; border-radius:50%; background:var(--gradient); display:flex; align-items:center; justify-content:center; color:var(--secondary); font-size:14px; font-weight:700; flex-shrink:0; border:1px solid var(--border); }
+.agent-info { flex:1; }
+.agent-name { font-size:13px; font-weight:600; color:white; }
+.agent-role { font-size:11px; color:#a0b0c0; }
+.btn-call { background:rgba(39,174,96,0.15); color:#27ae60; border:1px solid rgba(39,174,96,0.3); padding:7px 14px; border-radius:20px; font-family:'Vazirmatn',sans-serif; font-size:12px; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:5px; text-decoration:none; }
+.btn-call:hover { background:#27ae60; color:white; border-color:#27ae60; }
+
+/* SERVICES */
+.services { background:#0C2C54; border:1px solid var(--border); border-radius:20px; padding:35px; margin-bottom:35px; box-shadow:var(--shadow); }
+.services-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px; margin-top:25px; }
+.service-item { text-align:center; padding:25px 15px; border-radius:15px; background:rgba(255,255,255,0.04); border:1.5px solid var(--border); transition:all 0.3s; cursor:pointer; }
+.service-item:hover { border-color:var(--secondary); background:rgba(212,175,55,0.06); transform:translateY(-5px); }
+.service-icon { width:64px; height:64px; border-radius:50%; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:26px; color:var(--secondary); }
+.service-item h4 { font-size:15px; font-weight:700; color:white; margin-bottom:5px; }
+.service-item p { font-size:12px; color:#a0b0c0; }
+.services-address { margin-top:25px; padding-top:20px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+.services-addr-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#a0b0c0; flex:1; min-width:200px; }
+.services-addr-phone { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--secondary); text-decoration:none; background:rgba(212,175,55,0.08); border:1.5px solid rgba(212,175,55,0.25); padding:6px 12px; border-radius:20px; transition:all 0.2s; direction:ltr; }
+.services-addr-phone:hover { background:var(--secondary); color:#030D1E; }
+
+/* AGENTS */
+.agents-section { margin-bottom:35px; }
+.agents-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:20px; }
+.agent-card { background:#0C2C54; border:1px solid var(--border); border-radius:18px; padding:25px; text-align:center; box-shadow:var(--shadow); transition:all 0.3s; }
+.agent-card:hover { transform:translateY(-5px); box-shadow:0 15px 40px rgba(0,0,0,0.6); border-color:rgba(212,175,55,0.4); }
+.agent-photo { width:80px; height:80px; border-radius:50%; background:var(--gradient); display:flex; align-items:center; justify-content:center; margin:0 auto 15px; font-size:30px; font-weight:700; color:var(--secondary); border:3px solid var(--secondary); }
+.agent-card h3 { font-size:16px; font-weight:700; color:white; margin-bottom:5px; }
+.agent-card .role { font-size:13px; color:var(--secondary); font-weight:500; margin-bottom:12px; }
+.agent-card .phone { font-size:15px; font-weight:600; color:#a0b0c0; direction:ltr; display:block; margin-bottom:10px; text-decoration:none; }
+.agent-card .phone:hover { color:var(--secondary); }
+.agent-stats { display:flex; justify-content:center; gap:20px; margin-bottom:15px; padding:12px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.agent-stat strong { display:block; font-size:18px; font-weight:800; color:var(--secondary); }
+.agent-stat small { font-size:11px; color:#a0b0c0; }
+.btn-agent-call { width:100%; background:rgba(212,175,55,0.12); color:var(--secondary); border:1.5px solid rgba(212,175,55,0.3); padding:12px; border-radius:12px; font-family:'Vazirmatn',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+.btn-agent-call:hover { background:var(--secondary); color:#030D1E; border-color:var(--secondary); }
+
+/* MAP */
+.map-section { background:#0C2C54; border:1px solid var(--border); border-radius:20px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:35px; }
+.map-header { padding:20px 25px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
+
+/* CONTACT */
+.contact-section { background:var(--gradient); border:1px solid rgba(212,175,55,0.2); border-radius:20px; padding:40px; margin-bottom:35px; color:white; }
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:25px; margin-top:25px; }
+.contact-item { display:flex; align-items:flex-start; gap:15px; }
+.contact-icon { width:50px; height:50px; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--secondary); flex-shrink:0; }
+.contact-item h4 { font-size:14px; color:rgba(255,255,255,0.6); margin-bottom:5px; }
+.contact-item p { font-size:15px; font-weight:600; }
+.contact-item a { color:var(--secondary); text-decoration:none; font-size:18px; font-weight:700; display:block; }
+.contact-item a:hover { color:white; }
+
+/* FOOTER */
+footer { background:#020a14; color:white; padding:40px 20px 20px; border-top:1px solid rgba(212,175,55,0.15); }
+.footer-inner { max-width:1200px; margin:0 auto; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:30px; padding-bottom:30px; border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:20px; }
+.footer-desc { font-size:13px; color:rgba(255,255,255,0.5); line-height:1.8; margin:12px 0; }
+.footer-social { display:flex; gap:8px; flex-wrap:wrap; }
+.social-btn { min-width:40px; height:40px; padding:0 8px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; text-decoration:none; transition:all 0.3s; font-size:18px; }
+.social-btn:hover { transform:translateY(-3px) scale(1.1); }
+.social-btn.instagram { background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%); }
+.social-btn.telegram { background:#229ED9; }
+.social-btn.whatsapp { background:#25D366; }
+.social-btn.rubika { background:#8B5CF6; }
+.footer-col h4 { font-size:15px; font-weight:700; margin-bottom:15px; color:var(--secondary); }
+.footer-col ul { list-style:none; }
+.footer-col ul li { margin-bottom:10px; }
+.footer-col ul li a { color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px; transition:color 0.3s; display:flex; align-items:center; gap:8px; }
+.footer-col ul li a:hover { color:var(--secondary); }
+.footer-bottom { text-align:center; font-size:13px; color:rgba(255,255,255,0.3); }
+
+/* MOBILE NAV */
+.mobile-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:#0C2C54; border-top:1px solid var(--border); padding:10px 0; z-index:999; }
+.mobile-nav-inner { display:flex; justify-content:space-around; align-items:flex-end; }
+.mobile-nav-btn { display:flex; flex-direction:column; align-items:center; gap:4px; color:#a0b0c0; text-decoration:none; font-size:11px; transition:color 0.3s; }
+.mobile-nav-btn i { font-size:20px; }
+.mobile-nav-btn.active { color:var(--secondary); }
+.mobile-nav-center { position:relative; top:-20px; }
+.mobile-nav-center a { width:55px; height:55px; background:var(--secondary); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#030D1E; font-size:22px; box-shadow:0 5px 15px rgba(212,175,55,0.4); text-decoration:none; }
+
+/* FLOATS */
+.whatsapp-float { position:fixed; bottom:90px; left:25px; width:58px; height:58px; background:#25D366; border-radius:16px; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:0 4px 18px rgba(37,211,102,0.5); z-index:998; animation:bounce 2s infinite; }
+.whatsapp-float:hover { transform:scale(1.08); animation-play-state:paused; }
+.call-float { position:fixed; bottom:162px; left:25px; width:58px; height:58px; background:var(--primary); border:1px solid rgba(212,175,55,0.3); border-radius:16px; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:0 4px 18px rgba(12,44,84,0.7); z-index:998; transition:transform 0.2s; }
+.call-float:hover { transform:scale(1.08); }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:#0C2C54; border:1px solid var(--border); border-radius:20px; padding:30px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; animation:fadeInUp 0.3s ease; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.modal-header h3 { font-size:20px; font-weight:700; color:var(--secondary); }
+.modal-close { background:none; border:none; font-size:24px; cursor:pointer; color:#a0b0c0; }
+.form-group { margin-bottom:15px; }
+.form-group label { display:block; font-size:14px; font-weight:600; margin-bottom:7px; color:white; }
+.form-group input,.form-group select,.form-group textarea { width:100%; background:#030D1E; border:1.5px solid var(--border); border-radius:10px; padding:12px 15px; font-family:'Vazirmatn',sans-serif; font-size:14px; color:var(--text); outline:none; transition:border-color 0.3s; }
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus { border-color:var(--secondary); }
+.form-group select option { background:#030D1E; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.btn-submit { width:100%; background:var(--secondary); color:#030D1E; border:none; padding:14px; border-radius:12px; font-family:'Vazirmatn',sans-serif; font-size:16px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-top:5px; display:flex; align-items:center; justify-content:center; gap:8px; }
+.btn-submit:hover { background:#c9a020; transform:translateY(-2px); }
+.btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+.success-msg { background:rgba(39,174,96,0.15); border:1px solid rgba(39,174,96,0.3); color:#27ae60; border-radius:10px; padding:15px; text-align:center; display:none; margin-top:10px; font-size:14px; }
+.no-results { display:none; text-align:center; padding:40px; color:#a0b0c0; grid-column:1/-1; }
+.no-results i { font-size:40px; margin-bottom:10px; display:block; color:var(--secondary); }
+
+/* AUTH */
+.auth-tabs { display:flex; margin-bottom:20px; border-radius:12px; overflow:hidden; border:1.5px solid var(--border); }
+.auth-tab { flex:1; padding:11px; border:none; background:rgba(255,255,255,0.04); font-family:'Vazirmatn',sans-serif; font-size:14px; font-weight:600; cursor:pointer; color:#a0b0c0; transition:all 0.3s; }
+.auth-tab.active { background:var(--secondary); color:#030D1E; }
+.auth-error { color:#e74c3c; font-size:13px; margin-top:8px; display:none; padding:8px 12px; background:rgba(231,76,60,0.1); border-radius:8px; }
+.auth-success { color:#27ae60; font-size:13px; margin-top:8px; display:none; padding:8px 12px; background:rgba(39,174,96,0.1); border-radius:8px; }
+.btn-auth { background:rgba(255,255,255,0.1); color:white; border:1.5px solid rgba(255,255,255,0.2); padding:8px 18px; border-radius:25px; font-family:'Vazirmatn',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.3s; }
+.btn-auth:hover { background:rgba(255,255,255,0.2); }
+
+/* DROPDOWN */
+.user-dropdown { position:relative; }
+.user-avatar { width:38px; height:38px; border-radius:50%; background:rgba(212,175,55,0.2); border:2px solid rgba(212,175,55,0.4); display:flex; align-items:center; justify-content:center; color:var(--secondary); font-size:15px; font-weight:700; cursor:pointer; transition:all 0.3s; }
+.user-dropdown-menu { display:none; position:absolute; top:48px; left:0; background:#0C2C54; border:1px solid var(--border); border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.5); min-width:180px; padding:8px; z-index:9999; }
+.user-dropdown-menu.show { display:block; }
+.dropdown-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; font-size:14px; color:white; cursor:pointer; transition:background 0.2s; border:none; background:none; width:100%; font-family:'Vazirmatn',sans-serif; text-align:right; }
+.dropdown-item:hover { background:rgba(255,255,255,0.06); }
+.dropdown-item.danger { color:#e74c3c; }
+.dropdown-divider { height:1px; background:var(--border); margin:6px 0; }
+
+/* MY LISTINGS */
+.my-listings-section { background:#0C2C54; border:1px solid var(--border); border-radius:20px; padding:30px; margin-bottom:35px; box-shadow:var(--shadow); display:none; }
+.my-listing-item { border:1.5px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; }
+.my-listing-info h4 { font-size:15px; font-weight:700; color:white; margin-bottom:4px; }
+.my-listing-info p { font-size:13px; color:#a0b0c0; }
+.my-listing-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+.badge-pending { background:rgba(243,156,18,0.15); color:#f39c12; }
+.badge-approved { background:rgba(39,174,96,0.15); color:#27ae60; }
+
+/* AI WELCOME */
+.ai-welcome-notif { position:fixed; bottom:300px; left:20px; background:#0C2C54; border:1px solid rgba(212,175,55,0.3); border-radius:18px; padding:14px 16px; box-shadow:0 8px 30px rgba(0,0,0,0.5); z-index:997; display:none; align-items:flex-start; gap:10px; max-width:260px; animation:slideInLeft 0.5s ease forwards; }
+.ai-welcome-notif.hide { animation:slideOutLeft 0.4s ease forwards; }
+.ai-notif-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#6c3fc5,#4a90d9); display:flex; align-items:center; justify-content:center; color:white; font-size:16px; flex-shrink:0; }
+.ai-notif-text { flex:1; }
+.ai-notif-text strong { display:block; font-size:12px; color:white; margin-bottom:3px; }
+.ai-notif-text span { font-size:12px; color:#a0b0c0; line-height:1.5; }
+.ai-notif-close { background:none; border:none; color:#a0b0c0; font-size:16px; cursor:pointer; padding:0; line-height:1; flex-shrink:0; margin-top:-2px; }
+.ai-notif-dot { width:8px; height:8px; background:#25D366; border-radius:50%; position:absolute; top:12px; left:46px; border:2px solid #0C2C54; }
+
+/* AI FLOAT */
+.ai-float { position:fixed; bottom:234px; left:25px; width:58px; height:58px; background:linear-gradient(135deg,#6c3fc5,#4a90d9); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:22px; border:none; cursor:pointer; box-shadow:0 4px 18px rgba(108,63,197,0.5); z-index:998; transition:transform 0.2s; }
+.ai-float:hover { transform:scale(1.08); }
+
+/* AI CHAT MODAL */
+#aiChatModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:3000; align-items:flex-end; justify-content:flex-end; padding:20px; }
+#aiChatModal.show { display:flex; }
+.ai-chat-window { width:370px; max-width:100%; height:560px; background:#0C2C54; border:1px solid var(--border); border-radius:22px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.6); animation:fadeInUp 0.3s ease; }
+.ai-chat-header { background:linear-gradient(135deg,#6c3fc5,#4a90d9); padding:16px 18px; display:flex; align-items:center; gap:12px; }
+.ai-chat-avatar { width:42px; height:42px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.ai-chat-info { flex:1; }
+.ai-chat-info h4 { color:white; font-size:15px; font-weight:700; margin:0; }
+.ai-chat-info span { color:rgba(255,255,255,0.75); font-size:12px; }
+.ai-chat-close { background:none; border:none; color:white; font-size:22px; cursor:pointer; padding:0 4px; opacity:0.8; }
+.ai-chat-close:hover { opacity:1; }
+.ai-chat-messages { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:14px; background:#030D1E; }
+.ai-msg { display:flex; gap:8px; align-items:flex-end; }
+.ai-msg.user { flex-direction:row-reverse; }
+.ai-msg-bubble { max-width:80%; padding:11px 15px; border-radius:18px; font-size:14px; line-height:1.6; }
+.ai-msg.bot .ai-msg-bubble { background:#0C2C54; color:var(--text); border-bottom-right-radius:4px; border:1px solid var(--border); }
+.ai-msg.user .ai-msg-bubble { background:linear-gradient(135deg,#6c3fc5,#4a90d9); color:white; border-bottom-left-radius:4px; }
+.ai-msg-icon { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#6c3fc5,#4a90d9); display:flex; align-items:center; justify-content:center; color:white; font-size:13px; flex-shrink:0; }
+.ai-typing { display:flex; gap:5px; align-items:center; padding:8px 12px; background:#0C2C54; border-radius:18px; border-bottom-right-radius:4px; border:1px solid var(--border); }
+.ai-typing span { width:7px; height:7px; background:var(--secondary); border-radius:50%; animation:typing 1.2s infinite; display:inline-block; }
+.ai-typing span:nth-child(2) { animation-delay:0.2s; }
+.ai-typing span:nth-child(3) { animation-delay:0.4s; }
+@keyframes typing { 0%,80%,100% { transform:scale(0.8); opacity:0.5; } 40% { transform:scale(1.1); opacity:1; } }
+.ai-quick-btns { display:flex; gap:7px; padding:10px 18px; flex-wrap:wrap; background:#030D1E; border-top:1px solid var(--border); }
+.ai-quick-btn { background:#0C2C54; border:1.5px solid var(--border); border-radius:20px; padding:6px 13px; font-family:'Vazirmatn',sans-serif; font-size:12px; cursor:pointer; transition:all 0.2s; color:#a0b0c0; white-space:nowrap; }
+.ai-quick-btn:hover { border-color:var(--secondary); color:var(--secondary); }
+.ai-chat-input { padding:12px 14px; border-top:1px solid var(--border); display:flex; gap:10px; background:#0C2C54; }
+.ai-chat-input input { flex:1; border:1.5px solid var(--border); border-radius:25px; padding:10px 16px; font-family:'Vazirmatn',sans-serif; font-size:14px; outline:none; transition:border-color 0.3s; background:#030D1E; color:var(--text); }
+.ai-chat-input input:focus { border-color:var(--secondary); }
+.ai-send-btn { width:42px; height:42px; background:linear-gradient(135deg,#6c3fc5,#4a90d9); border:none; border-radius:50%; color:white; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.2s; flex-shrink:0; }
+.ai-send-btn:hover { transform:scale(1.08); }
+
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes bounce { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+@keyframes slideInLeft { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:translateX(0); } }
+@keyframes slideOutLeft { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(-30px); } }
+
+@media (max-width:900px) {
+    .search-box { grid-template-columns:1fr 1fr; }
+    .search-box > *:last-child { grid-column:1/-1; }
+    .footer-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:768px) {
+    nav { display:none; }
+    .mobile-nav { display:block; }
+    body { padding-bottom:70px; }
+    .hero h2 { font-size:24px; }
+    .contact-grid { grid-template-columns:1fr; }
+    .whatsapp-float { bottom:80px; }
+    .call-float { bottom:145px; }
+    .ai-float { bottom:244px; }
+    .ai-welcome-notif { bottom:310px; max-width:220px; }
+}
+@media (max-width:480px) {
+    .search-box { grid-template-columns:1fr; }
+    .footer-grid { grid-template-columns:1fr; }
+    #aiChatModal { padding:0; align-items:flex-end; justify-content:center; }
+    .ai-chat-window { width:100%; border-radius:22px 22px 0 0; height:85vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="top-bar-inner">
+        <div><i class="fas fa-map-marker-alt"></i> محمودآباد، خیابان امام، بعد از نسیم ۶۹/۱ &nbsp;|&nbsp; <i class="fas fa-clock"></i> ۸ صبح تا ۸ شب</div>
+        <div>
+            <a href="tel:01144735333"><i class="fas fa-phone"></i> ۰۱۱-۴۴۷۳-۵۳۳۳</a>
+            <a href="tel:09113276647"><i class="fas fa-phone"></i> ۰۹۱۱۳۲۷۶۶۴۷</a>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-main">
+        <a href="https://mahoorrlste.ir" class="logo">
+            <div class="logo-icon">🏠</div>
+            <div class="logo-text">
+                <h1>املاک ماهور</h1>
+                <p>انجام کلیه خدمات ملکی - محمودآباد</p>
+            </div>
+        </a>
+        <nav>
+            <a href="#" class="active">صفحه اصلی</a>
+            <a href="#listings">آگهی‌ها</a>
+            <a href="#services">خدمات</a>
+            <a href="#agents">کارشناسان</a>
+            <a href="#contact">تماس</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="user-dropdown" id="userDropdown" style="display:none;">
+                <div class="user-avatar" onclick="toggleDropdown()" id="userAvatar">ک</div>
+                <div class="user-dropdown-menu" id="dropdownMenu">
+                    <button class="dropdown-item" onclick="showMyListings();closeDropdown()"><i class="fas fa-list"></i> آگهی‌های من</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" onclick="doSignOut()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                </div>
+            </div>
+            <button class="btn-auth" id="btnLogin" onclick="openAuthModal()" style="display:none;"><i class="fas fa-user"></i> ورود / ثبت‌نام</button>
+            <button class="btn-post" onclick="requireAuthThenPost()"><i class="fas fa-plus"></i> <span>ثبت آگهی</span></button>
+        </div>
+    </div>
+</header>
+
+<section class="hero">
+    <h2>🏡 خانه رویاییت را پیدا کن</h2>
+    <p>بزرگ‌ترین پایگاه ملکی محمودآباد | خرید، فروش، اجاره و رهن</p>
+    <div class="search-container">
+        <div class="search-tabs">
+            <button class="search-tab active" onclick="setTab(this)">خرید</button>
+            <button class="search-tab" onclick="setTab(this)">اجاره</button>
+            <button class="search-tab" onclick="setTab(this)">رهن کامل</button>
+            <button class="search-tab" onclick="setTab(this)">پیش‌فروش</button>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 جستجو در محمودآباد و اطراف..." oninput="liveSearch()">
+            <select id="filterType" onchange="liveSearch()">
+                <option value="">نوع ملک</option>
+                <option value="apartment">آپارتمان</option>
+                <option value="villa">ویلا</option>
+                <option value="land">زمین</option>
+                <option value="commercial">تجاری</option>
+            </select>
+            <select id="filterSize" onchange="liveSearch()">
+                <option value="">متراژ</option>
+                <option value="small">تا ۵۰ متر</option>
+                <option value="medium">۵۰-۱۰۰ متر</option>
+                <option value="large">۱۰۰-۱۵۰ متر</option>
+                <option value="xlarge">بیشتر از ۱۵۰</option>
+            </select>
+            <select id="filterBudget" onchange="liveSearch()">
+                <option value="">بودجه</option>
+                <option value="low">تا ۵۰۰ میلیون</option>
+                <option value="mid">۵۰۰م - ۱ میلیارد</option>
+                <option value="high">۱-۲ میلیارد</option>
+                <option value="vhigh">بیشتر</option>
+            </select>
+            <button class="btn-search" onclick="liveSearch()"><i class="fas fa-search"></i> جستجو</button>
+        </div>
+    </div>
+</section>
+
+<div class="stats">
+    <div class="stats-inner">
+        <div class="stat-item"><div class="stat-num">+۵۰۰</div><div class="stat-label">آگهی فعال</div></div>
+        <div class="stat-item"><div class="stat-num">+۱۰۰۰</div><div class="stat-label">معامله موفق</div></div>
+        <div class="stat-item"><div class="stat-num">۱۵ سال</div><div class="stat-label">سابقه کاری</div></div>
+        <div class="stat-item"><div class="stat-num">۴ نفر</div><div class="stat-label">کارشناس متخصص</div></div>
+    </div>
+</div>
+
+<div class="main-content">
+
+<div class="services" id="services">
+    <div class="section-header">
+        <div class="section-title">خدمات ما</div>
+    </div>
+    <div class="services-grid">
+        <div class="service-item"><div class="service-icon"><i class="fas fa-house"></i></div><h4>خرید و فروش</h4><p>ملک دلخواهت را بخر</p></div>
+        <div class="service-item"><div class="service-icon"><i class="fas fa-key"></i></div><h4>اجاره و رهن</h4><p>بهترین قیمت اجاره</p></div>
+        <div class="service-item"><div class="service-icon"><i class="fas fa-moon"></i></div><h4>اجاره شبانه</h4><p>ویلا و اقامتگاه روزانه</p></div>
+        <div class="service-item"><div class="service-icon"><i class="fas fa-file-signature"></i></div><h4>تفکیک سند</h4><p>خدمات ثبتی و حقوقی</p></div>
+        <div class="service-item"><div class="service-icon"><i class="fas fa-pencil-ruler"></i></div><h4>طراحی و نظارت</h4><p>معماری و اجرا</p></div>
+        <div class="service-item"><div class="service-icon"><i class="fas fa-helmet-safety"></i></div><h4>پیمانکاری</h4><p>ساخت و ساز</p></div>
+    </div>
+    <div class="services-address">
+        <div class="services-addr-item">
+            <div style="color:var(--secondary);flex-shrink:0;"><i class="fas fa-map-marker-alt"></i></div>
+            <span>محمودآباد، خیابان امام، بعد از نسیم ۶۹/۱</span>
+        </div>
+        <a href="https://maps.app.goo.gl/Dv4UxLHXSBrPe1xbA" target="_blank" rel="noopener" class="services-addr-phone"><i class="fas fa-location-arrow"></i> مسیریابی</a>
+    </div>
+</div>
+
+<div class="my-listings-section" id="myListingsPanel">
+    <div class="section-header">
+        <div class="section-title">آگهی‌های من</div>
+        <button onclick="document.getElementById('myListingsPanel').style.display='none'" style="background:none;border:none;cursor:pointer;color:#a0b0c0;font-size:20px;">✕</button>
+    </div>
+    <div id="myListingsContainer"><p style="color:#a0b0c0;text-align:center;padding:20px;">در حال بارگذاری...</p></div>
+</div>
+
+<div id="listings">
+    <div class="section-header">
+        <div class="section-title">آگهی‌های اخیر</div>
+        <a href="#listings" class="see-all">مشاهده همه <i class="fas fa-chevron-left"></i></a>
+    </div>
+    <div class="filter-bar">
+        <span class="filter-label">فیلتر:</span>
+        <button class="filter-btn active" onclick="filterProps(this,'all')">همه</button>
+        <button class="filter-btn" onclick="filterProps(this,'sale')">فروشی</button>
+        <button class="filter-btn" onclick="filterProps(this,'rent')">اجاره‌ای</button>
+        <button class="filter-btn" onclick="filterProps(this,'mortgage')">رهن</button>
+        <button class="filter-btn" onclick="filterProps(this,'presale')">پیش‌فروش</button>
+        <button class="filter-btn" onclick="filterProps(this,'daily-rent')">اجاره شبانه</button>
+        <button class="filter-btn" onclick="filterProps(this,'villa')">ویلایی</button>
+        <button class="filter-btn" onclick="filterProps(this,'apartment')">آپارتمانی</button>
+    </div>
+
+    <!-- Live listings from app -->
+    <div id="mahoor-live-listings" style="margin-bottom:20px;"></div>
+    <script src="https://app.mahoorrlste.ir/embed-listings.js" defer></script>
+
+    <div class="property-grid" id="propertyGrid">
+        <div class="property-card" data-type="sale apartment" data-title="آپارتمان ۱۲۰ متری نوساز" data-price="2500">
+            <span class="card-badge badge-sale">فروشی</span>
+            <div class="card-img">
+                <span class="card-img-fallback"><i class="fas fa-building"></i></span>
+                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop" alt="آپارتمان" onerror="this.classList.add('broken')">
+                <div class="card-overlay">
+                    <span class="card-location"><i class="fas fa-map-marker-alt"></i> خیابان امام، محمودآباد</span>
+                    <button class="card-favorite" onclick="toggleFav(this)"><i class="far fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">آپارتمان ۱۲۰ متری نوساز - ۳ خواب</h3>
+                <div class="card-price">۲.۵ میلیارد تومان <span>/ قیمت کل</span></div>
+                <div class="card-features">
+                    <div class="feature"><i class="fas fa-ruler-combined"></i> ۱۲۰ متر</div>
+                    <div class="feature"><i class="fas fa-bed"></i> ۳ خواب</div>
+                    <div class="feature"><i class="fas fa-car"></i> پارکینگ</div>
+                </div>
+                <div class="card-agent">
+                    <div class="agent-avatar">ح</div>
+                    <div class="agent-info"><div class="agent-name">حیدری</div><div class="agent-role">کارشناس فروش</div></div>
+                    <a href="tel:09120996426" class="btn-call"><i class="fas fa-phone"></i> تماس</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="property-card" data-type="villa sale" data-title="ویلای دوبلکس ساحلی" data-price="5800">
+            <span class="card-badge badge-sale">فروشی</span>
+            <div class="card-img">
+                <span class="card-img-fallback"><i class="fas fa-home"></i></span>
+                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop" alt="ویلا" onerror="this.classList.add('broken')">
+                <div class="card-overlay">
+                    <span class="card-location"><i class="fas fa-map-marker-alt"></i> نسیم، محمودآباد</span>
+                    <button class="card-favorite" onclick="toggleFav(this)"><i class="far fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">ویلای دوبلکس ساحلی - ۲۰۰ متر زمین</h3>
+                <div class="card-price">۵.۸ میلیارد تومان <span>/ قیمت کل</span></div>
+                <div class="card-features">
+                    <div class="feature"><i class="fas fa-ruler-combined"></i> ۱۸۰ متر</div>
+                    <div class="feature"><i class="fas fa-bed"></i> ۴ خواب</div>
+                    <div class="feature"><i class="fas fa-tree"></i> حیاط</div>
+                </div>
+                <div class="card-agent">
+                    <div class="agent-avatar">آ</div>
+                    <div class="agent-info"><div class="agent-name">مهندس آزاد</div><div class="agent-role">مهندس عمران</div></div>
+                    <a href="tel:09113276647" class="btn-call"><i class="fas fa-phone"></i> تماس</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="property-card" data-type="rent apartment" data-title="آپارتمان ۸۵ متری مبله" data-price="5">
+            <span class="card-badge badge-rent">اجاره‌ای</span>
+            <div class="card-img">
+                <span class="card-img-fallback"><i class="fas fa-building"></i></span>
+                <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=250&fit=crop" alt="اجاره" onerror="this.classList.add('broken')">
+                <div class="card-overlay">
+                    <span class="card-location"><i class="fas fa-map-marker-alt"></i> خیابان ساحل، محمودآباد</span>
+                    <button class="card-favorite" onclick="toggleFav(this)"><i class="far fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">آپارتمان ۸۵ متری - ۲ خواب مبله</h3>
+                <div class="card-price">۵ میلیون <span>/ ماهانه</span></div>
+                <div class="card-features">
+                    <div class="feature"><i class="fas fa-ruler-combined"></i> ۸۵ متر</div>
+                    <div class="feature"><i class="fas fa-bed"></i> ۲ خواب</div>
+                    <div class="feature"><i class="fas fa-couch"></i> مبله</div>
+                </div>
+                <div class="card-agent">
+                    <div class="agent-avatar">ر</div>
+                    <div class="agent-info"><div class="agent-name">راعی</div><div class="agent-role">کارشناس اجاره</div></div>
+                    <a href="tel:09120997453" class="btn-call"><i class="fas fa-phone"></i> تماس</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="property-card" data-type="mortgage apartment" data-title="آپارتمان ۱۰۵ متری رهن کامل" data-price="400">
+            <span class="card-badge badge-mortgage">رهن کامل</span>
+            <div class="card-img">
+                <span class="card-img-fallback"><i class="fas fa-building"></i></span>
+                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=250&fit=crop" alt="رهن" onerror="this.classList.add('broken')">
+                <div class="card-overlay">
+                    <span class="card-location"><i class="fas fa-map-marker-alt"></i> مرکز شهر، محمودآباد</span>
+                    <button class="card-favorite" onclick="toggleFav(this)"><i class="far fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">آپارتمان ۱۰۵ متری رهن کامل - ۳ خواب</h3>
+                <div class="card-price">۴۰۰ میلیون <span>/ رهن کامل</span></div>
+                <div class="card-features">
+                    <div class="feature"><i class="fas fa-ruler-combined"></i> ۱۰۵ متر</div>
+                    <div class="feature"><i class="fas fa-bed"></i> ۳ خواب</div>
+                    <div class="feature"><i class="fas fa-car"></i> پارکینگ</div>
+                </div>
+                <div class="card-agent">
+                    <div class="agent-avatar">ح</div>
+                    <div class="agent-info"><div class="agent-name">حیدری</div><div class="agent-role">کارشناس فروش</div></div>
+                    <a href="tel:09120996426" class="btn-call"><i class="fas fa-phone"></i> تماس</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="property-card" data-type="presale apartment" data-title="برج مسکونی لاکچری" data-price="1620">
+            <span class="card-badge badge-pre-sale">پیش‌فروش</span>
+            <div class="card-img">
+                <span class="card-img-fallback"><i class="fas fa-city"></i></span>
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=250&fit=crop" alt="پیش فروش" onerror="this.classList.add('broken')">
+                <div class="card-overlay">
+                    <span class="card-location"><i class="fas fa-map-marker-alt"></i> فاز جدید، محمودآباد</span>
+                    <button class="card-favorite" onclick="toggleFav(this)"><i class="far fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">برج مسکونی لاکچری - پیش‌فروش ویژه</h3>
+                <div class="card-price">۱۸ میلیون <span>/ هر متر</span></div>
+                <div class="card-features">
+                    <div class="feature"><i class="fas fa-ruler-combined"></i> از ۹۰ متر</div>
+                    <div class="feature"><i class="fas fa-bed"></i> ۲-۴ خواب</div>
+                    <div class="feature"><i class="fas fa-shield-alt"></i> نگهبانی</div>
+                </div>
+                <div class="card-agent">
+                    <div class="agent-avatar">آ</div>
+                    <div class="agent-info"><div class="agent-name">مهندس آزاد</div><div class="agent-role">مهندس عمران</div></div>
+                    <a href="tel:09113276647" class="btn-call"><i class="fas fa-phone"></i> تماس</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="property-card" data-type="daily-rent villa" data-title="ویلا اجاره شبانه ساحلی" data-price="1">
+            <span class="card-badge badge-daily-rent">اجاره شبانه</span>
+            <div class="card-img">
+                <span class="card-img-fallback"><i class="fas fa-home"></i></span>
+                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop" alt="ویلا شبانه" onerror="this.classList.add('broken')">
+                <div class="card-overlay">
+                    <span class="card-location"><i class="fas fa-map-marker-alt"></i> ساحل، محمودآباد</span>
+                    <button class="card-favorite" onclick="toggleFav(this)"><i class="far fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">ویلا اجاره شبانه - ساحلی ۳ خواب</h3>
+                <div class="card-price">۸۰۰ هزار <span>/ هر شب</span></div>
+                <div class="card-features">
+                    <div class="feature"><i class="fas fa-ruler-combined"></i> ۱۵۰ متر</div>
+                    <div class="feature"><i class="fas fa-bed"></i> ۳ خواب</div>
+                    <div class="feature"><i class="fas fa-tree"></i> حیاط</div>
+                </div>
+                <div class="card-agent">
+                    <div class="agent-avatar">م</div>
+                    <div class="agent-info"><div class="agent-name">موسی مشکیاب</div><div class="agent-role">مسئول ویلا و اجاره شبانه</div></div>
+                    <a href="tel:09373687600" class="btn-call"><i class="fas fa-phone"></i> تماس</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="no-results" id="noResults">
+            <i class="fas fa-search"></i>
+            <p>ملکی با این مشخصات پیدا نشد</p>
+            <p style="font-size:12px;margin-top:5px;">فیلترها را تغییر دهید</p>
+        </div>
+    </div>
+</div>
+
+<div class="agents-section" id="agents" style="margin-top:40px;">
+    <div class="section-header">
+        <div class="section-title">کارشناسان ما</div>
+    </div>
+    <div class="agents-grid">
+        <div class="agent-card">
+            <div class="agent-photo">آ</div>
+            <h3>مهندس آزاد</h3>
+            <div class="role">مهندس عمران و کارشناس ملکی</div>
+            <a href="tel:09113276647" class="phone">۰۹۱۱۳۲۷۶۶۴۷</a>
+            <div class="agent-stats">
+                <div class="agent-stat"><strong>۵۰+</strong><small>پروژه</small></div>
+                <div class="agent-stat"><strong>۱۰+</strong><small>سال سابقه</small></div>
+                <div class="agent-stat"><strong>⭐ ۴.۹</strong><small>امتیاز</small></div>
+            </div>
+            <a href="tel:09113276647" class="btn-agent-call"><i class="fas fa-phone"></i> تماس با مهندس آزاد</a>
+        </div>
+        <div class="agent-card">
+            <div class="agent-photo">ح</div>
+            <h3>حیدری</h3>
+            <div class="role">کارشناس فروش ملکی</div>
+            <a href="tel:09120996426" class="phone">۰۹۱۲۰۹۹۶۴۲۶</a>
+            <div class="agent-stats">
+                <div class="agent-stat"><strong>۳۰۰+</strong><small>معامله</small></div>
+                <div class="agent-stat"><strong>۸+</strong><small>سال سابقه</small></div>
+                <div class="agent-stat"><strong>⭐ ۴.۸</strong><small>امتیاز</small></div>
+            </div>
+            <a href="tel:09120996426" class="btn-agent-call"><i class="fas fa-phone"></i> تماس با حیدری</a>
+        </div>
+        <div class="agent-card">
+            <div class="agent-photo">ر</div>
+            <h3>راعی</h3>
+            <div class="role">کارشناس اجاره و رهن</div>
+            <a href="tel:09120997453" class="phone">۰۹۱۲۰۹۹۷۴۵۳</a>
+            <div class="agent-stats">
+                <div class="agent-stat"><strong>۲۰۰+</strong><small>معامله</small></div>
+                <div class="agent-stat"><strong>۷+</strong><small>سال سابقه</small></div>
+                <div class="agent-stat"><strong>⭐ ۴.۸</strong><small>امتیاز</small></div>
+            </div>
+            <a href="tel:09120997453" class="btn-agent-call"><i class="fas fa-phone"></i> تماس با راعی</a>
+        </div>
+        <div class="agent-card">
+            <div class="agent-photo">م</div>
+            <h3>موسی مشکیاب</h3>
+            <div class="role">مسئول ویلا و اجاره شبانه (زیر یک ماه)</div>
+            <a href="tel:09373687600" class="phone">۰۹۳۷۳۶۸۷۶۰۰</a>
+            <div class="agent-stats">
+                <div class="agent-stat"><strong>۱۵۰+</strong><small>اجاره</small></div>
+                <div class="agent-stat"><strong>۵+</strong><small>سال سابقه</small></div>
+                <div class="agent-stat"><strong>⭐ ۴.۷</strong><small>امتیاز</small></div>
+            </div>
+            <a href="tel:09373687600" class="btn-agent-call"><i class="fas fa-phone"></i> تماس با موسی مشکیاب</a>
+        </div>
+    </div>
+</div>
+
+<div class="map-section" id="contact">
+    <div class="map-header">
+        <div class="section-title">موقعیت ما</div>
+        <a href="https://maps.app.goo.gl/Dv4UxLHXSBrPe1xbA" target="_blank" rel="noopener" class="see-all"><i class="fas fa-location-arrow"></i> مسیریابی</a>
+    </div>
+    <div style="position:relative;">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3232.0!2d52.2607!3d36.6333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3f8eb760f2e84c87%3A0x0!2z2YXYrdmF2YjYr9in2KjYp9iv!5e0!3m2!1sfa!2sir!4v1700000000000!5m2!1sfa!2sir"
+            width="100%" height="350" style="border:0;display:block;filter:invert(0.9) hue-rotate(180deg);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="موقعیت دفتر"></iframe>
+        <a href="https://maps.app.goo.gl/Dv4UxLHXSBrPe1xbA" target="_blank" rel="noopener"
+           style="position:absolute;bottom:16px;right:16px;background:var(--secondary);color:#030D1E;padding:10px 18px;border-radius:25px;text-decoration:none;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.4);z-index:10;">
+            <i class="fas fa-location-arrow"></i> مسیریابی به املاک ماهور
+        </a>
+    </div>
+</div>
+
+<div class="contact-section">
+    <div class="section-title" style="color:white;font-size:20px;">📞 تماس با ما</div>
+    <div class="contact-grid">
+        <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-building"></i></div>
+            <div><h4>دفتر مرکزی</h4><a href="tel:01144735333">۰۱۱-۴۴۷۳-۵۳۳۳</a></div>
+        </div>
+        <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-hard-hat"></i></div>
+            <div><h4>مهندس آزاد</h4><a href="tel:09113276647">۰۹۱۱۳۲۷۶۶۴۷</a></div>
+        </div>
+        <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-user-tie"></i></div>
+            <div><h4>حیدری / راعی</h4><a href="tel:09120996426">۰۹۱۲۰۹۹۶۴۲۶</a></div>
+        </div>
+        <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div><h4>آدرس دفتر</h4><p>محمودآباد، خیابان امام، بعد از نسیم ۶۹/۱</p></div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /main-content -->
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div style="font-size:22px;font-weight:800;color:white;margin-bottom:8px;">🏠 املاک ماهور</div>
+                <p class="footer-desc">انجام کلیه خدمات ملکی شامل خرید، فروش، اجاره، رهن، تفکیک سند، طراحی، نظارت، اجرا و پیمانکاری. با بیش از ۱۵ سال تجربه در محمودآباد.</p>
+                <div class="footer-social">
+                    <a href="https://www.instagram.com/amlake_mahour/" target="_blank" rel="noopener" class="social-btn instagram" aria-label="اینستاگرام"><i class="fab fa-instagram"></i></a>
+                    <a href="https://t.me/mahooradschannel" target="_blank" rel="noopener" class="social-btn telegram" aria-label="تلگرام"><i class="fab fa-telegram"></i></a>
+                    <a href="https://wa.me/981144735333" target="_blank" rel="noopener" class="social-btn whatsapp" aria-label="واتساپ"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://rubika.ir/mahoorrlste" target="_blank" rel="noopener" class="social-btn rubika" aria-label="روبیکا">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 3.5a6.5 6.5 0 110 13 6.5 6.5 0 010-13zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 1.5a3 3 0 110 6 3 3 0 010-6z"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>خدمات</h4>
+                <ul>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> خرید ملک</a></li>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> فروش ملک</a></li>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> اجاره و رهن</a></li>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> اجاره شبانه</a></li>
+                    <li><a href="#services"><i class="fas fa-chevron-left"></i> تفکیک سند</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>دسترسی سریع</h4>
+                <ul>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> آگهی‌های جدید</a></li>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> ویلاهای فروشی</a></li>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> آپارتمان اجاره‌ای</a></li>
+                    <li><a href="#listings"><i class="fas fa-chevron-left"></i> پیش‌فروش</a></li>
+                    <li><a href="https://app.mahoorrlste.ir" target="_blank"><i class="fas fa-chevron-left"></i> پنل مدیریت</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>تماس</h4>
+                <ul>
+                    <li><a href="tel:01144735333"><i class="fas fa-phone"></i> ۰۱۱-۴۴۷۳-۵۳۳۳</a></li>
+                    <li><a href="tel:09113276647"><i class="fas fa-phone"></i> ۰۹۱۱۳۲۷۶۶۴۷</a></li>
+                    <li><a href="tel:09120996426"><i class="fas fa-phone"></i> ۰۹۱۲۰۹۹۶۴۲۶</a></li>
+                    <li><a href="https://t.me/mahooradschannel" target="_blank"><i class="fab fa-telegram"></i> کانال تلگرام</a></li>
+                    <li><a href="https://maps.app.goo.gl/Dv4UxLHXSBrPe1xbA" target="_blank"><i class="fas fa-location-arrow"></i> مسیریابی</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© تمامی حقوق برای <strong style="color:var(--secondary)">املاک ماهور</strong> محمودآباد محفوظ است | mahoorrlste.ir</p>
+            <p style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.2);">Designed & Developed by <strong style="color:rgba(255,255,255,0.35)">NH</strong></p>
+        </div>
+    </div>
+</footer>
+
+<div class="mobile-nav">
+    <div class="mobile-nav-inner">
+        <a href="#" class="mobile-nav-btn active"><i class="fas fa-home"></i><span>خانه</span></a>
+        <a href="#listings" class="mobile-nav-btn"><i class="fas fa-search"></i><span>جستجو</span></a>
+        <div class="mobile-nav-center">
+            <a href="#" onclick="document.getElementById('postModal').classList.add('show')" aria-label="ثبت آگهی"><i class="fas fa-plus"></i></a>
+        </div>
+        <a href="#agents" class="mobile-nav-btn"><i class="fas fa-users"></i><span>کارشناسان</span></a>
+        <a href="#contact" class="mobile-nav-btn"><i class="fas fa-phone"></i><span>تماس</span></a>
+    </div>
+</div>
+
+<div class="ai-welcome-notif" id="aiWelcomeNotif">
+    <div class="ai-notif-dot"></div>
+    <div class="ai-notif-avatar"><i class="fas fa-robot"></i></div>
+    <div class="ai-notif-text">
+        <strong>پشتیبان هوشمند ماهور</strong>
+        <span>کارشناسان ما و دستیار AI آماده کمک‌رسانی به شما هستند 👋</span>
+    </div>
+    <button class="ai-notif-close" onclick="closeAiNotif()" aria-label="بستن">✕</button>
+</div>
+
+<a href="https://wa.me/981144735333" target="_blank" rel="noopener" class="whatsapp-float" aria-label="واتساپ">
+    <svg viewBox="0 0 48 48" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 4C13 4 4 13 4 24c0 3.6 1 7 2.7 9.9L4 44l10.4-2.7A20 20 0 0 0 24 44c11 0 20-9 20-20S35 4 24 4z" fill="#fff"/>
+        <path d="M24 7.2A16.8 16.8 0 0 0 7.2 24c0 3 .8 5.9 2.3 8.4l.4.7-1.7 6.1 6.3-1.6.7.4A16.8 16.8 0 1 0 24 7.2z" fill="#25D366"/>
+        <path d="M18.6 14.6c-.4-1-1-1-1.3-1h-1c-.4 0-1 .1-1.5.7-.5.6-2 2-2 4.8s2 5.5 2.3 5.9c.3.4 4 6.3 9.8 8.6 4.8 1.9 5.8 1.5 6.8 1.4 1 0 3.2-1.3 3.6-2.6.4-1.3.4-2.4.3-2.6-.1-.2-.5-.3-1-.6-.5-.2-3.2-1.6-3.7-1.8-.5-.2-.8-.3-1.2.3-.4.6-1.4 1.8-1.7 2.1-.3.4-.7.4-1.2.1-.5-.2-2.2-.8-4.2-2.6-1.5-1.4-2.6-3.1-2.9-3.6-.3-.5 0-.8.2-1.1.2-.2.5-.6.7-.9.2-.3.3-.5.5-.9.2-.4 0-.7-.1-1-.2-.2-1.2-3-1.6-4.2z" fill="#fff"/>
+    </svg>
+</a>
+
+<button class="ai-float" onclick="document.getElementById('aiChatModal').classList.add('show')" aria-label="پشتیبان هوش مصنوعی">
+    <svg viewBox="0 0 48 48" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="20" fill="rgba(255,255,255,0.15)"/>
+        <path d="M24 8c-2.2 0-4 1.8-4 4 0 .5.1 1 .3 1.4A8 8 0 0 0 16 20v.5A4 4 0 0 0 14 24a4 4 0 0 0 2 3.5V28a6 6 0 0 0 6 6h4a6 6 0 0 0 6-6v-.5A4 4 0 0 0 34 24a4 4 0 0 0-2-3.5V20a8 8 0 0 0-4.3-7.1c.2-.5.3-1 .3-1.5 0-2.2-1.8-4-4-4z" fill="white" opacity="0.9"/>
+        <circle cx="21" cy="22" r="1.5" fill="#6c3fc5"/><circle cx="27" cy="22" r="1.5" fill="#6c3fc5"/>
+        <path d="M21 27c0 0 1 2 3 2s3-2 3-2" stroke="#6c3fc5" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+</button>
+
+<a href="tel:01144735333" class="call-float" aria-label="تماس دفتر">
+    <svg viewBox="0 0 48 48" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.5 10h5.2l2.5 6.2-3 3a18.6 18.6 0 0 0 9.6 9.6l3-3 6.2 2.5v5.2A2 2 0 0 1 36 35.5C19.7 34.7 13.3 28.3 12.5 12a2 2 0 0 1 2-1.5z" fill="#D4AF37" stroke="#D4AF37" stroke-width="1" stroke-linejoin="round"/>
+    </svg>
+</a>
+
+<!-- AI CHAT MODAL -->
+<div id="aiChatModal" onclick="aiCloseOnOverlay(event)">
+    <div class="ai-chat-window">
+        <div class="ai-chat-header">
+            <div class="ai-chat-avatar">🤖</div>
+            <div class="ai-chat-info">
+                <h4>پشتیبان هوشمند ماهور</h4>
+                <span>● آنلاین - پاسخ فوری</span>
+            </div>
+            <button class="ai-chat-close" onclick="document.getElementById('aiChatModal').classList.remove('show')" aria-label="بستن">✕</button>
+        </div>
+        <div class="ai-chat-messages" id="aiMessages">
+            <div class="ai-msg bot">
+                <div class="ai-msg-icon"><i class="fas fa-robot"></i></div>
+                <div class="ai-msg-bubble">سلام! 👋 خوش آمدید به املاک ماهور.<br>من دستیار هوشمند هستم. چطور می‌تونم کمکتون کنم؟</div>
+            </div>
+        </div>
+        <div class="ai-quick-btns" id="aiQuickBtns">
+            <button class="ai-quick-btn" onclick="aiQuick('قیمت آپارتمان در محمودآباد چقدر است؟')">💰 قیمت آپارتمان</button>
+            <button class="ai-quick-btn" onclick="aiQuick('شرایط اجاره ویلا شبانه چیست؟')">🏡 اجاره شبانه</button>
+            <button class="ai-quick-btn" onclick="aiQuick('چطور با کارشناس تماس بگیرم؟')">📞 تماس با کارشناس</button>
+            <button class="ai-quick-btn" onclick="aiQuick('آدرس دفتر شما کجاست؟')">📍 آدرس دفتر</button>
+        </div>
+        <div class="ai-chat-input">
+            <input type="text" id="aiInput" placeholder="سوال خود را بنویسید..." onkeydown="if(event.key==='Enter') aiSend()">
+            <button class="ai-send-btn" onclick="aiSend()" aria-label="ارسال"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal" style="max-width:420px;">
+        <div class="modal-header">
+            <h3>🔐 ورود / ثبت‌نام</h3>
+            <button class="modal-close" onclick="document.getElementById('authModal').classList.remove('show')">✕</button>
+        </div>
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login',this)">ورود</button>
+            <button class="auth-tab" onclick="switchAuthTab('register',this)">ثبت‌نام</button>
+        </div>
+        <div id="authLoginForm">
+            <div class="form-group"><label>ایمیل</label><input type="email" id="loginEmail" placeholder="example@gmail.com" dir="ltr"></div>
+            <div class="form-group"><label>رمز عبور</label><input type="password" id="loginPass" placeholder="••••••••" dir="ltr"></div>
+            <div class="auth-error" id="loginError"></div>
+            <button class="btn-submit" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> ورود</button>
+        </div>
+        <div id="authRegisterForm" style="display:none;">
+            <div class="form-group"><label>نام کامل</label><input type="text" id="regName" placeholder="نام و نام خانوادگی"></div>
+            <div class="form-group"><label>ایمیل</label><input type="email" id="regEmail" placeholder="example@gmail.com" dir="ltr"></div>
+            <div class="form-group"><label>رمز عبور</label><input type="password" id="regPass" placeholder="حداقل ۶ کاراکتر" dir="ltr"></div>
+            <div class="auth-error" id="regError"></div>
+            <div class="auth-success" id="regSuccess"></div>
+            <button class="btn-submit" onclick="doRegister()"><i class="fas fa-user-plus"></i> ثبت‌نام</button>
+        </div>
+    </div>
+</div>
+
+<!-- POST LISTING MODAL -->
+<div class="modal-overlay" id="postModal" onclick="closeModal(event)">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>🏠 ثبت آگهی ملکی</h3>
+            <button class="modal-close" onclick="document.getElementById('postModal').classList.remove('show')" aria-label="بستن">✕</button>
+        </div>
+        <div id="formArea">
+            <div class="form-group"><label>عنوان آگهی</label><input type="text" id="f_title" placeholder="مثال: آپارتمان ۱۲۰ متری نوساز"></div>
+            <div class="form-row">
+                <div class="form-group"><label>نوع معامله</label>
+                    <select id="f_deal"><option>فروش</option><option>اجاره</option><option>رهن</option><option>پیش‌فروش</option><option>اجاره شبانه</option></select>
+                </div>
+                <div class="form-group"><label>نوع ملک</label>
+                    <select id="f_type"><option>آپارتمان</option><option>ویلا</option><option>زمین</option><option>تجاری</option></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>متراژ (متر)</label><input type="number" id="f_size" placeholder="۱۲۰"></div>
+                <div class="form-group"><label>قیمت (تومان)</label><input type="text" id="f_price" placeholder="۲,۵۰۰,۰۰۰,۰۰۰"></div>
+            </div>
+            <div class="form-group"><label>شماره تماس</label><input type="tel" id="f_phone" placeholder="۰۹۱۱..." dir="ltr"></div>
+            <div class="form-group"><label>توضیحات</label><textarea rows="3" id="f_desc" placeholder="توضیحات بیشتر..."></textarea></div>
+            <button class="btn-submit" id="submitBtn" onclick="submitForm()"><i class="fas fa-paper-plane"></i> ثبت آگهی از طریق واتساپ</button>
+        </div>
+        <div class="success-msg" id="successMsg">✅ در حال انتقال به واتساپ...<br><small>پیام آگهی شما آماده شده است</small></div>
+    </div>
+</div>
+
+<script>
+/* ── TABS ── */
+const tabTypeMap = { 'خرید':'sale', 'اجاره':'rent', 'رهن کامل':'mortgage', 'پیش‌فروش':'presale' };
+function setTab(btn) {
+    document.querySelectorAll('.search-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    const type = tabTypeMap[btn.textContent.trim()];
+    if (type) {
+        const fb = [...document.querySelectorAll('.filter-btn')].find(b=>b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+type+"'"));
+        if (fb) filterProps(fb,type);
+    }
+}
+
+/* ── FILTER ── */
+function filterProps(btn,type) {
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    let visible=0;
+    document.querySelectorAll('.property-card[data-type]').forEach(card=>{
+        const match=type==='all'||card.dataset.type.includes(type);
+        card.classList.toggle('hidden',!match);
+        if(match) visible++;
+    });
+    document.getElementById('noResults').style.display=visible===0?'block':'none';
+}
+
+/* ── LIVE SEARCH ── */
+function liveSearch() {
+    const q=document.getElementById('searchInput').value.trim().toLowerCase();
+    const typeFilter=document.getElementById('filterType').value.toLowerCase();
+    const sizeFilter=document.getElementById('filterSize').value;
+    const budgetFilter=document.getElementById('filterBudget').value;
+    let visible=0;
+    document.querySelectorAll('.property-card[data-type]').forEach(card=>{
+        const title=(card.dataset.title||'').toLowerCase();
+        const type=(card.dataset.type||'').toLowerCase();
+        const textMatch=!q||title.includes(q)||type.includes(q);
+        const typeMatch=!typeFilter||type.includes(typeFilter);
+        let sizeMatch=true;
+        if(sizeFilter){
+            const sizeEl=card.querySelector('.feature .fa-ruler-combined');
+            const sizeNum=parseInt((sizeEl?sizeEl.parentElement.textContent:'').replace(/[^\d]/g,''))||0;
+            if(sizeFilter==='small') sizeMatch=sizeNum>0&&sizeNum<=50;
+            else if(sizeFilter==='medium') sizeMatch=sizeNum>50&&sizeNum<=100;
+            else if(sizeFilter==='large') sizeMatch=sizeNum>100&&sizeNum<=150;
+            else if(sizeFilter==='xlarge') sizeMatch=sizeNum>150;
+        }
+        let budgetMatch=true;
+        if(budgetFilter){
+            const priceM=parseFloat(card.dataset.price)||0;
+            if(budgetFilter==='low') budgetMatch=priceM>0&&priceM<=500;
+            else if(budgetFilter==='mid') budgetMatch=priceM>500&&priceM<=1000;
+            else if(budgetFilter==='high') budgetMatch=priceM>1000&&priceM<=2000;
+            else if(budgetFilter==='vhigh') budgetMatch=priceM>2000;
+        }
+        const match=textMatch&&typeMatch&&sizeMatch&&budgetMatch;
+        card.classList.toggle('hidden',!match);
+        if(match) visible++;
+    });
+    document.getElementById('noResults').style.display=visible===0?'block':'none';
+    if(q) document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+}
+
+/* ── FAVORITE ── */
+function toggleFav(btn) {
+    btn.classList.toggle('active');
+    const icon=btn.querySelector('i');
+    if(btn.classList.contains('active')){ icon.className='fas fa-heart'; icon.style.color='#e74c3c'; }
+    else { icon.className='far fa-heart'; icon.style.color=''; }
+}
+
+/* ── MODAL ── */
+function closeModal(e){ if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('show'); }
+
+/* ── AUTH ── */
+function openAuthModal(){ document.getElementById('authModal').classList.add('show'); }
+function switchAuthTab(tab,btn){
+    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('authLoginForm').style.display=tab==='login'?'':'none';
+    document.getElementById('authRegisterForm').style.display=tab==='register'?'':'none';
+    document.getElementById('loginError').style.display='none';
+    document.getElementById('regError').style.display='none';
+}
+const FA_ERRORS = {
+    'auth/invalid-email':'ایمیل معتبر نیست.','auth/user-not-found':'حساب کاربری با این ایمیل وجود ندارد.',
+    'auth/wrong-password':'رمز عبور اشتباه است.','auth/email-already-in-use':'این ایمیل قبلاً ثبت شده است.',
+    'auth/weak-password':'رمز عبور باید حداقل ۶ کاراکتر باشد.','auth/invalid-credential':'ایمیل یا رمز عبور اشتباه است.',
+    'auth/too-many-requests':'تلاش‌های زیاد. لطفاً کمی صبر کنید.',
+};
+async function doLogin(){
+    const email=document.getElementById('loginEmail').value.trim();
+    const pass=document.getElementById('loginPass').value;
+    const errEl=document.getElementById('loginError');
+    errEl.style.display='none';
+    if(!email||!pass){ errEl.textContent='همه فیلدها را پر کنید.'; errEl.style.display='block'; return; }
+    try { await window._fb.signInWithEmailAndPassword(window._auth,email,pass); document.getElementById('authModal').classList.remove('show'); }
+    catch(e){ errEl.textContent=FA_ERRORS[e.code]||'خطا در ورود.'; errEl.style.display='block'; }
+}
+async function doRegister(){
+    const name=document.getElementById('regName').value.trim();
+    const email=document.getElementById('regEmail').value.trim();
+    const pass=document.getElementById('regPass').value;
+    const errEl=document.getElementById('regError'); const okEl=document.getElementById('regSuccess');
+    errEl.style.display='none'; okEl.style.display='none';
+    if(!name||!email||!pass){ errEl.textContent='همه فیلدها را پر کنید.'; errEl.style.display='block'; return; }
+    try {
+        const cred=await window._fb.createUserWithEmailAndPassword(window._auth,email,pass);
+        await window._fb.updateProfile(cred.user,{displayName:name});
+        okEl.textContent='✅ ثبت‌نام موفق! خوش آمدید.'; okEl.style.display='block';
+        setTimeout(()=>document.getElementById('authModal').classList.remove('show'),1200);
+    } catch(e){ errEl.textContent=FA_ERRORS[e.code]||'خطا در ثبت‌نام.'; errEl.style.display='block'; }
+}
+async function doSignOut(){ await window._fb.signOut(window._auth); closeDropdown(); document.getElementById('myListingsPanel').style.display='none'; }
+function toggleDropdown(){ document.getElementById('dropdownMenu').classList.toggle('show'); }
+function closeDropdown(){ document.getElementById('dropdownMenu').classList.remove('show'); }
+document.addEventListener('click',e=>{ const dd=document.getElementById('userDropdown'); if(dd&&!dd.contains(e.target)) closeDropdown(); });
+window.onAuthReady=function(user){
+    const loginBtn=document.getElementById('btnLogin');
+    const userDd=document.getElementById('userDropdown');
+    const avatarEl=document.getElementById('userAvatar');
+    if(user){ loginBtn.style.display='none'; userDd.style.display='flex'; avatarEl.textContent=(user.displayName||user.email||'ک')[0].toUpperCase(); }
+    else { loginBtn.style.display=''; userDd.style.display='none'; }
+};
+function requireAuthThenPost(){
+    if(!window._currentUser){ openAuthModal(); const orig=window.onAuthReady; window.onAuthReady=function(user){ orig(user); if(user){ window.onAuthReady=orig; document.getElementById('postModal').classList.add('show'); } }; }
+    else { document.getElementById('postModal').classList.add('show'); }
+}
+
+/* ── SUBMIT LISTING ── */
+async function submitForm(){
+    const title=document.getElementById('f_title').value.trim();
+    const phone=document.getElementById('f_phone').value.trim();
+    if(!title||!phone){ alert('لطفاً عنوان آگهی و شماره تماس را وارد کنید.'); return; }
+    const deal=document.getElementById('f_deal').value;
+    const type=document.getElementById('f_type').value;
+    const size=document.getElementById('f_size').value;
+    const price=document.getElementById('f_price').value;
+    const desc=document.getElementById('f_desc').value.trim();
+    document.getElementById('successMsg').style.display='block';
+    document.getElementById('submitBtn').disabled=true;
+    if(window._currentUser&&window._db){
+        try {
+            const {collection,addDoc,serverTimestamp}=window._fb;
+            await addDoc(collection(window._db,'listings'),{ uid:window._currentUser.uid, email:window._currentUser.email, name:window._currentUser.displayName||'', title,deal,type,size,price,phone,desc, status:'pending', createdAt:serverTimestamp() });
+        } catch(e){ console.error('Firestore error',e); }
+    }
+    const msg='🏠 *آگهی جدید - املاک ماهور*\n\n'+'📋 عنوان: '+title+'\n🔑 نوع معامله: '+deal+'\n🏗 نوع ملک: '+type+'\n'+(size?'📐 متراژ: '+size+' متر\n':'')+(price?'💰 قیمت: '+price+' تومان\n':'')+'📞 تماس: '+phone+'\n'+(desc?'📝 توضیحات: '+desc:'');
+    setTimeout(()=>{
+        window.open('https://wa.me/981144735333?text='+encodeURIComponent(msg),'_blank');
+        document.getElementById('postModal').classList.remove('show');
+        document.getElementById('successMsg').style.display='none';
+        document.getElementById('submitBtn').disabled=false;
+        ['f_title','f_phone','f_size','f_price','f_desc'].forEach(id=>document.getElementById(id).value='');
+    },1000);
+}
+
+/* ── MY LISTINGS ── */
+async function showMyListings(){
+    const panel=document.getElementById('myListingsPanel');
+    const container=document.getElementById('myListingsContainer');
+    panel.style.display='block'; panel.scrollIntoView({behavior:'smooth'});
+    if(!window._currentUser||!window._db){ container.innerHTML='<p style="color:#e74c3c;text-align:center;padding:20px;">ابتدا وارد حساب کاربری خود شوید.</p>'; return; }
+    container.innerHTML='<p style="color:#a0b0c0;text-align:center;padding:20px;">در حال بارگذاری...</p>';
+    try {
+        const {collection,query,where,getDocs}=window._fb;
+        const q=query(collection(window._db,'listings'),where('uid','==',window._currentUser.uid));
+        const snap=await getDocs(q);
+        if(snap.empty){ container.innerHTML='<p style="color:#a0b0c0;text-align:center;padding:20px;">هنوز آگهی ثبت نکرده‌اید.</p>'; return; }
+        container.innerHTML='';
+        snap.forEach(doc=>{
+            const d=doc.data();
+            container.innerHTML+='<div class="my-listing-item"><div class="my-listing-info"><h4>'+d.title+'</h4><p>'+d.deal+' | '+d.type+'</p></div><span class="my-listing-badge badge-'+(d.status==='approved'?'approved':'pending')+'">'+(d.status==='approved'?'تایید شده':'در انتظار')+' </span></div>';
+        });
+    } catch(e){ container.innerHTML='<p style="color:#e74c3c;text-align:center;padding:20px;">خطا در بارگذاری.</p>'; }
+}
+
+/* ════════════════════════════════════════
+   AI CHAT — proxied through /api/gemini
+════════════════════════════════════════ */
+async function aiSend(){
+    const input=document.getElementById('aiInput');
+    const text=input.value.trim();
+    if(!text) return;
+    input.value='';
+    document.getElementById('aiQuickBtns').style.display='none';
+    addAiMsg(text,'user');
+    const typingId=addTyping();
+    try {
+        const res=await fetch('https://app.mahoorrlste.ir/api/gemini',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({prompt:text})
+        });
+        const data=await res.json();
+        removeTyping(typingId);
+        const reply=data.text||'متأسفم، خطایی رخ داد. لطفاً مستقیم تماس بگیرید.';
+        addAiMsg(reply,'bot');
+    } catch(e){
+        removeTyping(typingId);
+        addAiMsg('ارتباط با دستیار قطع شد.\n\n📞 ۰۱۱-۴۴۷۳-۵۳۳۳ — دفتر ماهور\n📞 ۰۹۱۱۳۲۷۶۶۴۷ — مهندس آزاد','bot');
+    }
+}
+function aiQuick(text){ document.getElementById('aiInput').value=text; aiSend(); }
+function addAiMsg(text,role){
+    const container=document.getElementById('aiMessages');
+    const div=document.createElement('div');
+    div.className='ai-msg '+role;
+    if(role==='bot'){ div.innerHTML='<div class="ai-msg-icon"><i class="fas fa-robot"></i></div><div class="ai-msg-bubble">'+text.replace(/\n/g,'<br>')+'</div>'; }
+    else { div.innerHTML='<div class="ai-msg-bubble">'+text+'</div>'; }
+    container.appendChild(div);
+    container.scrollTop=container.scrollHeight;
+    return div;
+}
+function addTyping(){
+    const container=document.getElementById('aiMessages');
+    const div=document.createElement('div'); div.className='ai-msg bot';
+    const id='typing_'+Date.now(); div.id=id;
+    div.innerHTML='<div class="ai-msg-icon"><i class="fas fa-robot"></i></div><div class="ai-typing"><span></span><span></span><span></span></div>';
+    container.appendChild(div); container.scrollTop=container.scrollHeight; return id;
+}
+function removeTyping(id){ const el=document.getElementById(id); if(el) el.remove(); }
+function aiCloseOnOverlay(e){ if(e.target===document.getElementById('aiChatModal')) document.getElementById('aiChatModal').classList.remove('show'); }
+
+/* ── WELCOME NOTIFICATION ── */
+function closeAiNotif(){ const n=document.getElementById('aiWelcomeNotif'); n.classList.add('hide'); setTimeout(()=>n.remove(),400); }
+setTimeout(()=>{ const n=document.getElementById('aiWelcomeNotif'); if(n) n.style.display='flex'; },2000);
+setTimeout(()=>{ try { closeAiNotif(); } catch(e){} },10000);
+</script>
+</body>
+</html>
