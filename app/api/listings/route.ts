@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../src/db/index';
 import { realEstateAds, users } from '../../../src/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
+import { postListingToTelegram } from '../../../lib/telegram';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,13 +61,17 @@ export async function POST(req: NextRequest) {
     const submitterPhone = String(body.advisorPhone || body.phone || '');
     let advisorId: number | null = null;
     let isInsider = false;
+    let matchedAdvisorName = '';
+    let matchedAdvisorPhone = '';
 
     // Try to match the submitter's phone to a registered user
     if (submitterPhone) {
       const matched = await db.select().from(users).where(eq(users.phoneNumber, submitterPhone));
       if (matched.length > 0) {
-        advisorId = matched[0].id;
-        isInsider = true;
+        advisorId           = matched[0].id;
+        isInsider           = true;
+        matchedAdvisorName  = matched[0].fullName;
+        matchedAdvisorPhone = matched[0].phoneNumber;
       }
     }
 
@@ -98,6 +103,21 @@ export async function POST(req: NextRequest) {
         isManagerApproved: isInsider,   // insiders publish immediately
       })
       .returning();
+
+    // Fire-and-forget Telegram post for insider (auto-approved) listings
+    if (isInsider) {
+      void postListingToTelegram({
+        title:        body.title ?? 'بدون عنوان',
+        price:        priceNum,
+        type:         body.propType ?? body.deal ?? '',
+        location:     body.location ?? '',
+        areaSize:     Number(body.size) || 0,
+        rooms:        Number(body.beds) || 0,
+        imageUrl:     body.imageUrl ?? null,
+        advisorName:  matchedAdvisorName,
+        advisorPhone: matchedAdvisorPhone,
+      });
+    }
 
     return NextResponse.json({ id: String(inserted[0].id) });
   } catch (error: any) {
