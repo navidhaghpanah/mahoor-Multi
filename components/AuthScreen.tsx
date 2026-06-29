@@ -6,28 +6,27 @@ import { Phone, ArrowLeft, Loader2, Lock, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 
 interface AuthScreenProps {
-  onLogin: (user: any) => void;
+  onLogin: (user: any, sessionToken?: string) => void;
 }
 
 type Step = "phone" | "otp" | "pin" | "setup_pin";
 
 export function AuthScreen({ onLogin }: AuthScreenProps) {
-  const [phone, setPhone]         = useState("");
-  const [step, setStep]           = useState<Step>("phone");
-  const [otp, setOtp]             = useState("");
-  const [pin, setPin]             = useState("");
+  const [phone, setPhone]           = useState("");
+  const [step, setStep]             = useState<Step>("phone");
+  const [otp, setOtp]               = useState("");
+  const [otpCode, setOtpCode]       = useState("");   // code shown on screen (first login only)
+  const [pin, setPin]               = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
-  const [otpToken, setOtpToken]   = useState("");
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
-  const [timer, setTimer]         = useState(120);
+  const [otpToken, setOtpToken]     = useState("");
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState("");
+  const [timer, setTimer]           = useState(120);
 
   useEffect(() => {
-    let interval: any;
-    if (step === "otp" && timer > 0) {
-      interval = setInterval(() => setTimer((t) => t - 1), 1000);
-    }
-    return () => clearInterval(interval);
+    if (step !== "otp" || timer <= 0) return;
+    const id = setInterval(() => setTimer((t) => t - 1), 1000);
+    return () => clearInterval(id);
   }, [step, timer]);
 
   const formatTime = (t: number) => {
@@ -51,6 +50,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
         setStep("pin");
       } else {
         setOtpToken(data.token);
+        setOtpCode(data.code ?? "");  // show code on screen for first login
         setOtp(""); setStep("otp"); setTimer(120);
       }
     } catch (err: any) { setError(err.message); }
@@ -72,13 +72,13 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       if (data.needsPinSetup) {
         setPin(""); setPinConfirm(""); setStep("setup_pin");
       } else {
-        onLogin(data.user);
+        onLogin(data.user, data.sessionToken);
       }
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
   };
 
-  // ── Step 2b: verify PIN ──────────────────────────────────────────────────────
+  // ── Step 2b: verify PIN (returning users) ────────────────────────────────────
   const handleVerifyPin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length < 4) return;
@@ -90,12 +90,12 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "PIN نادرست است");
-      onLogin(data.user);
+      onLogin(data.user, data.sessionToken);
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
   };
 
-  // ── Step 3: set PIN (first time) ─────────────────────────────────────────────
+  // ── Step 3: set PIN (first login) ────────────────────────────────────────────
   const handleSetPin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
@@ -112,7 +112,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "خطا در ذخیره PIN");
-      onLogin(data.user);
+      onLogin(data.user, data.sessionToken);
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
   };
@@ -137,126 +137,157 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
         <p className="text-[#D4AF37] text-sm font-medium mb-2">MAHOOR REAL ESTATE</p>
         <p className="text-[#a0b0c0] mb-10 text-center text-sm">ورود به پنل مشاورین شمال کشور</p>
 
+        {/*
+          AnimatePresence with a single child whose `key` changes per step.
+          This is the reliable pattern — avoids the multi-conditional-children bug
+          where AnimatePresence sees false/ReactElement siblings and renders blank.
+        */}
         <AnimatePresence mode="wait">
-          {/* ── Phone entry ── */}
-          {step === "phone" && (
-            <motion.form key="phone" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-              onSubmit={handleSendOtp} className="w-full"
-            >
-              <div className="relative mb-6">
-                <input type="text" value={phone} onChange={e => setPhone(e.target.value)}
-                  placeholder="شماره موبایل (مثلا 09121234567)"
-                  className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-12 py-4 text-white text-left placeholder:text-right placeholder:text-gray-500 focus:outline-none focus:border-[#D4AF37]/50"
-                  dir="ltr"
-                />
-                <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-              </div>
-              {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
-              <button type="submit" disabled={loading || phone.length < 10}
-                className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ادامه"}
-                {!loading && <ArrowLeft className="w-5 h-5" />}
-              </button>
-            </motion.form>
-          )}
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 16 }}
+            transition={{ duration: 0.18 }}
+            className="w-full"
+          >
 
-          {/* ── OTP entry ── */}
-          {step === "otp" && (
-            <motion.form key="otp" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-              onSubmit={handleVerify} className="w-full"
-            >
-              <p className="text-sm text-[#a0b0c0] mb-4 text-center">کد ارسال شده به {phone} را وارد کنید</p>
-              <div className="relative mb-4">
-                <input type="text" inputMode="numeric" maxLength={4} value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, ""))}
-                  placeholder="- - - -"
-                  className={inp} dir="ltr" autoFocus
-                />
-              </div>
-              {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
-              <button type="submit" disabled={loading || otp.length < 4}
-                className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "تایید کد"}
-              </button>
-              <div className="flex justify-between mt-4">
-                <button type="button" onClick={() => { setStep("phone"); setError(""); }}
-                  className="text-sm text-gray-400 hover:text-white">ویرایش شماره</button>
-                <span className="text-sm text-[#D4AF37] font-mono">{formatTime(timer)}</span>
-              </div>
-            </motion.form>
-          )}
+            {/* ── Phone entry ── */}
+            {step === "phone" && (
+              <form onSubmit={handleSendOtp} className="w-full">
+                <div className="relative mb-6">
+                  <input
+                    type="text" value={phone} onChange={e => setPhone(e.target.value)}
+                    placeholder="شماره موبایل (مثلا 09121234567)"
+                    className="w-full bg-[#0C2C54]/50 border border-[#1E293B] rounded-xl px-12 py-4 text-white text-left placeholder:text-right placeholder:text-gray-500 focus:outline-none focus:border-[#D4AF37]/50"
+                    dir="ltr"
+                  />
+                  <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                </div>
+                {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+                <button
+                  type="submit" disabled={loading || phone.length < 10}
+                  className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>ادامه <ArrowLeft className="w-5 h-5" /></>}
+                </button>
+              </form>
+            )}
 
-          {/* ── PIN entry (returning users) ── */}
-          {step === "pin" && (
-            <motion.form key="pin" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-              onSubmit={handleVerifyPin} className="w-full"
-            >
-              <div className="flex items-center justify-center gap-2 mb-4 text-[#D4AF37]">
-                <Lock className="w-5 h-5" />
-                <p className="text-sm text-[#a0b0c0] text-center">کد PIN خود را وارد کنید</p>
-              </div>
-              <div className="relative mb-4">
-                <input type="password" inputMode="numeric" maxLength={4} value={pin}
-                  onChange={e => setPin(e.target.value.replace(/\D/g, ""))}
-                  placeholder="• • • •"
-                  className={inp} dir="ltr" autoFocus
-                />
-              </div>
-              {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
-              <button type="submit" disabled={loading || pin.length < 4}
-                className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ورود"}
-              </button>
-              <button type="button" onClick={() => { setPin(""); setStep("phone"); setError(""); }}
-                className="w-full text-center text-sm text-gray-400 hover:text-white mt-4">
-                ← تغییر شماره
-              </button>
-            </motion.form>
-          )}
+            {/* ── OTP entry (first login — code shown on screen) ── */}
+            {step === "otp" && (
+              <form onSubmit={handleVerify} className="w-full">
+                {otpCode && (
+                  <div className="bg-[#0C2C54]/60 border border-[#D4AF37]/20 rounded-xl px-4 py-3 mb-5 text-center">
+                    <p className="text-xs text-[#a0b0c0] mb-1">کد ورود شما</p>
+                    <p className="text-3xl font-bold tracking-[0.3em] text-[#D4AF37]" dir="ltr">{otpCode}</p>
+                  </div>
+                )}
+                <p className="text-sm text-[#a0b0c0] mb-4 text-center">
+                  کد بالا را در کادر زیر وارد کنید
+                </p>
+                <div className="mb-4">
+                  <input
+                    type="text" inputMode="numeric" maxLength={4} value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, ""))}
+                    placeholder="- - - -"
+                    className={inp} dir="ltr" autoFocus
+                  />
+                </div>
+                {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+                <button
+                  type="submit" disabled={loading || otp.length < 4}
+                  className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "تایید کد"}
+                </button>
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button" onClick={() => { setStep("phone"); setError(""); }}
+                    className="text-sm text-gray-400 hover:text-white"
+                  >
+                    ویرایش شماره
+                  </button>
+                  <span className="text-sm text-[#D4AF37] font-mono">{formatTime(timer)}</span>
+                </div>
+              </form>
+            )}
 
-          {/* ── PIN setup (first login) ── */}
-          {step === "setup_pin" && (
-            <motion.form key="setup_pin" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-              onSubmit={handleSetPin} className="w-full"
-            >
-              <div className="flex items-center justify-center gap-2 mb-2 text-[#D4AF37]">
-                <ShieldCheck className="w-5 h-5" />
-                <span className="text-sm font-semibold">تنظیم کد PIN</span>
-              </div>
-              <p className="text-xs text-[#a0b0c0] text-center mb-5">
-                برای ورودهای بعدی یک کد ۴ رقمی انتخاب کنید
-              </p>
-              <div className="space-y-3 mb-4">
-                <div>
-                  <p className="text-xs text-gray-400 mb-1 text-center">PIN جدید</p>
-                  <input type="password" inputMode="numeric" maxLength={4} value={pin}
+            {/* ── PIN entry (returning users) ── */}
+            {step === "pin" && (
+              <form onSubmit={handleVerifyPin} className="w-full">
+                <div className="flex items-center justify-center gap-2 mb-5">
+                  <Lock className="w-5 h-5 text-[#D4AF37]" />
+                  <p className="text-sm text-[#a0b0c0]">رمز ۴ رقمی خود را وارد کنید</p>
+                </div>
+                <div className="mb-4">
+                  <input
+                    type="password" inputMode="numeric" maxLength={4} value={pin}
                     onChange={e => setPin(e.target.value.replace(/\D/g, ""))}
                     placeholder="• • • •"
                     className={inp} dir="ltr" autoFocus
                   />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400 mb-1 text-center">تکرار PIN</p>
-                  <input type="password" inputMode="numeric" maxLength={4} value={pinConfirm}
-                    onChange={e => setPinConfirm(e.target.value.replace(/\D/g, ""))}
-                    placeholder="• • • •"
-                    className={inp} dir="ltr"
-                  />
+                {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+                <button
+                  type="submit" disabled={loading || pin.length < 4}
+                  className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ورود"}
+                </button>
+                <button
+                  type="button" onClick={() => { setPin(""); setStep("phone"); setError(""); }}
+                  className="w-full text-center text-sm text-gray-400 hover:text-white mt-4"
+                >
+                  ← تغییر شماره
+                </button>
+              </form>
+            )}
+
+            {/* ── PIN setup (first login, after OTP confirmed) ── */}
+            {step === "setup_pin" && (
+              <form onSubmit={handleSetPin} className="w-full">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
+                  <span className="text-sm font-semibold text-white">تنظیم رمز ۴ رقمی</span>
                 </div>
-              </div>
-              {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
-              <button type="submit" disabled={loading || pin.length < 4 || pinConfirm.length < 4}
-                className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ثبت PIN و ورود"}
-              </button>
-            </motion.form>
-          )}
+                <p className="text-xs text-[#a0b0c0] text-center mb-5">
+                  این رمز برای ورودهای بعدی استفاده می‌شود
+                </p>
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1 text-center">رمز جدید</p>
+                    <input
+                      type="password" inputMode="numeric" maxLength={4} value={pin}
+                      onChange={e => setPin(e.target.value.replace(/\D/g, ""))}
+                      placeholder="• • • •"
+                      className={inp} dir="ltr" autoFocus
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1 text-center">تکرار رمز</p>
+                    <input
+                      type="password" inputMode="numeric" maxLength={4} value={pinConfirm}
+                      onChange={e => setPinConfirm(e.target.value.replace(/\D/g, ""))}
+                      placeholder="• • • •"
+                      className={inp} dir="ltr"
+                    />
+                  </div>
+                </div>
+                {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+                <button
+                  type="submit" disabled={loading || pin.length < 4 || pinConfirm.length < 4}
+                  className="w-full bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold py-4 rounded-xl flex items-center justify-center disabled:opacity-50"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ثبت رمز و ورود"}
+                </button>
+              </form>
+            )}
+
+          </motion.div>
         </AnimatePresence>
       </motion.div>
+
       <p className="absolute bottom-4 left-0 right-0 text-center text-[10px] text-gray-700 tracking-widest font-semibold select-none z-10">NH</p>
     </div>
   );

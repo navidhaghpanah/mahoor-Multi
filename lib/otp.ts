@@ -23,6 +23,32 @@ export function signOtpToken(phone: string, code: string): string {
   return `${b64}.${sig}`;
 }
 
+const SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+export function signSessionToken(phone: string): string {
+  const payload = JSON.stringify({ phone, exp: Date.now() + SESSION_TTL });
+  const b64     = Buffer.from(payload).toString('base64url');
+  const sig     = crypto.createHmac('sha256', secret()).update(b64).digest('hex');
+  return `${b64}.${sig}`;
+}
+
+export function verifySessionToken(token: string): { phone: string } | null {
+  try {
+    const dot = token.lastIndexOf('.');
+    if (dot < 0) return null;
+    const b64 = token.slice(0, dot);
+    const sig  = token.slice(dot + 1);
+    const expected = crypto.createHmac('sha256', secret()).update(b64).digest('hex');
+    const sigBuf = Buffer.from(sig,      'hex');
+    const expBuf = Buffer.from(expected, 'hex');
+    if (sigBuf.length !== expBuf.length) return null;
+    if (!crypto.timingSafeEqual(sigBuf, expBuf)) return null;
+    const payload: { phone: string; exp: number } = JSON.parse(Buffer.from(b64, 'base64url').toString());
+    if (Date.now() > payload.exp) return null;
+    return { phone: payload.phone };
+  } catch { return null; }
+}
+
 export function verifyOtpToken(token: string): { phone: string; code: string } | null {
   try {
     const dot = token.lastIndexOf('.');

@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
     const token = signOtpToken(normalised, code);
     void sendOtp(normalised, code);
 
-    // Never return the code in the response body — delivery is via SMS only
-    return NextResponse.json({ token });
+    // Return code on screen for first login (user hasn't set PIN yet; they'll choose one next)
+    return NextResponse.json({ token, code });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

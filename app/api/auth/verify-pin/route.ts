@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pbkdf2Sync } from 'crypto';
+import { signSessionToken } from '../../../../lib/otp';
 import { db } from '../../../../src/db/index';
 import { users } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { pin: _omit, ...safeUser } = matched[0] as any;
-    return NextResponse.json({ user: { ...safeUser, isInsider: true } });
+    return NextResponse.json({ user: { ...safeUser, isInsider: true }, sessionToken: signSessionToken(String(phone)) });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

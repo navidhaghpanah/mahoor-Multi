@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pbkdf2Sync } from 'crypto';
-import { verifyOtpToken } from '../../../../lib/otp';
+import { verifyOtpToken, signSessionToken } from '../../../../lib/otp';
 import { db } from '../../../../src/db/index';
 import { users } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (!matched.length) return NextResponse.json({ error: 'کاربر یافت نشد' }, { status: 404 });
 
     const { pin: _omit, ...safeUser } = matched[0] as any;
-    return NextResponse.json({ user: { ...safeUser, isInsider: true } });
+    return NextResponse.json({ user: { ...safeUser, isInsider: true }, sessionToken: signSessionToken(String(phone)) });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { AuthScreen } from "./AuthScreen";
 import { AppShell } from "./AppShell";
 import { TabListings } from "./TabListings";
@@ -10,18 +11,51 @@ import { TabProfile } from "./TabProfile";
 import { AiAssistant } from "./AiAssistant";
 import { ManagerApp } from "./ManagerApp";
 
-export function ClientAppRouter() {
-  const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("listings");
-  const [isAiOpen, setIsAiOpen] = useState(false);
+const SESSION_KEY = "mahoor_session";
 
-  if (!user) {
-    return <AuthScreen onLogin={(u) => setUser(u)} />;
+export function ClientAppRouter() {
+  const [user, setUser]           = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("listings");
+  const [isAiOpen, setIsAiOpen]   = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
+
+  // On mount: restore session from localStorage if a valid signed token exists
+  useEffect(() => {
+    const token = localStorage.getItem(SESSION_KEY);
+    if (!token) { setSessionLoading(false); return; }
+
+    fetch(`/api/auth/me?token=${encodeURIComponent(token)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => { if (data?.user) setUser(data.user); })
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
+  }, []);
+
+  const handleLogin = (u: any, sessionToken?: string) => {
+    if (sessionToken) localStorage.setItem(SESSION_KEY, sessionToken);
+    setUser(u);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(SESSION_KEY);
+    setUser(null);
+    setActiveTab("listings");
+  };
+
+  if (sessionLoading) {
+    return (
+      <div className="min-h-[100dvh] bg-[#030D1E] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#D4AF37]" />
+      </div>
+    );
   }
 
-  // Manager gets a completely separate environment
+  if (!user) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
   if (user?.isManager) {
-    return <ManagerApp user={user} onLogout={() => setUser(null)} />;
+    return <ManagerApp user={user} onLogout={handleLogout} />;
   }
 
   const isInsider = !!user?.isInsider;
@@ -32,11 +66,14 @@ export function ClientAppRouter() {
         return <TabListings />;
       case "add":
         return <TabAddListing user={user} />;
-      // Insider-only tabs — redirect public users to listings if they somehow reach them
       case "channels":
         return isInsider ? <TabChannels /> : <TabListings />;
       case "profile":
-        return isInsider ? <TabProfile user={user} onLogout={() => { setUser(null); setActiveTab("listings"); }} /> : <TabListings />;
+        return isInsider ? (
+          <TabProfile user={user} onLogout={handleLogout} />
+        ) : (
+          <TabListings />
+        );
       default:
         return <TabListings />;
     }

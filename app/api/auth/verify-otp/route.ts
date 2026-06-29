@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyOtpToken } from '../../../../lib/otp';
+import { verifyOtpToken, signSessionToken } from '../../../../lib/otp';
 import { db } from '../../../../src/db/index';
 import { users } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
@@ -35,13 +35,13 @@ export async function POST(req: NextRequest) {
 
     if (matchedUsers.length > 0) {
       const u = matchedUsers[0];
-      // If insider has no PIN yet, tell the client to set one now
       const needsPinSetup = !u.pin;
       const { pin: _omit, ...safeUser } = u as any;
-      return NextResponse.json({ user: { ...safeUser, isInsider: true }, needsPinSetup });
+      const sessionToken = needsPinSetup ? undefined : signSessionToken(phone);
+      return NextResponse.json({ user: { ...safeUser, isInsider: true }, needsPinSetup, sessionToken });
     }
 
-    // Public visitor — same shape as login route
+    // Public visitor
     return NextResponse.json({
       user: {
         id: null, uid: null,
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         isManager: false, title: null,
         isInsider: false,
       },
+      sessionToken: signSessionToken(phone),
     });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
