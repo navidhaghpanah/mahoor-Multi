@@ -8,6 +8,23 @@ import { postListingToKenar } from '../../../lib/kenar';
 
 export const dynamic = 'force-dynamic';
 
+const CORS_ORIGINS = ['https://mahoorrlste.ir', 'http://mahoorrlste.ir'];
+
+function corsHeaders(origin: string | null): Record<string, string> {
+  const allowed = origin && CORS_ORIGINS.includes(origin) ? origin : CORS_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
+
+// Preflight for cross-origin requests from the static main site
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get('origin');
+  return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
+}
+
 function rowToListing(ad: any, advisor?: any) {
   return {
     id: String(ad.id),
@@ -47,7 +64,8 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(realEstateAds.timestamp));
 
     const listings = rows.map((r: any) => rowToListing(r.real_estate_ads, r.users));
-    return NextResponse.json({ listings });
+    const origin = req.headers.get('origin');
+    return NextResponse.json({ listings }, { headers: corsHeaders(origin) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
