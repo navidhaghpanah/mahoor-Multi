@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, Filter, MapPin, Bed, Car, Ruler, Heart, Phone,
-  Home, Building2, TreePine, Store, ChevronDown, X, Map, Loader2,
+  Home, Building2, TreePine, Store, ChevronDown, X, Map, Loader2, Share2,
 } from "lucide-react";
 import { subscribeToListings, type Listing } from "../lib/listings";
 import { MapModal } from "./MapModal";
 import { ListingDetailModal } from "./ListingDetailModal";
+import { SharePanel } from "./SharePanel";
 
 const STATIC_LISTINGS: Listing[] = [
   {
@@ -94,6 +95,7 @@ export function TabListings() {
   const [firestoreListings, setFirestoreListings] = useState<Listing[]>([]);
   const [mapListing, setMapListing] = useState<Listing | null>(null);
   const [detailListing, setDetailListing] = useState<Listing | null>(null);
+  const [shareListing, setShareListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -267,7 +269,7 @@ export function TabListings() {
                     {badge.label}
                   </span>
 
-                  {/* Map + Fav buttons */}
+                  {/* Map + Share + Fav buttons */}
                   <div className="absolute top-3 left-3 flex gap-1.5">
                     <button
                       onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
@@ -275,6 +277,13 @@ export function TabListings() {
                       title="نمایش روی نقشه"
                     >
                       <Map className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShareListing(listing); }}
+                      className="w-8 h-8 rounded-full bg-black/40 text-white/80 hover:bg-[#D4AF37] hover:text-black flex items-center justify-center transition-all"
+                      title="اشتراک‌گذاری"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleFav(favId); }}
@@ -358,6 +367,11 @@ export function TabListings() {
         onClose={() => setDetailListing(null)}
         onShowMap={(l) => setMapListing(l)}
       />
+
+      {/* Share panel (triggered from card share icon) */}
+      {shareListing && (
+        <SharePanel listing={shareListing} onClose={() => setShareListing(null)} />
+      )}
 
       {/* Map Modal */}
       <MapModal

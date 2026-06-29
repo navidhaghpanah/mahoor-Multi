@@ -3,6 +3,7 @@ import { db } from '../../../src/db/index';
 import { realEstateAds, users } from '../../../src/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { postListingToTelegram } from '../../../lib/telegram';
+import { postListingToKenar } from '../../../lib/kenar';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,9 +105,9 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    // Fire-and-forget Telegram post for insider (auto-approved) listings
+    // Fire-and-forget publish hooks (Telegram + Divar/Kenar) for insider auto-approved listings
     if (isInsider) {
-      void postListingToTelegram({
+      const publishPayload = {
         title:        body.title ?? 'بدون عنوان',
         price:        priceNum,
         type:         body.propType ?? body.deal ?? '',
@@ -116,7 +117,9 @@ export async function POST(req: NextRequest) {
         imageUrl:     body.imageUrl ?? null,
         advisorName:  matchedAdvisorName,
         advisorPhone: matchedAdvisorPhone,
-      });
+      };
+      void postListingToTelegram(publishPayload);
+      void postListingToKenar({ ...publishPayload, lat: body.lat ?? null, lng: body.lng ?? null });
     }
 
     return NextResponse.json({ id: String(inserted[0].id) });

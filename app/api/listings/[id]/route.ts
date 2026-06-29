@@ -3,6 +3,7 @@ import { db } from '../../../../src/db/index';
 import { realEstateAds, users } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { postListingToTelegram } from '../../../../lib/telegram';
+import { postListingToKenar } from '../../../../lib/kenar';
 
 // PATCH /api/listings/:id  -> update fields (e.g. imageUrl) on a listing
 export async function PATCH(
@@ -36,7 +37,7 @@ export async function PATCH(
           if (rows.length > 0) {
             const ad     = rows[0].real_estate_ads;
             const advisor = rows[0].users;
-            await postListingToTelegram({
+            const approvedPayload = {
               title:        ad.title,
               price:        Number(ad.price),
               type:         ad.type,
@@ -46,7 +47,9 @@ export async function PATCH(
               imageUrl:     ad.imageUrl,
               advisorName:  advisor?.fullName ?? 'کارشناس ماهور',
               advisorPhone: advisor?.phoneNumber ?? '',
-            });
+            };
+            await postListingToTelegram(approvedPayload);
+            await postListingToKenar({ ...approvedPayload, lat: null, lng: null });
           }
         } catch (e: any) {
           console.error('[Telegram] post-on-approve failed:', e?.message);

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, MapPin, Bed, Ruler, Phone, Map, Building2 } from "lucide-react";
+import { X, MapPin, Bed, Ruler, Phone, Map, Building2, Share2 } from "lucide-react";
 import { type Listing } from "../lib/listings";
+import { SharePanel } from "./SharePanel";
 
 const BADGE: Record<string, { label: string; color: string }> = {
   sale:     { label: "فروشی",    color: "bg-red-500" },
@@ -18,6 +20,7 @@ interface ListingDetailModalProps {
 }
 
 export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetailModalProps) {
+  const [showShare, setShowShare] = useState(false);
   if (!listing) return null;
   const badge = BADGE[listing.deal] ?? { label: listing.deal, color: "bg-gray-600" };
 
@@ -127,9 +130,23 @@ export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetai
                 <Map className="w-4 h-4" />
                 نمایش روی نقشه
               </button>
+
+              {/* Share button */}
+              <button
+                onClick={() => setShowShare(true)}
+                className="w-full flex items-center justify-center gap-2 bg-[#1E293B] hover:bg-[#243447] border border-[#1E293B] text-gray-300 hover:text-white py-3 rounded-xl text-sm font-medium transition-all"
+              >
+                <Share2 className="w-4 h-4" />
+                اشتراک‌گذاری / نشر آگهی
+              </button>
             </div>
           </motion.div>
         </motion.div>
+      )}
+
+      {/* Share panel */}
+      {showShare && (
+        <SharePanel listing={listing} onClose={() => setShowShare(false)} />
       )}
     </AnimatePresence>
   );
