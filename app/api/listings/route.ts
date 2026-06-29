@@ -8,12 +8,9 @@ import { postListingToKenar } from '../../../lib/kenar';
 
 export const dynamic = 'force-dynamic';
 
-const CORS_ORIGINS = ['https://mahoorrlste.ir', 'http://mahoorrlste.ir'];
-
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && CORS_ORIGINS.includes(origin) ? origin : CORS_ORIGINS[0];
+function corsHeaders(_origin: string | null): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Origin':  '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
@@ -25,11 +22,29 @@ export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
 }
 
+const DEAL_MAP: Record<string, string> = {
+  'فروش': 'sale',         'sale': 'sale',
+  'اجاره': 'rent',        'rent': 'rent',
+  'رهن کامل': 'mortgage', 'رهن و اجاره': 'mortgage', 'mortgage': 'mortgage',
+  'پیش‌فروش': 'presale',  'presale': 'presale',
+  'اجاره شبانه': 'daily-rent', 'daily-rent': 'daily-rent',
+};
+
 function rowToListing(ad: any, advisor?: any) {
+  // Strip internal phone/source notes added by bot-flow from the public description
+  const rawDesc = ad.description ?? '';
+  const desc = rawDesc
+    .replace(/\s*\|\s*تماس:[^|]*/g, '')
+    .replace(/\s*\|\s*منبع:[^|]*/g, '')
+    .replace(/تماس:[^|]*/g, '')
+    .trim()
+    .replace(/^\|/, '')
+    .trim();
+
   return {
     id: String(ad.id),
     title: ad.title,
-    deal: ad.type,
+    deal: DEAL_MAP[ad.type] ?? ad.type,
     propType: ad.type,
     price: ad.price != null ? String(ad.price) : '',
     size: ad.areaSize ?? 0,
@@ -37,7 +52,7 @@ function rowToListing(ad: any, advisor?: any) {
     phone: advisor?.phoneNumber ?? '',
     location: ad.location ?? '',
     imageUrl: ad.imageUrl ?? undefined,
-    desc: ad.description ?? '',
+    desc,
     advisorName: advisor?.fullName ?? 'کارشناس ماهور',
     advisorPhone: advisor?.phoneNumber ?? '',
     status: ad.isManagerApproved ? 'approved' : 'pending',
@@ -113,7 +128,7 @@ export async function POST(req: NextRequest) {
         title: body.title ?? 'بدون عنوان',
         description: body.desc ?? '',
         price: priceNum,
-        type: body.propType ?? body.deal ?? 'نامشخص',
+        type: body.deal ?? body.propType ?? 'نامشخص',
         location: body.location ?? '',
         areaSize: Number(body.size) || 0,
         rooms: Number(body.beds) || 0,

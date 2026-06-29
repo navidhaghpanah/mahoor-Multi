@@ -11,62 +11,6 @@ import { MapModal } from "./MapModal";
 import { ListingDetailModal } from "./ListingDetailModal";
 import { SharePanel } from "./SharePanel";
 
-const STATIC_LISTINGS: Listing[] = [
-  {
-    id: "s1", deal: "sale", propType: "apartment",
-    title: "آپارتمان ۱۲۰ متری نوساز - ۳ خواب",
-    price: "۲.۵ میلیارد تومان", location: "خیابان امام، محمودآباد",
-    size: 120, beds: 3, phone: "09120996426",
-    imageUrl: "/listings/s1.svg",
-    advisorName: "حیدری", advisorPhone: "09120996426",
-    status: "approved", lat: 36.6343, lng: 52.2607,
-  },
-  {
-    id: "s2", deal: "sale", propType: "villa",
-    title: "ویلای دوبلکس ساحلی - ۲۰۰ متر زمین",
-    price: "۵.۸ میلیارد تومان", location: "نسیم، محمودآباد",
-    size: 180, beds: 4, phone: "09113276647",
-    imageUrl: "/listings/s2.svg",
-    advisorName: "مهندس آزاد", advisorPhone: "09113276647",
-    status: "approved", lat: 36.6360, lng: 52.2580,
-  },
-  {
-    id: "s3", deal: "rent", propType: "apartment",
-    title: "آپارتمان ۸۵ متری مبله - ۲ خواب",
-    price: "۵ میلیون / ماهانه", location: "خیابان ساحل، محمودآباد",
-    size: 85, beds: 2, phone: "09120997453",
-    imageUrl: "/listings/s3.svg",
-    advisorName: "راعی", advisorPhone: "09120997453",
-    status: "approved", lat: 36.6320, lng: 52.2620,
-  },
-  {
-    id: "s4", deal: "mortgage", propType: "apartment",
-    title: "آپارتمان ۱۰۵ متری رهن کامل - ۳ خواب",
-    price: "۴۰۰ میلیون", location: "مرکز شهر، محمودآباد",
-    size: 105, beds: 3, phone: "09120996426",
-    imageUrl: "/listings/s4.svg",
-    advisorName: "حیدری", advisorPhone: "09120996426",
-    status: "approved", lat: 36.6333, lng: 52.2597,
-  },
-  {
-    id: "s5", deal: "presale", propType: "apartment",
-    title: "برج مسکونی لاکچری - پیش‌فروش ویژه",
-    price: "۱۸ میلیون / متر", location: "فاز جدید، محمودآباد",
-    size: 90, beds: 2, phone: "09113276647",
-    imageUrl: "/listings/s5.svg",
-    advisorName: "مهندس آزاد", advisorPhone: "09113276647",
-    status: "approved", lat: 36.6350, lng: 52.2640,
-  },
-  {
-    id: "s6", deal: "daily-rent", propType: "villa",
-    title: "ویلا اجاره شبانه - ساحلی محمودآباد",
-    price: "۸۰۰ هزار / شب", location: "ساحل، محمودآباد",
-    size: 150, beds: 3, phone: "09373687600",
-    imageUrl: "/listings/s6.svg",
-    advisorName: "موسی مشکیاب", advisorPhone: "09373687600",
-    status: "approved", lat: 36.6300, lng: 52.2650,
-  },
-];
 
 const BADGE: Record<string, { label: string; color: string }> = {
   sale:         { label: "فروشی",           color: "bg-red-500" },
@@ -108,10 +52,7 @@ export function TabListings() {
     return () => { unsub(); clearTimeout(timer); };
   }, []);
 
-  const allListings = [
-    ...firestoreListings,
-    ...STATIC_LISTINGS.filter((s) => !firestoreListings.find((f) => f.id === s.id)),
-  ];
+  const allListings = firestoreListings;
 
   const filtered = allListings.filter((l) => {
     const matchDeal = dealFilter === "all" || l.deal === dealFilter;
@@ -272,13 +213,15 @@ export function TabListings() {
 
                   {/* Map + Share + Fav buttons */}
                   <div className="absolute top-3 left-3 flex gap-1.5">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
-                      className="w-8 h-8 rounded-full bg-black/40 text-white/80 hover:bg-[#D4AF37] hover:text-black flex items-center justify-center transition-all"
-                      title="نمایش روی نقشه"
-                    >
-                      <Map className="w-3.5 h-3.5" />
-                    </button>
+                    {listing.lat && listing.lng && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
+                        className="w-8 h-8 rounded-full bg-black/40 text-white/80 hover:bg-[#D4AF37] hover:text-black flex items-center justify-center transition-all"
+                        title="نمایش روی نقشه"
+                      >
+                        <Map className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     <button
                       onClick={(e) => { e.stopPropagation(); setShareListing(listing); }}
                       className="w-8 h-8 rounded-full bg-black/40 text-white/80 hover:bg-[#D4AF37] hover:text-black flex items-center justify-center transition-all"
@@ -326,13 +269,15 @@ export function TabListings() {
                         {listing.beds} خواب
                       </div>
                     )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
-                      className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-white transition-colors"
-                    >
-                      <Map className="w-3.5 h-3.5" />
-                      نقشه
-                    </button>
+                    {listing.lat && listing.lng && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMapListing(listing); }}
+                        className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-white transition-colors"
+                      >
+                        <Map className="w-3.5 h-3.5" />
+                        نقشه
+                      </button>
+                    )}
                   </div>
 
                   {/* Agent */}

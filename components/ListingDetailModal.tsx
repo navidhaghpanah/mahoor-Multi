@@ -122,14 +122,16 @@ export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetai
                 </a>
               </div>
 
-              {/* Show on map button */}
-              <button
-                onClick={() => { onClose(); onShowMap(listing); }}
-                className="w-full flex items-center justify-center gap-2 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 text-[#D4AF37] py-3 rounded-xl text-sm font-medium transition-all"
-              >
-                <Map className="w-4 h-4" />
-                نمایش روی نقشه
-              </button>
+              {/* Show on map — only when real coordinates exist */}
+              {listing.lat && listing.lng && (
+                <button
+                  onClick={() => { onClose(); onShowMap(listing); }}
+                  className="w-full flex items-center justify-center gap-2 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 hover:border-[#D4AF37]/60 text-[#D4AF37] py-3 rounded-xl text-sm font-medium transition-all"
+                >
+                  <Map className="w-4 h-4" />
+                  نمایش روی نقشه
+                </button>
+              )}
 
               {/* Share button */}
               <button
