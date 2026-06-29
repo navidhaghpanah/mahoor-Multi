@@ -13,7 +13,7 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
   const [phone, setPhone] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [otp, setOtp] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
+  const [otpToken, setOtpToken] = useState("");   // HMAC-signed server token
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(120);
@@ -26,43 +26,43 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.length < 10) return;
     setLoading(true);
     setError("");
-    // Generate a 4-digit verification code locally (demo mode, no real SMS).
-    const newCode = String(Math.floor(1000 + Math.random() * 9000));
-    setTimeout(() => {
-      setGeneratedCode(newCode);
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'خطا در ارسال کد');
+      setOtpToken(data.token);
       setOtp("");
-      setLoading(false);
       setStep("otp");
       setTimer(120);
-    }, 1000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length < 4) return;
-
-    if (otp !== generatedCode) {
-      setError("کد وارد شده صحیح نیست");
-      return;
-    }
-
     setLoading(true);
     setError("");
-
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
+      const res = await fetch('/api/auth/verify-otp', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
+        body:    JSON.stringify({ token: otpToken, code: otp }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "خطا در ورود پیامکی");
-
+      if (!res.ok) throw new Error(data.error || 'خطا در تایید کد');
       onLogin(data.user);
     } catch (err: any) {
       setError(err.message);
@@ -145,13 +145,6 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
                   dir="ltr"
                 />
               </div>
-
-              {generatedCode && (
-                <div className="mb-6 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-3 text-center">
-                  <p className="text-xs text-[#a0b0c0] mb-1">کد تایید شما (نمایش آزمایشی):</p>
-                  <p className="text-2xl font-bold text-[#D4AF37] tracking-[0.5em]" dir="ltr">{generatedCode}</p>
-                </div>
-              )}
 
               {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
 
