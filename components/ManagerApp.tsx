@@ -294,7 +294,7 @@ function HomeTab({
 
 // ─── Advisor Detail View ───────────────────────────────────────────────────────
 
-function AdvisorDetail({ advisor, onBack }: { advisor: AdvisorStats; onBack: () => void }) {
+function AdvisorDetail({ advisor, onBack, managerPhone }: { advisor: AdvisorStats; onBack: () => void; managerPhone?: string }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Back + header */}
@@ -317,6 +317,19 @@ function AdvisorDetail({ advisor, onBack }: { advisor: AdvisorStats; onBack: () 
               <Phone className="w-3.5 h-3.5" />
               <span dir="ltr">{advisor.phoneNumber}</span>
             </span>
+            <button
+              onClick={async () => {
+                if (!confirm(`بازنشانی PIN برای ${advisor.fullName}؟`)) return;
+                const res = await fetch('/api/admin/reset-pin', {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ managerPhone, targetPhone: advisor.phoneNumber }),
+                });
+                alert(res.ok ? 'PIN بازنشانی شد' : 'خطا در بازنشانی PIN');
+              }}
+              className="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 px-2 py-0.5 rounded-full font-medium transition-colors"
+            >
+              بازنشانی PIN
+            </button>
           </div>
         </div>
       </div>
@@ -656,7 +669,7 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
 
     if (activeTab === "advisors") {
       if (selectedAdvisor) {
-        return <AdvisorDetail advisor={selectedAdvisor} onBack={() => setSelectedAdvisor(null)} />;
+        return <AdvisorDetail advisor={selectedAdvisor} onBack={() => setSelectedAdvisor(null)} managerPhone={user?.phoneNumber} />;
       }
       return (
         <AdvisorsTab

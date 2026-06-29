@@ -18,6 +18,7 @@ export const users = pgTable('users', {
   totalDirectSyncLimit: integer('total_direct_sync_limit').notNull(),
   isManager: boolean('is_manager').default(false).notNull(),
   title: text('title'),
+  pin: text('pin'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

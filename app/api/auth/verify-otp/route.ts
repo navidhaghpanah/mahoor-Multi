@@ -34,7 +34,11 @@ export async function POST(req: NextRequest) {
       .where(eq(users.phoneNumber, phone));
 
     if (matchedUsers.length > 0) {
-      return NextResponse.json({ user: { ...matchedUsers[0], isInsider: true } });
+      const u = matchedUsers[0];
+      // If insider has no PIN yet, tell the client to set one now
+      const needsPinSetup = !u.pin;
+      const { pin: _omit, ...safeUser } = u as any;
+      return NextResponse.json({ user: { ...safeUser, isInsider: true }, needsPinSetup });
     }
 
     // Public visitor — same shape as login route
