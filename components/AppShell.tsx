@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Home, PlusSquare, Share2, BarChart2, User, Sparkles } from "lucide-react";
+import { Home, PlusSquare, Share2, BarChart2, User, Sparkles, Phone } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 
@@ -90,6 +90,10 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user, isI
           <p className="text-center text-[10px] text-gray-600 mt-3">
             &copy; {new Date().getFullYear()} &mdash; mahoorrlste.ir
           </p>
+          <a href="tel:01144735333" className="flex items-center justify-center gap-1 text-gray-700 hover:text-gray-400 text-[9px] mt-1.5 transition-colors" title="شماره دفتر">
+            <Phone className="w-2.5 h-2.5" />
+            <span dir="ltr">011-4473-5333</span>
+          </a>
           <p className="text-center text-[10px] text-gray-700 mt-1 tracking-widest font-semibold select-none">NH</p>
         </div>
       </aside>
@@ -116,7 +120,11 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user, isI
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 animate-in fade-in duration-500">
         {children}
-        <p className="text-center text-[10px] text-gray-700 mt-6 mb-1 tracking-widest font-semibold select-none md:hidden">NH</p>
+        <p className="text-center text-[10px] text-gray-700 mt-6 tracking-widest font-semibold select-none md:hidden">NH</p>
+        <a href="tel:01144735333" className="flex items-center justify-center gap-1 text-gray-700 hover:text-gray-500 text-[9px] mt-1 mb-1 md:hidden transition-colors">
+          <Phone className="w-2.5 h-2.5" />
+          <span dir="ltr">011-4473-5333</span>
+        </a>
       </main>
 
       {/* Mobile Bottom Tab Navigation */}

@@ -15,6 +15,7 @@ export async function GET() {
           phoneNumber: users.phoneNumber,
           currentPlan: users.currentPlan,
           agencyName: users.agencyName,
+          title: users.title,
         })
         .from(users)
         .where(eq(users.isManager, false)),

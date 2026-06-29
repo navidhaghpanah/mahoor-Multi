@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       directSyncLimitRemaining: 0,
       totalDirectSyncLimit: 0,
       isManager: false,
+      title: null,
       isInsider: false,
     };
     return NextResponse.json({ user: publicUser });

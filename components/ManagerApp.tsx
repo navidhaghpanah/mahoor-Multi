@@ -30,6 +30,7 @@ interface AdvisorStats {
   phoneNumber: string;
   currentPlan: string;
   agencyName: string;
+  title?: string | null;
   totalListings: number;
   approved: number;
   pending: number;
@@ -307,12 +308,14 @@ function AdvisorDetail({ advisor, onBack }: { advisor: AdvisorStats; onBack: () 
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-bold text-white">{advisor.fullName}</h2>
           <div className="flex flex-wrap items-center gap-2 mt-1">
+            {advisor.title && (
+              <span className="text-[10px] bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full font-medium">
+                {advisor.title}
+              </span>
+            )}
             <span className="text-gray-400 text-sm flex items-center gap-1">
               <Phone className="w-3.5 h-3.5" />
               <span dir="ltr">{advisor.phoneNumber}</span>
-            </span>
-            <span className="text-[10px] bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full">
-              {advisor.currentPlan}
             </span>
           </div>
         </div>
@@ -497,11 +500,14 @@ function AdvisorsTab({
                     </span>
                   )}
                 </div>
+                {a.title && (
+                  <p className="text-[#D4AF37]/70 text-xs mt-0.5 font-medium">{a.title}</p>
+                )}
                 <p className="text-gray-500 text-xs mt-0.5 flex items-center gap-1">
                   <Phone className="w-3 h-3" />
                   <span dir="ltr">{a.phoneNumber}</span>
                 </p>
-                <p className="text-[#D4AF37]/60 text-xs mt-0.5">{a.currentPlan}</p>
+                <p className="text-[#D4AF37]/40 text-xs mt-0.5">{a.currentPlan}</p>
 
                 {/* Type chips */}
                 {Object.keys(a.byType).length > 0 && (
@@ -688,7 +694,9 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
               <p className="text-[#D4AF37] text-xs font-bold leading-tight truncate">
                 {user?.fullName ?? "مدیر ارشد"}
               </p>
-              <p className="text-[#D4AF37]/50 text-[10px] leading-tight">مدیر ارشد سیستم</p>
+              <p className="text-[#D4AF37]/50 text-[10px] leading-tight truncate">
+                {user?.title ?? "مدیر ارشد سیستم"}
+              </p>
             </div>
             <span className="mr-auto bg-[#D4AF37] text-[#0A0018] text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wide flex-shrink-0">
               ADMIN
