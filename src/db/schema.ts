@@ -21,6 +21,14 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const telegramSessions = pgTable('telegram_sessions', {
+  chatId: bigint('chat_id', { mode: 'number' }).primaryKey(),
+  bot:    text('bot').notNull().default('telegram'),
+  step:   text('step').notNull().default('idle'),
+  data:   text('data').notNull().default('{}'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const realEstateAds = pgTable('real_estate_ads', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
@@ -32,6 +40,7 @@ export const realEstateAds = pgTable('real_estate_ads', {
   rooms: integer('rooms').notNull(),
   imageUrl: text('image_url'),
   submitterPhone: text('submitter_phone'),
+  source: text('source').default('web'),
   publishToDivar: boolean('publish_to_divar').default(false).notNull(),
   publishToSheypoor: boolean('publish_to_sheypoor').default(false).notNull(),
   publishToMahoor: boolean('publish_to_mahoor').default(true).notNull(),
