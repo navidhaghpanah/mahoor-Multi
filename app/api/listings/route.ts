@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../src/db/index';
 import { realEstateAds, users } from '../../../src/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { postListingToTelegram } from '../../../lib/telegram';
 import { postListingToBale } from '../../../lib/bale';
 import { postListingToKenar } from '../../../lib/kenar';
@@ -76,43 +76,29 @@ const MASK_PHONES = ['09120996426', '09120997453'];
 
 // POST /api/listings → create a listing. ALL submissions saved as pending regardless of role.
 // Manager-approve PATCH is the only path to published + Telegram/Bale hooks.
-// Public submitter's real phone is stored in submitterPhone for office reference;
-// the public-displayed contact is masked to a Mahoor advisor number.
+// ALL listings (advisor or public) display a Mahoor mask advisor (حیدری/راعی alternating).
+// The real submitter phone is stored in submitterPhone for internal reference only.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const submitterPhone = String(body.advisorPhone || body.phone || '');
+    // Store real submitter phone internally regardless of who submitted
+    const storedSubmitterPhone = String(body.advisorPhone || body.phone || '') || null;
+
+    // Always assign a Mahoor mask advisor — alternates حیدری / راعی
+    const countRows = await db
+      .select({ id: realEstateAds.id })
+      .from(realEstateAds)
+      .where(eq(realEstateAds.isManagerApproved, false));
+    const maskPhone = MASK_PHONES[countRows.length % MASK_PHONES.length];
+    const maskAdvisor = await db.select().from(users).where(eq(users.phoneNumber, maskPhone));
+
     let advisorId: number | null = null;
-    let isInsider = false;
-    let storedSubmitterPhone: string | null = null;
-
-    // Try to match the submitter's phone to a registered insider
-    if (submitterPhone) {
-      const matched = await db.select().from(users).where(eq(users.phoneNumber, submitterPhone));
-      if (matched.length > 0) {
-        advisorId = matched[0].id;
-        isInsider = true;
-      }
-    }
-
-    // Public submission: mask contact to alternating Mahoor advisor
-    if (!isInsider) {
-      storedSubmitterPhone = submitterPhone || null;
-      // Count existing public submissions to alternate the mask advisor
-      const countRows = await db
-        .select({ id: realEstateAds.id })
-        .from(realEstateAds)
-        .where(eq(realEstateAds.isManagerApproved, false));
-      const maskPhone = MASK_PHONES[countRows.length % MASK_PHONES.length];
-      const maskAdvisor = await db.select().from(users).where(eq(users.phoneNumber, maskPhone));
-      if (maskAdvisor.length > 0) {
-        advisorId = maskAdvisor[0].id;
-      } else {
-        // Fallback: any user
-        const anyUser = await db.select().from(users).limit(1);
-        if (anyUser.length > 0) advisorId = anyUser[0].id;
-      }
+    if (maskAdvisor.length > 0) {
+      advisorId = maskAdvisor[0].id;
+    } else {
+      const anyUser = await db.select().from(users).limit(1);
+      if (anyUser.length > 0) advisorId = anyUser[0].id;
     }
 
     if (advisorId == null) {
