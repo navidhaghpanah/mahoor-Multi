@@ -22,6 +22,12 @@ export async function publishApprovedListing(adId: number): Promise<void> {
     const ad = rows[0].real_estate_ads;
     const advisor = rows[0].users;
 
+    let images: string[] = [];
+    if (ad.images) {
+      try { images = JSON.parse(ad.images); } catch { images = []; }
+    }
+    if (images.length === 0 && ad.imageUrl) images = [ad.imageUrl];
+
     const payload = {
       title:        ad.title,
       price:        Number(ad.price),
@@ -30,7 +36,8 @@ export async function publishApprovedListing(adId: number): Promise<void> {
       areaSize:     ad.areaSize ?? 0,
       buildingArea: ad.buildingArea ?? 0,
       rooms:        ad.rooms ?? 0,
-      imageUrl:     ad.imageUrl,
+      imageUrl:     images[0] ?? ad.imageUrl,
+      images,
       code:         listingCode(ad.id),
       advisorName:  advisor?.fullName ?? 'کارشناس ماهور',
       advisorPhone: advisor?.phoneNumber ?? '',

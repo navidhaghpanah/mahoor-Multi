@@ -42,9 +42,22 @@
   }
 
   function buildCard(l) {
-    var imgHtml = l.imageUrl
-      ? '<img src="' + esc(l.imageUrl) + '" alt="' + esc(l.title) + '" style="width:100%;height:180px;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display=\'none\'">'
+    // Build image gallery: main cover + scrollable thumbnail strip when multiple images exist
+    var imgs = Array.isArray(l.images) && l.images.length > 0 ? l.images : (l.imageUrl ? [l.imageUrl] : []);
+    var mainImg = imgs.length > 0
+      ? '<div style="position:relative;">'
+        + '<img src="' + esc(imgs[0]) + '" alt="' + esc(l.title) + '" style="width:100%;height:180px;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display=\'none\'">'
+        + (imgs.length > 1 ? '<span style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.65);color:#fff;font-size:0.72rem;padding:2px 8px;border-radius:12px;">' + faDigits(imgs.length) + ' عکس</span>' : '')
+        + '</div>'
       : '<div style="width:100%;height:100px;display:flex;align-items:center;justify-content:center;color:#D4AF37;font-size:2.2rem;">&#127968;</div>';
+    var thumbStrip = '';
+    if (imgs.length > 1) {
+      var thumbs = imgs.slice(1).map(function(src) {
+        return '<img src="' + esc(src) + '" alt="" loading="lazy" style="width:56px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid rgba(212,175,55,.25);" onerror="this.style.display=\'none\'">';
+      }).join('');
+      thumbStrip = '<div style="display:flex;gap:5px;padding:5px 8px;overflow-x:auto;background:#071c36;">' + thumbs + '</div>';
+    }
+    var imgHtml = mainImg + thumbStrip;
 
     var badgeType = typeLabel(l.deal || l.propType || '');
     var badgeHtml = badgeType

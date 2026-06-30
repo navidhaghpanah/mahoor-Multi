@@ -92,25 +92,41 @@ export async function addListing(
 }
 
 /*
- * Image handling without Firebase Storage:
- * convert the selected file to a Base64 data URL so it can be sent
- * inside the listing payload and stored in the image_url text column.
+ * Compress and convert a selected image file to a Base64 data URL.
+ * Images are resized to max 1400px wide/tall and re-encoded at 0.78 quality
+ * (typically <200 KB per photo) so multi-image payloads stay within Vercel's
+ * 4.5 MB request body limit even for high-resolution camera shots.
  */
 export async function uploadImage(
   file: File,
   _listingId: string,
   onProgress?: (pct: number) => void
 ): Promise<string> {
+  onProgress?.(10);
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onprogress = (e) => {
-      if (e.lengthComputable && onProgress) {
-        onProgress(Math.round((e.loaded / e.total) * 100));
-      }
-    };
-    reader.onload = () => {
-      onProgress?.(100);
-      resolve(reader.result as string);
+    reader.onload = (ev) => {
+      onProgress?.(40);
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1400;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          const ratio = Math.min(MAX / width, MAX / height);
+          width  = Math.round(width  * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        onProgress?.(90);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+        onProgress?.(100);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = ev.target!.result as string;
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
