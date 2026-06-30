@@ -17,12 +17,24 @@
 
   function typeLabel(v) { return TYPE_LABEL[v] || v || ''; }
 
+  var FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  function faDigits(s) {
+    return String(s == null ? '' : s).replace(/[0-9]/g, function (d) { return FA_DIGITS[+d]; });
+  }
+  function withCommas(n) {
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   function fmtPrice(n) {
     var num = parseInt(String(n || '').replace(/[^0-9]/g, ''), 10);
-    if (!num || num <= 0) return 'توافقی'; // توافقی
-    if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace('.0', '') + ' میلیارد تومان';
-    if (num >= 1000000)    return Math.round(num / 1000000) + ' میلیون تومان';
-    return num.toLocaleString('fa-IR') + ' تومان';
+    if (!num || num <= 0) return 'توافقی';
+    return faDigits(withCommas(num)) + ' تومان';
+  }
+
+  function fmtNum(n) {
+    var num = parseInt(String(n || '').replace(/[^0-9]/g, ''), 10);
+    if (!num) return faDigits('0');
+    return faDigits(withCommas(num));
   }
 
   function esc(s) {
@@ -40,8 +52,9 @@
       : '';
 
     var details = [];
-    if (l.size > 0) details.push('&#128208; ' + l.size + ' متر');
-    if (l.beds > 0) details.push('&#128716; ' + l.beds + ' خواب');
+    if (l.size > 0) details.push('&#128208; ' + fmtNum(l.size) + ' متر');
+    if (l.buildingArea > 0) details.push('&#127959; ' + fmtNum(l.buildingArea) + ' متر بنا');
+    if (l.beds > 0) details.push('&#128716; ' + faDigits(l.beds) + ' خواب');
     if (l.location) details.push('&#128205; ' + esc(l.location));
     var detailHtml = details.length
       ? '<p style="color:#a0b0c0;font-size:0.8rem;margin:0 0 6px;line-height:1.9;">' + details.join(' &nbsp;&middot;&nbsp; ') + '</p>'
@@ -60,7 +73,8 @@
       + imgHtml
       + '<div style="padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;">'
       + badgeHtml
-      + '<h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 8px;line-height:1.45;">' + esc(l.title || 'ملک') + '</h3>'
+      + (l.code ? '<span style="float:left;color:#6b7e8f;font-size:0.7rem;font-family:monospace;" dir="ltr">' + esc(l.code) + '</span>' : '')
+      + '<h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 8px;line-height:1.45;clear:both;">' + esc(l.title || 'ملک') + '</h3>'
       + '<p style="color:#D4AF37;font-size:1rem;font-weight:700;margin:0 0 10px;">' + fmtPrice(l.price) + '</p>'
       + detailHtml
       + advisorHtml
