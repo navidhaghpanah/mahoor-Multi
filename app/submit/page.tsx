@@ -9,7 +9,7 @@ type State = "idle" | "loading" | "done" | "error";
 export default function PublicSubmit() {
   const [form, setForm] = useState({
     deal: "فروش", propType: "آپارتمان",
-    title: "", price: "", location: "", size: "", beds: "", phone: "", desc: "",
+    title: "", price: "", location: "", size: "", buildingArea: "", beds: "", phone: "", desc: "",
   });
   const [state, setState] = useState<State>("idle");
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -26,7 +26,7 @@ export default function PublicSubmit() {
         body: JSON.stringify({
           title: form.title, deal: form.deal, propType: form.propType,
           price: form.price, location: form.location,
-          size: form.size, beds: form.beds,
+          size: form.size, buildingArea: form.buildingArea, beds: form.beds,
           phone: form.phone, advisorPhone: form.phone,
           desc: form.desc, source: "web",
         }),
@@ -46,7 +46,7 @@ export default function PublicSubmit() {
         <div className="text-5xl mb-4">✅</div>
         <h2 className="text-white text-xl font-bold mb-2">آگهی شما ثبت شد!</h2>
         <p className="text-[#a0b0c0] text-sm">پس از بررسی و تأیید مدیر، آگهی شما منتشر خواهد شد.</p>
-        <button onClick={() => { setState("idle"); setForm(f => ({ ...f, title:"",price:"",location:"",size:"",beds:"",phone:"",desc:"" })); }}
+        <button onClick={() => { setState("idle"); setForm(f => ({ ...f, title:"",price:"",location:"",size:"",buildingArea:"",beds:"",phone:"",desc:"" })); }}
           className="mt-6 bg-[#D4AF37] text-[#030D1E] font-bold px-8 py-3 rounded-xl hover:bg-[#c9a020] transition">
           ثبت آگهی جدید
         </button>
@@ -102,9 +102,14 @@ export default function PublicSubmit() {
               <input type="number" value={form.size} onChange={set("size")} placeholder="۱۲۰" className={inp} />
             </div>
             <div>
-              <label className="block text-white text-sm font-semibold mb-1">تعداد خواب</label>
-              <input type="number" value={form.beds} onChange={set("beds")} placeholder="۳" className={inp} />
+              <label className="block text-white text-sm font-semibold mb-1">متراژ بنا (متر)</label>
+              <input type="number" value={form.buildingArea} onChange={set("buildingArea")} placeholder="۹۰" className={inp} />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-white text-sm font-semibold mb-1">تعداد خواب</label>
+            <input type="number" value={form.beds} onChange={set("beds")} placeholder="۳" className={inp} />
           </div>
 
           <div>

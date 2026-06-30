@@ -35,8 +35,9 @@ export function TabAddListing({ user }: { user?: any }) {
   const [location, setLocation] = useState("");
   const [lat, setLat] = useState<number | undefined>();
   const [lng, setLng] = useState<number | undefined>();
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [buildingArea, setBuildingArea] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedChannels, setSelectedChannels] = useState<string[]>(["whatsapp"]);
   const [success, setSuccess] = useState(false);
@@ -45,15 +46,28 @@ export function TabAddListing({ user }: { user?: any }) {
   const [mapOpen, setMapOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const MAX_IMAGES = 8;
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert("حجم تصویر نباید بیشتر از ۵ مگابایت باشد");
-      return;
-    }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    const room = MAX_IMAGES - imageFiles.length;
+    const accepted = files.slice(0, room).filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        alert(`حجم تصویر «${f.name}» بیشتر از ۵ مگابایت است و نادیده گرفته شد`);
+        return false;
+      }
+      return true;
+    });
+    if (accepted.length === 0) return;
+    setImageFiles((prev) => [...prev, ...accepted]);
+    setImagePreviews((prev) => [...prev, ...accepted.map((f) => URL.createObjectURL(f))]);
+    e.target.value = "";
+  };
+
+  const removeImageAt = (idx: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== idx));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleGeocode = async () => {
@@ -77,9 +91,9 @@ export function TabAddListing({ user }: { user?: any }) {
     );
 
   const reset = () => {
-    setTitle(""); setSize(""); setPrice(""); setBeds("");
+    setTitle(""); setSize(""); setPrice(""); setBeds(""); setBuildingArea("");
     setDesc(""); setLocation(""); setLat(undefined); setLng(undefined);
-    setImageFile(null); setImagePreview(""); setUploadProgress(0);
+    setImageFiles([]); setImagePreviews([]); setUploadProgress(0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,13 +102,13 @@ export function TabAddListing({ user }: { user?: any }) {
     setLoading(true);
 
     try {
-      // Convert the selected image to a Base64 data URL (no Firebase Storage).
-      let imageUrl: string | undefined;
-      if (imageFile) {
+      // Convert all selected images to Base64 data URLs (no Firebase Storage).
+      const images: string[] = [];
+      for (const file of imageFiles) {
         try {
-          imageUrl = await uploadImage(imageFile, "", setUploadProgress);
+          images.push(await uploadImage(file, "", setUploadProgress));
         } catch {
-          console.warn("Image conversion failed, listing saved without image");
+          console.warn("Image conversion failed for one file, skipping");
         }
       }
 
@@ -103,8 +117,9 @@ export function TabAddListing({ user }: { user?: any }) {
         deal,
         propType,
         price, size: parseInt(size) || 0,
+        buildingArea: parseInt(buildingArea) || 0,
         beds: parseInt(beds) || 0, phone, location,
-        lat, lng, desc, imageUrl,
+        lat, lng, desc, images,
         advisorName: user?.fullName ?? "کارشناس ماهور",
         advisorPhone: phone,
         status: "pending",
@@ -203,34 +218,46 @@ export function TabAddListing({ user }: { user?: any }) {
               </div>
             </Card>
 
-            {/* Image Upload */}
-            <Card label="تصویر ملک">
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-              {imagePreview ? (
-                <div className="relative rounded-xl overflow-hidden">
-                  <img src={imagePreview} alt="پیش‌نمایش" className="w-full h-48 object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => { setImageFile(null); setImagePreview(""); }}
-                    className="absolute top-2 left-2 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  {uploadProgress > 0 && uploadProgress < 100 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/40">
-                      <div className="h-full bg-[#D4AF37] transition-all" style={{ width: `${uploadProgress}%` }} />
+            {/* Image Upload — multiple photos (gallery) */}
+            <Card label={`تصاویر ملک${imagePreviews.length ? ` (${imagePreviews.length}/${MAX_IMAGES})` : ""}`}>
+              <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {imagePreviews.map((src, i) => (
+                    <div key={i} className="relative rounded-xl overflow-hidden h-24">
+                      <img src={src} alt={`تصویر ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImageAt(i)}
+                        className="absolute top-1 left-1 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      {i === 0 && (
+                        <span className="absolute bottom-1 right-1 bg-[#D4AF37] text-black text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          اصلی
+                        </span>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ) : (
+              )}
+              {imagePreviews.length < MAX_IMAGES && (
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="w-full h-36 border-2 border-dashed border-[#1E293B] hover:border-[#D4AF37]/50 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#D4AF37] transition-all"
+                  className="w-full h-28 border-2 border-dashed border-[#1E293B] hover:border-[#D4AF37]/50 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#D4AF37] transition-all"
                 >
-                  <ImagePlus className="w-8 h-8" />
-                  <span className="text-sm">انتخاب تصویر (تا ۵ مگابایت)</span>
+                  <ImagePlus className="w-7 h-7" />
+                  <span className="text-sm">
+                    {imagePreviews.length ? "افزودن تصویر دیگر" : "انتخاب تصاویر (تا ۵ مگابایت هر کدام)"}
+                  </span>
                 </button>
+              )}
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="h-1.5 bg-black/20 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full bg-[#D4AF37] transition-all" style={{ width: `${uploadProgress}%` }} />
+                </div>
               )}
             </Card>
 
@@ -241,8 +268,10 @@ export function TabAddListing({ user }: { user?: any }) {
 
               <div className="grid grid-cols-2 gap-4">
                 <Field label="متراژ (متر)" value={size} onChange={setSize} placeholder="۱۲۰" type="number" />
-                <Field label="اتاق خواب" value={beds} onChange={setBeds} placeholder="۳" type="number" />
+                <Field label="متراژ بنا (متر)" value={buildingArea} onChange={setBuildingArea} placeholder="۹۰" type="number" />
               </div>
+
+              <Field label="اتاق خواب" value={beds} onChange={setBeds} placeholder="۳" type="number" />
 
               <Field label="قیمت / اجاره (تومان)" value={price} onChange={setPrice} placeholder="۲,۵۰۰,۰۰۰,۰۰۰" />
 
