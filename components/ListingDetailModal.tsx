@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, MapPin, Bed, Ruler, Phone, Map, Building2, Share2 } from "lucide-react";
+import { X, MapPin, Bed, Ruler, Phone, Map, Building2, Share2, ChevronRight, ChevronLeft } from "lucide-react";
 import { type Listing } from "../lib/listings";
 import { SharePanel } from "./SharePanel";
+import { formatPrice, formatNumber, toPersianDigits } from "../lib/format";
 
 const BADGE: Record<string, { label: string; color: string }> = {
   sale:     { label: "فروشی",    color: "bg-red-500" },
@@ -21,8 +22,13 @@ interface ListingDetailModalProps {
 
 export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetailModalProps) {
   const [showShare, setShowShare] = useState(false);
+  const [imgIndex, setImgIndex] = useState(0);
+
+  useEffect(() => { setImgIndex(0); }, [listing?.id]);
+
   if (!listing) return null;
   const badge = BADGE[listing.deal] ?? { label: listing.deal, color: "bg-gray-600" };
+  const gallery = listing.images && listing.images.length > 0 ? listing.images : (listing.imageUrl ? [listing.imageUrl] : []);
 
   return (
     <AnimatePresence>
@@ -41,11 +47,11 @@ export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetai
             transition={{ type: "spring", bounce: 0.15 }}
             className="w-full sm:max-w-xl bg-[#0C2C54] rounded-t-3xl sm:rounded-3xl overflow-hidden border border-[#1E293B] shadow-2xl max-h-[92dvh] flex flex-col"
           >
-            {/* Image */}
+            {/* Image gallery */}
             <div className="relative h-[200px] flex-shrink-0 bg-[#1E293B]">
-              {listing.imageUrl ? (
+              {gallery.length > 0 ? (
                 <img
-                  src={listing.imageUrl}
+                  src={gallery[imgIndex]}
                   alt={listing.title}
                   className="w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -65,14 +71,46 @@ export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetai
               >
                 <X className="w-4 h-4" />
               </button>
+
+              {gallery.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setImgIndex((i) => (i - 1 + gallery.length) % gallery.length)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setImgIndex((i) => (i + 1) % gallery.length)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {gallery.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIndex ? "bg-[#D4AF37] w-4" : "bg-white/40"}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Content */}
             <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-4">
               {/* Title & Price */}
               <div>
-                <h2 className="text-white font-bold text-lg leading-relaxed mb-1">{listing.title}</h2>
-                <p className="text-[#D4AF37] text-2xl font-bold">{listing.price}</p>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <h2 className="text-white font-bold text-lg leading-relaxed">{listing.title}</h2>
+                  {listing.code && (
+                    <span className="flex-shrink-0 text-[10px] font-mono text-gray-500 bg-[#1E293B]/60 px-2 py-0.5 rounded" dir="ltr">
+                      {listing.code}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[#D4AF37] text-2xl font-bold">{formatPrice(listing.price)}</p>
               </div>
 
               {/* Location */}
@@ -82,15 +120,21 @@ export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetai
               </div>
 
               {/* Stats row */}
-              <div className="flex gap-5 py-3 border-y border-[#1E293B]">
+              <div className="flex gap-5 py-3 border-y border-[#1E293B] flex-wrap">
                 <div className="flex items-center gap-2 text-sm text-gray-300">
                   <Ruler className="w-4 h-4 text-[#D4AF37]" />
-                  <span>{listing.size} متر</span>
+                  <span>{formatNumber(listing.size)} متر</span>
                 </div>
+                {!!listing.buildingArea && (
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <Building2 className="w-4 h-4 text-[#D4AF37]" />
+                    <span>{formatNumber(listing.buildingArea)} متر بنا</span>
+                  </div>
+                )}
                 {listing.beds > 0 && (
                   <div className="flex items-center gap-2 text-sm text-gray-300">
                     <Bed className="w-4 h-4 text-[#D4AF37]" />
-                    <span>{listing.beds} خواب</span>
+                    <span>{toPersianDigits(listing.beds)} خواب</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-sm text-gray-300">

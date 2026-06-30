@@ -10,6 +10,7 @@ import { subscribeToListings, type Listing } from "../lib/listings";
 import { MapModal } from "./MapModal";
 import { ListingDetailModal } from "./ListingDetailModal";
 import { SharePanel } from "./SharePanel";
+import { formatPrice, formatNumber, toPersianDigits } from "../lib/format";
 
 
 const BADGE: Record<string, { label: string; color: string }> = {
@@ -247,11 +248,16 @@ export function TabListings() {
 
                 {/* Body */}
                 <div className="p-4">
-                  <h3 className="font-bold text-white text-sm mb-2 leading-relaxed line-clamp-2">
-                    {listing.title}
-                  </h3>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h3 className="font-bold text-white text-sm leading-relaxed line-clamp-2">
+                      {listing.title}
+                    </h3>
+                    {listing.code && (
+                      <span className="flex-shrink-0 text-[9px] font-mono text-gray-500" dir="ltr">{listing.code}</span>
+                    )}
+                  </div>
                   <p className="text-[#D4AF37] text-lg font-bold mb-1">
-                    {listing.price}
+                    {formatPrice(listing.price)}
                   </p>
                   {listing.desc && (
                     <p className="text-gray-400 text-xs mb-2 line-clamp-2">{listing.desc}</p>
@@ -261,12 +267,12 @@ export function TabListings() {
                   <div className="flex gap-4 pt-3 border-t border-[#1E293B] mt-2 flex-wrap">
                     <div className="flex items-center gap-1.5 text-xs text-gray-400">
                       <Ruler className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      {listing.size} متر
+                      {formatNumber(listing.size)} متر
                     </div>
                     {listing.beds > 0 && (
                       <div className="flex items-center gap-1.5 text-xs text-gray-400">
                         <Bed className="w-3.5 h-3.5 text-[#D4AF37]" />
-                        {listing.beds} خواب
+                        {toPersianDigits(listing.beds)} خواب
                       </div>
                     )}
                     {listing.lat && listing.lng && (
