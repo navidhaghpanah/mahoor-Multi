@@ -2,17 +2,20 @@
 
 export interface Listing {
   id?: string;
+  code?: string;
   title: string;
   deal: string;
   propType: string;
   price: string;
   size: number;
+  buildingArea?: number;
   beds: number;
   phone: string;
   location: string;
   lat?: number;
   lng?: number;
   imageUrl?: string;
+  images?: string[];
   desc?: string;
   advisorName?: string;
   advisorPhone?: string;

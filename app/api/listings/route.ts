@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../src/db/index';
 import { realEstateAds, users } from '../../../src/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { postListingToTelegram } from '../../../lib/telegram';
-import { postListingToBale } from '../../../lib/bale';
-import { postListingToKenar } from '../../../lib/kenar';
+import { publishApprovedListing } from '../../../lib/publish';
+import { listingCode } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,17 +40,26 @@ function rowToListing(ad: any, advisor?: any) {
     .replace(/^\|/, '')
     .trim();
 
+  let images: string[] = [];
+  if (ad.images) {
+    try { images = JSON.parse(ad.images); } catch { images = []; }
+  }
+  if (images.length === 0 && ad.imageUrl) images = [ad.imageUrl];
+
   return {
     id: String(ad.id),
+    code: listingCode(ad.id),
     title: ad.title,
     deal: DEAL_MAP[ad.type] ?? ad.type,
     propType: ad.type,
     price: ad.price != null ? String(ad.price) : '',
     size: ad.areaSize ?? 0,
+    buildingArea: ad.buildingArea ?? 0,
     beds: ad.rooms ?? 0,
     phone: advisor?.phoneNumber ?? '',
     location: ad.location ?? '',
-    imageUrl: ad.imageUrl ?? undefined,
+    imageUrl: images[0] ?? undefined,
+    images,
     desc,
     advisorName: advisor?.fullName ?? 'کارشناس ماهور',
     advisorPhone: advisor?.phoneNumber ?? '',
@@ -89,16 +97,22 @@ export async function GET(req: NextRequest) {
 // Masking advisors for public submissions — alternates between Haydar and Raei
 const MASK_PHONES = ['09120996426', '09120997453'];
 
-// POST /api/listings → create a listing. ALL submissions saved as pending regardless of role.
-// Manager-approve PATCH is the only path to published + Telegram/Bale hooks.
-// ALL listings (advisor or public) display a Mahoor mask advisor (حیدری/راعی alternating).
-// The real submitter phone is stored in submitterPhone for internal reference only.
+// POST /api/listings → create a listing.
+// Advisor submissions (submitter phone matches a registered user) publish immediately.
+// Public (non-advisor) submissions stay pending for manager approval.
+// ALL listings (advisor or public) display a Mahoor mask advisor (حیدری/راعی alternating)
+// as the public contact — the real submitter phone is stored in submitterPhone internally.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Store real submitter phone internally regardless of who submitted
     const storedSubmitterPhone = String(body.advisorPhone || body.phone || '') || null;
+
+    // Advisor (insider) submissions auto-publish; public submissions need approval.
+    const submitterUser = storedSubmitterPhone
+      ? await db.select({ id: users.id }).from(users).where(eq(users.phoneNumber, storedSubmitterPhone))
+      : [];
+    const isAdvisorSubmission = submitterUser.length > 0;
 
     // Always assign a Mahoor mask advisor — alternates حیدری / راعی
     const countRows = await db
@@ -121,6 +135,8 @@ export async function POST(req: NextRequest) {
     }
 
     const priceNum = parseInt(String(body.price ?? '').replace(/[^0-9]/g, ''), 10) || 0;
+    const images: string[] = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
+    const coverImage = images[0] ?? body.imageUrl ?? null;
 
     const inserted = await db
       .insert(realEstateAds)
@@ -131,16 +147,21 @@ export async function POST(req: NextRequest) {
         type: body.deal ?? body.propType ?? 'نامشخص',
         location: body.location ?? '',
         areaSize: Number(body.size) || 0,
+        buildingArea: Number(body.buildingArea) || null,
         rooms: Number(body.beds) || 0,
-        imageUrl: body.imageUrl ?? null,
+        imageUrl: coverImage,
+        images: images.length > 0 ? JSON.stringify(images) : null,
         submitterPhone: storedSubmitterPhone,
         publishStatus: 'pending',
         advisorId,
-        isManagerApproved: false,  // ALL listings require manager approval
+        isManagerApproved: isAdvisorSubmission,
       })
       .returning();
 
-    return NextResponse.json({ id: String(inserted[0].id) });
+    const newId = inserted[0].id;
+    if (isAdvisorSubmission) void publishApprovedListing(newId);
+
+    return NextResponse.json({ id: String(newId) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -3,27 +3,25 @@
 // If either env var is missing this is a complete no-op — never throws.
 
 import type { ListingForTelegram } from './telegram';
-
-function formatPrice(p: number): string {
-  if (!p || p <= 0) return 'توافقی';
-  return p.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' تومان';
-}
+import { formatPrice, formatNumber, toPersianDigits } from './format';
 
 function buildCaption(l: ListingForTelegram): string {
   const lines: string[] = [
     `🏡 <b>${l.title}</b>`,
+    l.code ? `🔖 کد آگهی: ${l.code}` : '',
     '',
     `💰 <b>قیمت:</b> ${formatPrice(l.price)}`,
-    l.type       ? `🔑 <b>نوع:</b> ${l.type}`                 : '',
-    l.location   ? `📍 <b>موقعیت:</b> ${l.location}`         : '',
-    l.areaSize   ? `📐 <b>متراژ:</b> ${l.areaSize} متر مربع` : '',
-    l.rooms      ? `🛏 <b>اتاق خواب:</b> ${l.rooms}`         : '',
+    l.type         ? `🔑 <b>نوع:</b> ${l.type}`                                       : '',
+    l.location     ? `📍 <b>موقعیت:</b> ${l.location}`                               : '',
+    l.areaSize     ? `📐 <b>متراژ:</b> ${formatNumber(l.areaSize)} متر مربع`         : '',
+    l.buildingArea ? `🏗 <b>متراژ بنا:</b> ${formatNumber(l.buildingArea)} متر مربع` : '',
+    l.rooms        ? `🛏 <b>اتاق خواب:</b> ${toPersianDigits(l.rooms)}`              : '',
     '',
     `👤 <b>مشاور:</b> ${l.advisorName}`,
-    l.advisorPhone ? `📱 ${l.advisorPhone}`                   : '',
+    l.advisorPhone ? `📱 ${toPersianDigits(l.advisorPhone)}` : '',
     '',
     '🏠 <i>مجموعه تخصصی املاک ماهور</i>',
-    '☎️ 011-4473-5333',
+    '☎️ ' + toPersianDigits('011-4473-5333'),
   ];
   return lines.filter(Boolean).join('\n');
 }

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../src/db/index';
-import { realEstateAds, users } from '../../../../src/db/schema';
+import { realEstateAds } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
-import { postListingToTelegram } from '../../../../lib/telegram';
-import { postListingToBale } from '../../../../lib/bale';
-import { postListingToKenar } from '../../../../lib/kenar';
+import { publishApprovedListing } from '../../../../lib/publish';
 
 // PATCH /api/listings/:id  -> update fields (e.g. imageUrl) on a listing
 export async function PATCH(
@@ -17,8 +15,15 @@ export async function PATCH(
     const updates: Record<string, any> = {};
     if (body.approve === true) updates.isManagerApproved = true;
     if (body.imageUrl !== undefined) updates.imageUrl = body.imageUrl;
+    if (body.images !== undefined) updates.images = Array.isArray(body.images) ? JSON.stringify(body.images) : null;
     if (body.title !== undefined) updates.title = body.title;
     if (body.description !== undefined) updates.description = body.description;
+    if (body.price !== undefined) updates.price = Number(body.price) || 0;
+    if (body.location !== undefined) updates.location = body.location;
+    if (body.areaSize !== undefined) updates.areaSize = Number(body.areaSize) || 0;
+    if (body.buildingArea !== undefined) updates.buildingArea = Number(body.buildingArea) || null;
+    if (body.rooms !== undefined) updates.rooms = Number(body.rooms) || 0;
+    if (body.submitterPhone !== undefined) updates.submitterPhone = body.submitterPhone;
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ ok: true });
@@ -26,38 +31,8 @@ export async function PATCH(
 
     await db.update(realEstateAds).set(updates).where(eq(realEstateAds.id, Number(id)));
 
-    // Fire-and-forget Telegram post when a public listing is manager-approved
-    if (body.approve === true) {
-      void (async () => {
-        try {
-          const rows = await db
-            .select()
-            .from(realEstateAds)
-            .leftJoin(users, eq(realEstateAds.advisorId, users.id))
-            .where(eq(realEstateAds.id, Number(id)));
-          if (rows.length > 0) {
-            const ad     = rows[0].real_estate_ads;
-            const advisor = rows[0].users;
-            const approvedPayload = {
-              title:        ad.title,
-              price:        Number(ad.price),
-              type:         ad.type,
-              location:     ad.location ?? '',
-              areaSize:     ad.areaSize ?? 0,
-              rooms:        ad.rooms ?? 0,
-              imageUrl:     ad.imageUrl,
-              advisorName:  advisor?.fullName ?? 'کارشناس ماهور',
-              advisorPhone: advisor?.phoneNumber ?? '',
-            };
-            await postListingToTelegram(approvedPayload);
-            await postListingToBale(approvedPayload);
-            await postListingToKenar({ ...approvedPayload, lat: null, lng: null });
-          }
-        } catch (e: any) {
-          console.error('[Telegram] post-on-approve failed:', e?.message);
-        }
-      })();
-    }
+    // Fire-and-forget channel post when a listing is (manager- or auto-)approved
+    if (body.approve === true) void publishApprovedListing(Number(id));
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {

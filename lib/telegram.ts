@@ -2,38 +2,39 @@
 // If either is missing this is a complete no-op — it never throws or breaks the
 // listing publish flow.
 
+import { formatPrice, formatNumber, toPersianDigits } from './format';
+
 export interface ListingForTelegram {
   title: string;
   price: number;
   type: string;
   location: string;
   areaSize: number;
+  buildingArea?: number;
   rooms: number;
   imageUrl?: string | null;
+  code?: string;
   advisorName: string;
   advisorPhone: string;
-}
-
-function formatPrice(p: number): string {
-  if (!p || p <= 0) return 'توافقی';
-  return p.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' تومان';
 }
 
 function buildCaption(l: ListingForTelegram): string {
   const lines: string[] = [
     `🏡 <b>${l.title}</b>`,
+    l.code ? `🔖 کد آگهی: ${l.code}` : '',
     '',
     `💰 <b>قیمت:</b> ${formatPrice(l.price)}`,
-    l.type       ? `🔑 <b>نوع:</b> ${l.type}`                       : '',
-    l.location   ? `📍 <b>موقعیت:</b> ${l.location}`               : '',
-    l.areaSize   ? `📐 <b>متراژ:</b> ${l.areaSize} متر مربع`       : '',
-    l.rooms      ? `🛏 <b>اتاق خواب:</b> ${l.rooms}`               : '',
+    l.type         ? `🔑 <b>نوع:</b> ${l.type}`                                       : '',
+    l.location     ? `📍 <b>موقعیت:</b> ${l.location}`                               : '',
+    l.areaSize     ? `📐 <b>متراژ:</b> ${formatNumber(l.areaSize)} متر مربع`         : '',
+    l.buildingArea ? `🏗 <b>متراژ بنا:</b> ${formatNumber(l.buildingArea)} متر مربع` : '',
+    l.rooms        ? `🛏 <b>اتاق خواب:</b> ${toPersianDigits(l.rooms)}`              : '',
     '',
     `👤 <b>مشاور:</b> ${l.advisorName}`,
-    l.advisorPhone ? `📱 ${l.advisorPhone}`                         : '',
+    l.advisorPhone ? `📱 ${toPersianDigits(l.advisorPhone)}` : '',
     '',
     '🏠 <i>مجموعه تخصصی املاک ماهور</i>',
-    '☎️ 011-4473-5333',
+    '☎️ ' + toPersianDigits('011-4473-5333'),
   ];
   return lines.filter(Boolean).join('\n');
 }
