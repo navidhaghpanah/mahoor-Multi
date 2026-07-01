@@ -7,3 +7,6 @@ coverage/
 !.env.example
 .vercel
 .env.local
+
+# DB backups contain personal data — keep local only
+backups/
