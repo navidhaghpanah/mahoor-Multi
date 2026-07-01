@@ -3,7 +3,7 @@ import { db } from '../../../src/db/index';
 import { realEstateAds, users } from '../../../src/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { publishApprovedListing } from '../../../lib/publish';
-import { listingCode } from '../../../lib/format';
+import { listingCode, parseNumeric } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,14 +94,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Masking advisors for public submissions — alternates between Haydar and Raei
-const MASK_PHONES = ['09120996426', '09120997453'];
+// All public-facing listings show خانم حیدری as the contact — never راعی.
+const MASK_PHONE = '09120996426';
 
 // POST /api/listings → create a listing.
 // Advisor submissions (submitter phone matches a registered user) publish immediately.
 // Public (non-advisor) submissions stay pending for manager approval.
-// ALL listings (advisor or public) display a Mahoor mask advisor (حیدری/راعی alternating)
-// as the public contact — the real submitter phone is stored in submitterPhone internally.
+// ALL listings display خانم حیدری as the public contact — real phone stored in submitterPhone.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -114,13 +113,8 @@ export async function POST(req: NextRequest) {
       : [];
     const isAdvisorSubmission = submitterUser.length > 0;
 
-    // Always assign a Mahoor mask advisor — alternates حیدری / راعی
-    const countRows = await db
-      .select({ id: realEstateAds.id })
-      .from(realEstateAds)
-      .where(eq(realEstateAds.isManagerApproved, false));
-    const maskPhone = MASK_PHONES[countRows.length % MASK_PHONES.length];
-    const maskAdvisor = await db.select().from(users).where(eq(users.phoneNumber, maskPhone));
+    // Always assign خانم حیدری as the public-facing mask advisor.
+    const maskAdvisor = await db.select().from(users).where(eq(users.phoneNumber, MASK_PHONE));
 
     let advisorId: number | null = null;
     if (maskAdvisor.length > 0) {
@@ -134,7 +128,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'هیچ کاربری برای ثبت آگهی یافت نشد.' }, { status: 400 });
     }
 
-    const priceNum = parseInt(String(body.price ?? '').replace(/[^0-9]/g, ''), 10) || 0;
+    const priceNum = parseNumeric(body.price);
     const images: string[] = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
     const coverImage = images[0] ?? body.imageUrl ?? null;
 
