@@ -94,34 +94,42 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// All public-facing listings show خانم حیدری as the contact — never راعی.
-const MASK_PHONE = '09120996426';
+// راعی's listings are displayed under حیدری's identity.
+// All other advisors show their own name/phone. Public submissions default to حیدری.
+const RAEI_PHONE   = '09120997453';
+const HAYDAR_PHONE = '09120996426';
 
 // POST /api/listings → create a listing.
 // Advisor submissions (submitter phone matches a registered user) publish immediately.
 // Public (non-advisor) submissions stay pending for manager approval.
-// ALL listings display خانم حیدری as the public contact — real phone stored in submitterPhone.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
     const storedSubmitterPhone = String(body.advisorPhone || body.phone || '') || null;
 
-    // Advisor (insider) submissions auto-publish; public submissions need approval.
-    const submitterUser = storedSubmitterPhone
-      ? await db.select({ id: users.id }).from(users).where(eq(users.phoneNumber, storedSubmitterPhone))
+    // Fetch the submitter's full user row (if they are a registered advisor).
+    const submitterRows = storedSubmitterPhone
+      ? await db.select().from(users).where(eq(users.phoneNumber, storedSubmitterPhone))
       : [];
-    const isAdvisorSubmission = submitterUser.length > 0;
+    const isAdvisorSubmission = submitterRows.length > 0;
+    const submitterUser = submitterRows[0] ?? null;
 
-    // Always assign خانم حیدری as the public-facing mask advisor.
-    const maskAdvisor = await db.select().from(users).where(eq(users.phoneNumber, MASK_PHONE));
+    // Determine public-facing advisor:
+    //   راعی → show as حیدری  |  public (no row) → حیدری  |  everyone else → own row
+    const needsMask = !submitterUser || submitterUser.phoneNumber === RAEI_PHONE;
 
     let advisorId: number | null = null;
-    if (maskAdvisor.length > 0) {
-      advisorId = maskAdvisor[0].id;
+    if (needsMask) {
+      const haydar = await db.select().from(users).where(eq(users.phoneNumber, HAYDAR_PHONE));
+      if (haydar.length > 0) {
+        advisorId = haydar[0].id;
+      } else {
+        const anyUser = await db.select().from(users).limit(1);
+        if (anyUser.length > 0) advisorId = anyUser[0].id;
+      }
     } else {
-      const anyUser = await db.select().from(users).limit(1);
-      if (anyUser.length > 0) advisorId = anyUser[0].id;
+      advisorId = submitterUser!.id;
     }
 
     if (advisorId == null) {
