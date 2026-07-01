@@ -7,6 +7,7 @@ import {
   MapPin, ImagePlus, X, Loader2, Map, Info,
 } from "lucide-react";
 import { addListing, uploadImage, geocodeAddress } from "../lib/listings";
+import { toPersianDigits } from "../lib/format";
 import { MapModal } from "./MapModal";
 
 const DEAL_TYPES = ["فروش", "اجاره", "رهن کامل", "رهن و اجاره", "پیش‌فروش", "اجاره شبانه"];
@@ -28,7 +29,7 @@ export function TabAddListing({ user }: { user?: any }) {
   const [propType, setPropType] = useState("آپارتمان");
   const [title, setTitle] = useState("");
   const [size, setSize] = useState("");
-  const [price, setPrice] = useState("");
+  const [rawPrice, setRawPrice] = useState(""); // ASCII digits for submission
   const [beds, setBeds] = useState("");
   const [phone, setPhone] = useState(user?.phoneNumber ?? "");
   const [desc, setDesc] = useState("");
@@ -47,6 +48,17 @@ export function TabAddListing({ user }: { user?: any }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const MAX_IMAGES = 8;
+
+  // Live price formatting: display with Persian digits + separators; submit raw ASCII.
+  const priceDisplay = rawPrice
+    ? toPersianDigits(rawPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ','))
+    : '';
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value
+      .replace(/[۰-۹]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 0x06F0 + 0x0030))
+      .replace(/[^0-9]/g, '');
+    setRawPrice(v);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -91,7 +103,7 @@ export function TabAddListing({ user }: { user?: any }) {
     );
 
   const reset = () => {
-    setTitle(""); setSize(""); setPrice(""); setBeds(""); setBuildingArea("");
+    setTitle(""); setSize(""); setRawPrice(""); setBeds(""); setBuildingArea("");
     setDesc(""); setLocation(""); setLat(undefined); setLng(undefined);
     setImageFiles([]); setImagePreviews([]); setUploadProgress(0);
   };
@@ -116,7 +128,7 @@ export function TabAddListing({ user }: { user?: any }) {
         title,
         deal,
         propType,
-        price, size: parseInt(size) || 0,
+        price: rawPrice, size: parseInt(size) || 0,
         buildingArea: parseInt(buildingArea) || 0,
         beds: parseInt(beds) || 0, phone, location,
         lat, lng, desc, images,
@@ -130,7 +142,7 @@ export function TabAddListing({ user }: { user?: any }) {
         `📋 عنوان: ${title}\n🔑 نوع: ${deal} / ${propType}\n` +
         (size ? `📐 متراژ: ${size} متر\n` : "") +
         (beds ? `🛏 خواب: ${beds}\n` : "") +
-        (price ? `💰 قیمت: ${price}\n` : "") +
+        (priceDisplay ? `💰 قیمت: ${priceDisplay}\n` : "") +
         (location ? `📍 موقعیت: ${location}\n` : "") +
         `📞 تماس: ${phone}\n` +
         (desc ? `📝 توضیحات: ${desc}` : "");
@@ -273,7 +285,17 @@ export function TabAddListing({ user }: { user?: any }) {
 
               <Field label="اتاق خواب" value={beds} onChange={setBeds} placeholder="۳" type="number" />
 
-              <Field label="قیمت / اجاره (تومان)" value={price} onChange={setPrice} placeholder="۲,۵۰۰,۰۰۰,۰۰۰" />
+              <div>
+                <label className="block text-sm text-gray-300 font-medium mb-2">قیمت / اجاره (تومان)</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={priceDisplay}
+                  onChange={handlePriceChange}
+                  placeholder="۲,۵۰۰,۰۰۰,۰۰۰"
+                  className={inputCls}
+                />
+              </div>
 
               {/* Location + Map */}
               <div>
