@@ -1,5 +1,6 @@
-// Serves a listing's first image as a real HTTP response so it can be used as og:image.
-// Base64 data URLs can't be og:image URLs — this route bridges the gap.
+// Serves a listing image as a real HTTP image response.
+// ?i=N selects from the images[] array (default 0). Falls back to imageUrl.
+// Used for og:image, hero, and thumbnail grid — no raw base64 in HTML.
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../src/db/index';
 import { realEstateAds } from '../../../../src/db/schema';
@@ -8,12 +9,14 @@ import { eq } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: rawId } = await params;
   const id = parseInt(rawId, 10);
   if (!id) return new NextResponse(null, { status: 404 });
+
+  const idx = parseInt(req.nextUrl.searchParams.get('i') ?? '0', 10) || 0;
 
   const rows = await db
     .select({
@@ -28,7 +31,10 @@ export async function GET(
 
   let dataUrl = '';
   if (rows[0].images) {
-    try { dataUrl = (JSON.parse(rows[0].images) as string[])[0] ?? ''; } catch {}
+    try {
+      const arr = JSON.parse(rows[0].images) as string[];
+      dataUrl = arr[idx] ?? arr[0] ?? '';
+    } catch {}
   }
   if (!dataUrl) dataUrl = rows[0].imageUrl ?? '';
 

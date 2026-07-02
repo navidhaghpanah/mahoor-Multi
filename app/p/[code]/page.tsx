@@ -208,13 +208,13 @@ export default async function ListingPage({
           </div>
         )}
 
-        {/* Extra images grid */}
+        {/* Extra images grid — use proxy for every thumbnail, never raw base64 */}
         {imgs.length > 1 && (
           <div className="grid grid-cols-3 gap-2 mb-6">
-            {imgs.slice(1).map((src, i) => (
+            {imgs.slice(1).map((_, i) => (
               <img
                 key={i}
-                src={src}
+                src={`/api/listing-image/${ad.id}?i=${i + 1}`}
                 alt=""
                 loading="lazy"
                 className="w-full rounded-lg object-cover border border-[#D4AF37]/20"
