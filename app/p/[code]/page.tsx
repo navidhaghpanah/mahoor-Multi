@@ -149,11 +149,11 @@ export default async function ListingPage({
   return (
     <div className="min-h-screen bg-[#030D1E] text-white">
 
-      {/* Hero image */}
+      {/* Hero image — use the proxy route to avoid embedding a 40+ KB base64 string in HTML */}
       {imgs.length > 0 && (
         <div className="relative w-full" style={{ maxHeight: 420, overflow: 'hidden' }}>
           <img
-            src={imgs[0]}
+            src={`/api/listing-image/${ad.id}`}
             alt={ad.title}
             className="w-full object-cover"
             style={{ height: 420 }}
