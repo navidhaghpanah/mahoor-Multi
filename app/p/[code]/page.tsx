@@ -151,7 +151,7 @@ export default async function ListingPage({
 
       {/* Hero image — 4:3 aspect ratio matches most real-estate photos, minimising crop */}
       {imgs.length > 0 && (
-        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '4/3', maxHeight: 480 }}>
+        <div className="relative w-full mx-auto overflow-hidden" style={{ aspectRatio: '3/2', maxWidth: 720 }}>
           <img
             src={`/api/listing-image/${ad.id}`}
             alt={ad.title}
