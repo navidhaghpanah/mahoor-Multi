@@ -149,14 +149,13 @@ export default async function ListingPage({
   return (
     <div className="min-h-screen bg-[#030D1E] text-white">
 
-      {/* Hero image — use the proxy route to avoid embedding a 40+ KB base64 string in HTML */}
+      {/* Hero image — 4:3 aspect ratio matches most real-estate photos, minimising crop */}
       {imgs.length > 0 && (
-        <div className="relative w-full" style={{ maxHeight: 420, overflow: 'hidden' }}>
+        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '4/3', maxHeight: 480 }}>
           <img
             src={`/api/listing-image/${ad.id}`}
             alt={ad.title}
-            className="w-full object-cover"
-            style={{ height: 420 }}
+            className="w-full h-full object-cover object-center"
           />
           {imgs.length > 1 && (
             <span className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
