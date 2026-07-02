@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { AuthScreen } from "./AuthScreen";
 import { AppShell } from "./AppShell";
@@ -14,6 +15,7 @@ import { ManagerApp } from "./ManagerApp";
 const SESSION_KEY = "mahoor_session";
 
 export function ClientAppRouter() {
+  const pathname = usePathname();
   const [user, setUser]           = useState<any>(null);
   const [activeTab, setActiveTab] = useState("listings");
   const [isAiOpen, setIsAiOpen]   = useState(false);
@@ -41,6 +43,8 @@ export function ClientAppRouter() {
     setUser(null);
     setActiveTab("listings");
   };
+
+  if (pathname.startsWith('/p/')) return null;
 
   if (sessionLoading) {
     return (
