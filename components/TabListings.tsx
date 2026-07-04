@@ -195,9 +195,9 @@ export function TabListings() {
               >
                 {/* Image */}
                 <div className="relative h-[200px] overflow-hidden bg-[#1E293B]">
-                  {listing.imageUrl ? (
+                  {listing.id ? (
                     <img
-                      src={listing.imageUrl}
+                      src={`/api/listing-image/${listing.id}`}
                       alt={listing.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}

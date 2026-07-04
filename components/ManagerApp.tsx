@@ -158,8 +158,8 @@ function PendingQueue({
               className="flex items-center gap-4 bg-[#1E293B]/60 border border-[#1E293B] hover:border-red-500/20 rounded-xl p-4 transition-colors"
             >
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#0C1A2E] flex-shrink-0">
-                {listing.imageUrl
-                  ? <img src={listing.imageUrl} alt="" className="w-full h-full object-cover" />
+                {listing.id
+                  ? <img src={`/api/listing-image/${listing.id}`} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   : <div className="w-full h-full flex items-center justify-center">
                       <Building2 className="w-6 h-6 text-gray-700" />
                     </div>
@@ -424,8 +424,8 @@ function AdvisorDetail({ advisor, onBack, managerPhone }: { advisor: AdvisorStat
                 className="flex items-center gap-3 bg-[#1E293B]/50 rounded-xl p-3 border border-[#1E293B]"
               >
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#0C1A2E] flex-shrink-0">
-                  {l.imageUrl
-                    ? <img src={l.imageUrl} alt="" className="w-full h-full object-cover" />
+                  {l.id
+                    ? <img src={`/api/listing-image/${l.id}`} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     : <div className="w-full h-full flex items-center justify-center">
                         <Building2 className="w-5 h-5 text-gray-700" />
                       </div>

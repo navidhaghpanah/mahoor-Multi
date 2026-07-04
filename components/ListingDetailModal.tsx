@@ -28,7 +28,12 @@ export function ListingDetailModal({ listing, onClose, onShowMap }: ListingDetai
 
   if (!listing) return null;
   const badge = BADGE[listing.deal] ?? { label: listing.deal, color: "bg-gray-600" };
-  const gallery = listing.images && listing.images.length > 0 ? listing.images : (listing.imageUrl ? [listing.imageUrl] : []);
+  const imgCount = listing.images && listing.images.length > 0
+    ? listing.images.length
+    : (listing.imageUrl ? 1 : 0);
+  const gallery = listing.id
+    ? Array.from({ length: imgCount }, (_, i) => `/api/listing-image/${listing.id}${i > 0 ? `?i=${i}` : ''}`)
+    : [];
 
   return (
     <AnimatePresence>

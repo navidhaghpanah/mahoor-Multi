@@ -22,12 +22,11 @@ export async function GET(
     .select({
       images:   realEstateAds.images,
       imageUrl: realEstateAds.imageUrl,
-      approved: realEstateAds.isManagerApproved,
     })
     .from(realEstateAds)
     .where(eq(realEstateAds.id, id));
 
-  if (!rows.length || !rows[0].approved) return new NextResponse(null, { status: 404 });
+  if (!rows.length) return new NextResponse(null, { status: 404 });
 
   let dataUrl = '';
   if (rows[0].images) {
