@@ -14,6 +14,7 @@ import {
   toPersianDigits,
   listingCode,
 } from '../../../lib/format';
+import ShareButtons from '@/components/ShareButtons';
 
 const APP_URL = 'https://app.mahoorrlste.ir';
 
@@ -248,6 +249,13 @@ export default async function ListingPage({
             </div>
           )}
         </div>
+
+        {/* Share buttons */}
+        <ShareButtons
+          url={`${APP_URL}/p/${listingSlug(ad.id)}`}
+          title={ad.title}
+          description={desc}
+        />
 
         {/* Footer */}
         <p className="text-center text-[#4a6070] text-xs mt-8">
