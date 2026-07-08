@@ -10,3 +10,4 @@ coverage/
 
 # DB backups contain personal data — keep local only
 backups/
+tsconfig.tsbuildinfo
