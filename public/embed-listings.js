@@ -187,10 +187,34 @@
       });
   }
 
+  // Replace any Google Maps embed on the host page with the Neshan office map.
+  var NESHAN_IFRAME = 'https://neshan.org/maps/iframe/places/e6b2021f031276677ff2932eb5210ea0#c36.609-52.274-15z-0p/36.608712415328405/52.26866934659323';
+  var NESHAN_LINK   = 'https://nshn.ir/e6_bfscK2FHD8-';
+
+  function replaceGoogleMap() {
+    var frames = document.querySelectorAll('iframe');
+    for (var i = 0; i < frames.length; i++) {
+      var src = frames[i].getAttribute('src') || '';
+      if (src.indexOf('google.com/maps') !== -1 || src.indexOf('maps.google') !== -1) {
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'border-radius:14px;overflow:hidden;border:1px solid rgba(212,175,55,0.25);direction:rtl;';
+        wrap.innerHTML =
+          '<iframe title="نقشه دفتر املاک ماهور" src="' + NESHAN_IFRAME + '" '
+          + 'style="width:100%;height:' + (frames[i].offsetHeight || 400) + 'px;border:0;display:block;" allowfullscreen loading="lazy"></iframe>'
+          + '<a href="' + NESHAN_LINK + '" target="_blank" rel="noopener" '
+          + 'style="display:block;text-align:center;background:#0C2C54;color:#D4AF37;padding:12px 0;'
+          + 'font-weight:700;font-size:0.9rem;text-decoration:none;font-family:\'Vazirmatn\',\'Tahoma\',sans-serif;">'
+          + '🧭 مسیریابی با نشان</a>';
+        frames[i].parentNode.replaceChild(wrap, frames[i]);
+      }
+    }
+  }
+
   // Run immediately if DOM is ready, otherwise wait
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function () { init(); replaceGoogleMap(); });
   } else {
     init();
+    replaceGoogleMap();
   }
 }());

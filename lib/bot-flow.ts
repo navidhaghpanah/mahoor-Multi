@@ -35,8 +35,8 @@ const MAX_BOT_PHOTOS = 6;
 
 type Step =
   | 'idle' | 'deal_type' | 'prop_type' | 'title' | 'price' | 'location'
-  | 'area' | 'building_area' | 'rooms' | 'phone' | 'photo'
-  | 'myads_phone' | 'myads_pick' | 'myads_field' | 'myads_value';
+  | 'area' | 'building_area' | 'rooms' | 'documents' | 'phone' | 'photo'
+  | 'myads_phone' | 'myads_pick' | 'myads_field' | 'myads_value' | 'myads_photos';
 type Data = Record<string, string>;
 type Key  = { text: string; callback_data: string };
 export type BotMsg = { text: string; keyboard?: Key[][] };
@@ -89,6 +89,7 @@ async function createListing(data: Data, bot: string): Promise<{ id: number; app
     areaSize:      parseInt(data.area  ?? '0', 10) || 0,
     buildingArea:  parseInt(data.buildingArea ?? '0', 10) || null,
     rooms:         parseInt(data.rooms ?? '0', 10) || 0,
+    documents:     data.documents || null,
     imageUrl:      images[0] ?? null,
     images:        images.length > 0 ? JSON.stringify(images) : null,
     submitterPhone,
@@ -118,6 +119,7 @@ function buildSummary(data: Data, result: { approved: boolean; code: string }): 
     `📐 متراژ: ${formatNumber(data.area)} متر`,
     (parseInt(data.buildingArea ?? '0', 10) > 0) ? `🏗 متراژ بنا: ${formatNumber(data.buildingArea)} متر` : '',
     `🛏 خواب: ${toPersianDigits(data.rooms ?? '0')}`,
+    data.documents ? `📄 مدارک: ${data.documents}` : '',
     `📞 تماس: ${toPersianDigits(data.phone ?? '')}`,
   ].filter(Boolean).join('\n');
 
@@ -148,8 +150,10 @@ const editFieldKeyboard: Key[][] = [
   [{ text: '📝 عنوان', callback_data: 'editfield:title' }, { text: '💰 قیمت', callback_data: 'editfield:price' }],
   [{ text: '📍 محل', callback_data: 'editfield:location' }, { text: '📐 متراژ', callback_data: 'editfield:area' }],
   [{ text: '🏗 متراژ بنا', callback_data: 'editfield:buildingArea' }, { text: '🛏 خواب', callback_data: 'editfield:rooms' }],
-  [{ text: '📞 شماره تماس', callback_data: 'editfield:phone' }],
+  [{ text: '📄 مدارک', callback_data: 'editfield:documents' }, { text: '📞 شماره تماس', callback_data: 'editfield:phone' }],
+  [{ text: '🖼 عکس‌ها (جایگزینی کامل)', callback_data: 'editfield:photos' }],
 ];
+const editPhotosDoneKeyboard: Key[][] = [[{ text: '✅ پایان و ذخیره عکس‌ها', callback_data: 'finish_edit_photos' }]];
 
 export async function handleUpdate(
   bot: string,
@@ -226,6 +230,14 @@ export async function handleUpdate(
       const val = callbackData?.startsWith('rooms:') ? callbackData.slice(6) : text?.trim();
       if (!val) return [{ text: 'لطفاً تعداد خواب را انتخاب یا تایپ کنید.', keyboard: roomsKeyboard }];
       data.rooms = val;
+      await saveSession(chatId, bot, 'documents', data);
+      return [{ text: '📄 مدارک/سند ملک را بنویسید:\n(مثال: سند تک‌برگ)\nاگر ندارید، کلمه «ندارد» را بفرستید.' }];
+    }
+
+    if (step === 'documents') {
+      if (!text?.trim()) return [{ text: 'لطفاً مدارک/سند را بنویسید یا «ندارد» را بفرستید.' }];
+      const v = text.trim();
+      data.documents = (v === 'ندارد' || v === '0' || v === '۰') ? '' : v;
       await saveSession(chatId, bot, 'phone', data);
       return [{ text: '📞 شماره تماس خود را وارد کنید:' }];
     }
@@ -316,6 +328,13 @@ export async function handleUpdate(
     if (step === 'myads_field') {
       if (!callbackData?.startsWith('editfield:')) return [{ text: 'لطفاً یکی از گزینه‌های بالا را انتخاب کنید.', keyboard: editFieldKeyboard }];
       const field = callbackData.slice(10);
+
+      // Photo edit has its own multi-photo flow — replaces ALL existing photos
+      if (field === 'photos') {
+        await saveSession(chatId, bot, 'myads_photos', { phone: data.phone, editId: data.editId });
+        return [{ text: '🖼 عکس(های) جدید ملک را ارسال کنید (حداقل ۱ و تا ۶ عکس).\n⚠️ عکس‌های قبلی به‌طور کامل جایگزین می‌شوند.' }];
+      }
+
       await saveSession(chatId, bot, 'myads_value', { ...data, editField: field });
       const prompts: Record<string, string> = {
         title:        '📝 عنوان جدید را بنویسید:',
@@ -324,9 +343,46 @@ export async function handleUpdate(
         area:         '📐 متراژ جدید را وارد کنید:',
         buildingArea: '🏗 متراژ بنا جدید را وارد کنید:',
         rooms:        '🛏 تعداد خواب جدید را وارد کنید:',
+        documents:    '📄 مدارک/سند جدید را بنویسید:',
         phone:        '📞 شماره تماس جدید را وارد کنید:',
       };
       return [{ text: prompts[field] ?? 'مقدار جدید را وارد کنید:' }];
+    }
+
+    if (step === 'myads_photos') {
+      let imgs: string[] = data.newImages ? JSON.parse(data.newImages) : [];
+
+      if (photoFileId) {
+        const dataUrl = await downloadPhoto(bot, photoFileId);
+        if (dataUrl) imgs.push(dataUrl);
+        data.newImages = JSON.stringify(imgs);
+        await saveSession(chatId, bot, 'myads_photos', data);
+        if (imgs.length < MAX_BOT_PHOTOS) {
+          return [{
+            text: `🖼 عکس ${toPersianDigits(imgs.length)} دریافت شد.\nعکس بعدی را بفرستید یا «پایان» را بزنید:`,
+            keyboard: editPhotosDoneKeyboard,
+          }];
+        }
+      }
+
+      const wantsFinish =
+        callbackData === 'finish_edit_photos' ||
+        imgs.length >= MAX_BOT_PHOTOS ||
+        (!!text && !photoFileId);
+
+      if (wantsFinish && imgs.length === 0) {
+        return [{ text: '⛔️ حداقل یک عکس لازم است.\n🖼 لطفاً عکس جدید ملک را ارسال کنید:' }];
+      }
+
+      if (wantsFinish) {
+        await db.update(realEstateAds)
+          .set({ imageUrl: imgs[0], images: JSON.stringify(imgs) })
+          .where(eq(realEstateAds.id, Number(data.editId)));
+        await saveSession(chatId, bot, 'idle', {});
+        return [{ text: `✅ ${toPersianDigits(imgs.length)} عکس جدید ذخیره شد و جایگزین عکس‌های قبلی گردید.`, keyboard: newListing }];
+      }
+
+      return [{ text: '🖼 عکس جدید را ارسال کنید:', keyboard: imgs.length ? editPhotosDoneKeyboard : undefined }];
     }
 
     if (step === 'myads_value') {
@@ -340,6 +396,7 @@ export async function handleUpdate(
       else if (field === 'area') updates.areaSize = parseInt(text.replace(/[^0-9]/g, ''), 10) || 0;
       else if (field === 'buildingArea') updates.buildingArea = parseInt(text.replace(/[^0-9]/g, ''), 10) || null;
       else if (field === 'rooms') updates.rooms = parseInt(text.replace(/[^0-9]/g, ''), 10) || 0;
+      else if (field === 'documents') updates.documents = text.trim() === 'ندارد' ? null : text.trim();
       else if (field === 'phone') updates.submitterPhone = text.trim();
 
       if (Object.keys(updates).length > 0) {
