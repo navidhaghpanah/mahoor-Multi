@@ -157,36 +157,32 @@ export default async function ListingPage({
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
 
-        {/* Badges row */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className="bg-[#D4AF37] text-[#030D1E] text-xs font-bold px-3 py-1 rounded">
-            {dealLabel}
-          </span>
-          <span className="text-[#D4AF37] text-xs font-mono px-3 py-1 rounded border border-[#D4AF37]/30 bg-[#D4AF37]/10">
-            {displayCode}
-          </span>
-        </div>
-
         {/* Title */}
-        <h1 className="text-xl font-bold leading-snug mb-3">{ad.title}</h1>
+        <h1 className="text-xl font-bold leading-snug mb-5">{ad.title}</h1>
 
-        {/* Price */}
-        <p className="text-[#D4AF37] text-2xl font-bold mb-5">{formatPrice(ad.price)}</p>
-
-        {/* Stats */}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#a0b0c0] mb-6">
-          {ad.areaSize > 0 && (
-            <span>📐 {formatNumber(ad.areaSize)} متر زمین</span>
-          )}
-          {ad.buildingArea != null && ad.buildingArea > 0 && (
-            <span>🏗 {formatNumber(ad.buildingArea)} متر بنا</span>
-          )}
-          {ad.rooms > 0 && (
-            <span>🛏 {toPersianDigits(ad.rooms)} خواب</span>
-          )}
-          {ad.location && (
-            <span>📍 {ad.location}</span>
-          )}
+        {/* Details — fixed order: کد، نوع، زمین، بنا، خواب، مدارک، موقعیت، قیمت، مشاور */}
+        <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl overflow-hidden mb-6">
+          {([
+            ['کد',      displayCode],
+            ['نوع',     dealLabel],
+            ['زمین',    ad.areaSize > 0 ? `${formatNumber(ad.areaSize)} متر` : ''],
+            ['بنا',     ad.buildingArea && ad.buildingArea > 0 ? `${formatNumber(ad.buildingArea)} متر` : ''],
+            ['خواب',    ad.rooms > 0 ? toPersianDigits(ad.rooms) : ''],
+            ['مدارک',   ad.documents ?? ''],
+            ['موقعیت',  ad.location ?? ''],
+            ['قیمت',    formatPrice(ad.price)],
+            ['مشاور',   advisorName],
+          ] as [string, string][]).filter(([, v]) => v).map(([label, value], i, arr) => (
+            <div
+              key={label}
+              className={`flex items-center justify-between px-4 py-3 text-sm ${i < arr.length - 1 ? 'border-b border-white/[0.06]' : ''}`}
+            >
+              <span className="text-[#a0b0c0]">{label}</span>
+              <span className={`font-semibold text-left ${label === 'قیمت' ? 'text-[#D4AF37] text-base' : 'text-white'}`}>
+                {value}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Description */}

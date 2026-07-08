@@ -18,6 +18,7 @@ export interface Listing {
   size: number;
   buildingArea?: number;
   beds: number;
+  documents?: string;
   phone: string;
   location: string;
   lat?: number;

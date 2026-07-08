@@ -40,6 +40,7 @@ export const realEstateAds = pgTable('real_estate_ads', {
   areaSize: integer('area_size').notNull(),
   buildingArea: integer('building_area'),
   rooms: integer('rooms').notNull(),
+  documents: text('documents'), // مدارک / سند (e.g. سند تک‌برگ)
   imageUrl: text('image_url'),
   images: text('images'),
   submitterPhone: text('submitter_phone'),

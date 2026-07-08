@@ -23,6 +23,7 @@ export async function PATCH(
     if (body.areaSize !== undefined) updates.areaSize = Number(body.areaSize) || 0;
     if (body.buildingArea !== undefined) updates.buildingArea = Number(body.buildingArea) || null;
     if (body.rooms !== undefined) updates.rooms = Number(body.rooms) || 0;
+    if (body.documents !== undefined) updates.documents = body.documents ? String(body.documents) : null;
     if (body.submitterPhone !== undefined) updates.submitterPhone = body.submitterPhone;
     if (body.externalPublications !== undefined) {
       updates.externalPublications =

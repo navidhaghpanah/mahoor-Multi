@@ -37,6 +37,7 @@ export function TabAddListing({ user }: { user?: any }) {
   const [lat, setLat] = useState<number | undefined>();
   const [lng, setLng] = useState<number | undefined>();
   const [buildingArea, setBuildingArea] = useState("");
+  const [documents, setDocuments] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -134,6 +135,7 @@ export function TabAddListing({ user }: { user?: any }) {
         propType,
         price: rawPrice, size: parseInt(size) || 0,
         buildingArea: parseInt(buildingArea) || 0,
+        documents,
         beds: parseInt(beds) || 0, phone, location,
         lat, lng, desc, images,
         advisorName: user?.fullName ?? "کارشناس ماهور",
@@ -288,6 +290,9 @@ export function TabAddListing({ user }: { user?: any }) {
               </div>
 
               <Field label="اتاق خواب" value={beds} onChange={setBeds} placeholder="۳" type="number" />
+
+              <Field label="مدارک (سند)" value={documents} onChange={setDocuments}
+                placeholder="مثال: سند تک‌برگ" />
 
               <div>
                 <label className="block text-sm text-gray-300 font-medium mb-2">قیمت / اجاره (تومان)</label>
