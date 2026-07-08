@@ -15,6 +15,7 @@ import {
   listingCode,
 } from '../../../lib/format';
 import ShareButtons from '@/components/ShareButtons';
+import PublicGallery from '@/components/PublicGallery';
 
 const APP_URL = 'https://app.mahoorrlste.ir';
 
@@ -150,21 +151,8 @@ export default async function ListingPage({
   return (
     <div className="min-h-screen bg-[#030D1E] text-white">
 
-      {/* Hero image — 4:3 aspect ratio matches most real-estate photos, minimising crop */}
-      {imgs.length > 0 && (
-        <div className="relative w-full mx-auto overflow-hidden" style={{ aspectRatio: '3/2', maxWidth: 720 }}>
-          <img
-            src={`/api/listing-image/${ad.id}`}
-            alt={ad.title}
-            className="w-full h-full object-cover object-center"
-          />
-          {imgs.length > 1 && (
-            <span className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-              {toPersianDigits(imgs.length)} عکس
-            </span>
-          )}
-        </div>
-      )}
+      {/* Swipeable gallery — arrows / dots / swipe, all photos via watermark proxy */}
+      <PublicGallery listingId={ad.id} count={imgs.length} title={ad.title} />
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
@@ -208,22 +196,6 @@ export default async function ListingPage({
           </div>
         )}
 
-        {/* Extra images grid — use proxy for every thumbnail, never raw base64 */}
-        {imgs.length > 1 && (
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            {imgs.slice(1).map((_, i) => (
-              <img
-                key={i}
-                src={`/api/listing-image/${ad.id}?i=${i + 1}`}
-                alt=""
-                loading="lazy"
-                className="w-full rounded-lg object-cover border border-[#D4AF37]/20"
-                style={{ height: 90 }}
-              />
-            ))}
-          </div>
-        )}
-
         {/* Advisor contact card */}
         <div className="bg-[#0C2C54] border border-[#D4AF37]/25 rounded-2xl p-5 mb-6">
           <p className="text-[#a0b0c0] text-xs mb-1">مشاور ملکی</p>
@@ -256,6 +228,27 @@ export default async function ListingPage({
           title={ad.title}
           description={desc}
         />
+
+        {/* Office location — Neshan map */}
+        <div className="mt-8 bg-[#0C2C54] border border-[#1E293B] rounded-2xl overflow-hidden">
+          <p className="text-sm font-bold px-4 pt-4 pb-2">📍 موقعیت دفتر املاک ماهور</p>
+          <iframe
+            title="نقشه دفتر املاک ماهور"
+            src="https://neshan.org/maps/iframe/places/e6b2021f031276677ff2932eb5210ea0#c36.609-52.274-15z-0p/36.608712415328405/52.26866934659323"
+            className="w-full border-0"
+            style={{ height: 260 }}
+            allowFullScreen
+            loading="lazy"
+          />
+          <a
+            href="https://nshn.ir/e6_bfscK2FHD8-"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-center bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border-t border-[#D4AF37]/20 text-[#D4AF37] py-3 text-sm font-bold transition-colors"
+          >
+            🧭 مسیریابی با نشان
+          </a>
+        </div>
 
         {/* Footer */}
         <p className="text-center text-[#4a6070] text-xs mt-8">

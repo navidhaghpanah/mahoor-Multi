@@ -157,6 +157,14 @@ export async function POST(req: NextRequest) {
     const images: string[] = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
     const coverImage = images[0] ?? body.imageUrl ?? null;
 
+    // Listings without at least one photo are not accepted
+    if (!coverImage) {
+      return NextResponse.json(
+        { error: 'ثبت آگهی بدون عکس ممکن نیست — حداقل یک عکس اضافه کنید.' },
+        { status: 400 }
+      );
+    }
+
     const inserted = await db
       .insert(realEstateAds)
       .values({

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, Filter, MapPin, Bed, Car, Ruler, Heart, Phone,
@@ -33,6 +34,7 @@ const PROP_TYPES = [
 ];
 
 export function TabListings() {
+  const router = useRouter();
   const [search, setSearch]       = useState("");
   const [dealFilter, setDealFilter] = useState("all");
   const [propFilter, setPropFilter] = useState("all");
@@ -64,6 +66,15 @@ export function TabListings() {
       l.location.toLowerCase().includes(search.toLowerCase());
     return matchDeal && matchProp && matchSearch;
   });
+
+  // Card click → the dedicated public listing page (same page as the site)
+  const openListingPage = (l: Listing) => {
+    if (l.id) {
+      const n = parseInt(l.id, 10);
+      if (n > 0) { router.push(`/p/MH-${String(n).padStart(4, "0")}`); return; }
+    }
+    setDetailListing(l); // fallback: modal for listings without a numeric id
+  };
 
   const toggleFav = (id: string) =>
     setFavorites((prev) => {
@@ -191,7 +202,7 @@ export function TabListings() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
                 className="bg-[#0C2C54]/50 border border-[#1E293B] rounded-2xl overflow-hidden hover:border-[#D4AF37]/30 hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
-                onClick={() => setDetailListing(listing)}
+                onClick={() => openListingPage(listing)}
               >
                 {/* Image */}
                 <div className="relative h-[200px] overflow-hidden bg-[#1E293B]">

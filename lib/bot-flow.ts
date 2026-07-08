@@ -139,7 +139,6 @@ const roomsKeyboard: Key[][] = [
   [{ text: '۰', callback_data: 'rooms:0' }, { text: '۱', callback_data: 'rooms:1' }, { text: '۲', callback_data: 'rooms:2' }],
   [{ text: '۳', callback_data: 'rooms:3' }, { text: '۴', callback_data: 'rooms:4' }, { text: '۵+', callback_data: 'rooms:5' }],
 ];
-const skipPhoto: Key[][] = [[{ text: '⏭ رد کردن (بدون عکس)', callback_data: 'skip_photo' }]];
 const photoMoreKeyboard: Key[][] = [[{ text: '✅ پایان و ثبت آگهی', callback_data: 'finish_photos' }]];
 const newListing: Key[][] = [
   [{ text: '➕ ثبت آگهی جدید', callback_data: 'new_listing' }],
@@ -235,7 +234,7 @@ export async function handleUpdate(
       if (!text?.trim()) return [{ text: 'لطفاً شماره تماس را وارد کنید.' }];
       data.phone = text.trim();
       await saveSession(chatId, bot, 'photo', data);
-      return [{ text: '🖼 عکس(های) ملک را ارسال کنید (اختیاری، تا ۶ عکس)\nیا دکمه رد کردن را بزنید:', keyboard: skipPhoto }];
+      return [{ text: '🖼 عکس(های) ملک را ارسال کنید (حداقل ۱ و تا ۶ عکس):' }];
     }
 
     if (step === 'photo') {
@@ -261,6 +260,11 @@ export async function handleUpdate(
         imgs.length >= MAX_BOT_PHOTOS ||
         (!!text && !photoFileId);
 
+      // At least one photo is required — no photo, no listing
+      if (wantsFinish && imgs.length === 0) {
+        return [{ text: '⛔️ ثبت آگهی بدون عکس ممکن نیست.\n🖼 لطفاً حداقل یک عکس از ملک ارسال کنید:' }];
+      }
+
       if (wantsFinish) {
         try {
           const result = await createListing(data, bot);
@@ -274,8 +278,8 @@ export async function handleUpdate(
       }
 
       return [{
-        text: imgs.length ? 'عکس دیگری بفرستید یا «پایان» را بزنید.' : 'عکس ارسال کنید یا دکمه «رد کردن» را بزنید.',
-        keyboard: imgs.length ? photoMoreKeyboard : skipPhoto,
+        text: imgs.length ? 'عکس دیگری بفرستید یا «پایان» را بزنید.' : '🖼 لطفاً حداقل یک عکس از ملک ارسال کنید:',
+        keyboard: imgs.length ? photoMoreKeyboard : undefined,
       }];
     }
 

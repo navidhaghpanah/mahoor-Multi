@@ -111,6 +111,10 @@ export function TabAddListing({ user }: { user?: any }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !phone) return;
+    if (imageFiles.length === 0) {
+      alert("ثبت آگهی بدون عکس ممکن نیست — حداقل یک عکس از ملک اضافه کنید.");
+      return;
+    }
     setLoading(true);
 
     try {

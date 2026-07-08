@@ -85,14 +85,21 @@
       ? '<a href="tel:' + esc(phone) + '" style="display:block;width:100%;box-sizing:border-box;background:#D4AF37;color:#030D1E;text-align:center;padding:10px 0;border-radius:8px;font-weight:700;font-size:0.9rem;text-decoration:none;margin-top:14px;">&#128222; تماس با مشاور</a>'
       : '';
 
+    // Whole card links to the public listing page; the call button keeps tel: behavior
+    var pageUrl = 'https://app.mahoorrlste.ir/p/MH-' + ('0000' + (parseInt(l.id, 10) || 0)).slice(-4);
+
     return '<div style="background:#0C2C54;border:1px solid rgba(212,175,55,0.2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">'
+      + '<a href="' + pageUrl + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;cursor:pointer;">'
       + imgHtml
+      + '</a>'
       + '<div style="padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;">'
       + badgeHtml
       + (l.code ? '<span style="float:left;color:#6b7e8f;font-size:0.7rem;font-family:monospace;" dir="ltr">' + esc(l.code) + '</span>' : '')
+      + '<a href="' + pageUrl + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">'
       + '<h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 8px;line-height:1.45;clear:both;">' + esc(l.title || 'ملک') + '</h3>'
       + '<p style="color:#D4AF37;font-size:1rem;font-weight:700;margin:0 0 10px;">' + fmtPrice(l.price) + '</p>'
       + detailHtml
+      + '</a>'
       + advisorHtml
       + callHtml
       + '</div></div>';
