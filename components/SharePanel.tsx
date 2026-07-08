@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Share2, Copy, CheckCircle2, MessageCircle, Send, ExternalLink } from "lucide-react";
+import QRCode from "qrcode";
+import { X, Share2, Copy, CheckCircle2, MessageCircle, Send, ExternalLink, QrCode, Download } from "lucide-react";
 import type { Listing } from "../lib/listings";
 import { formatPrice, formatNumber, toPersianDigits } from "../lib/format";
 
@@ -131,10 +132,32 @@ interface SharePanelProps {
 export function SharePanel({ listing, onClose }: SharePanelProps) {
   const [copied,    setCopied]    = useState(false);
   const [copiedKey, setCopiedKey] = useState<TemplateKey | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const caption   = buildCaption(listing);
   const fullText  = caption;
   const templates = buildTemplates(listing);
+  const publicUrl = listingPublicUrl(listing);
+
+  useEffect(() => {
+    QRCode.toDataURL(publicUrl, {
+      width: 480,
+      margin: 2,
+      color: { dark: "#030D1E", light: "#FFFFFF" },
+      errorCorrectionLevel: "M",
+    })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(""));
+  }, [publicUrl]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch { /* clipboard unavailable */ }
+  };
 
   const canNativeShare =
     typeof navigator !== "undefined" && typeof navigator.share === "function";
@@ -277,6 +300,46 @@ export function SharePanel({ listing, onClose }: SharePanelProps) {
               <p className="text-center text-[9px] text-gray-600 mt-0.5">
                 برای دیوار و شیپور، متن آگهی کپی می‌شود — پس از باز شدن سایت جای‌گذاری کنید
               </p>
+            </div>
+
+            {/* ── QR Code آگهی ─────────────────────────────────────── */}
+            <div className="border-t border-[#1E293B] px-5 pb-5">
+              <p className="text-[#D4AF37] text-xs font-bold pt-4 mb-3 flex items-center gap-1.5">
+                <QrCode className="w-3.5 h-3.5" />
+                QR Code آگهی
+              </p>
+              {qrDataUrl ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-white rounded-xl p-2">
+                    <img src={qrDataUrl} alt="QR Code" className="w-36 h-36" />
+                  </div>
+                  <p className="text-[10px] text-gray-500 text-center" dir="ltr">{publicUrl}</p>
+                  <div className="grid grid-cols-2 gap-2 w-full">
+                    <a
+                      href={qrDataUrl}
+                      download={`mahoor-${listing.code ? listing.code.replace(/[۰-۹]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 0x06f0 + 0x30)) : listing.id}-qr.png`}
+                      className="flex items-center justify-center gap-1.5 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37] py-2.5 rounded-xl text-xs font-semibold transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      دانلود QR
+                    </a>
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex items-center justify-center gap-1.5 bg-[#1E293B] hover:bg-[#243447] border border-[#1E293B] text-gray-300 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+                    >
+                      {linkCopied
+                        ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                        : <Copy className="w-3.5 h-3.5" />}
+                      {linkCopied ? "کپی شد!" : "کپی لینک"}
+                    </button>
+                  </div>
+                  <p className="text-center text-[9px] text-gray-600">
+                    برای چاپ روی بنر، تراکت یا برچسب ویترین — اسکن → صفحه آگهی
+                  </p>
+                </div>
+              ) : (
+                <p className="text-center text-xs text-gray-600 py-4">در حال ساخت QR…</p>
+              )}
             </div>
 
             {/* ── متن آماده انتشار ─────────────────────────────────── */}
