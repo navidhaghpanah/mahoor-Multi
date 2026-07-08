@@ -208,6 +208,11 @@
         frames[i].parentNode.replaceChild(wrap, frames[i]);
       }
     }
+    // Rewrite Google-Maps links (e.g. مسیریابی buttons) to the Neshan link
+    var links = document.querySelectorAll('a[href*="maps.app.goo.gl"], a[href*="google.com/maps"], a[href*="maps.google"], a[href*="goo.gl/maps"]');
+    for (var j = 0; j < links.length; j++) {
+      links[j].setAttribute('href', NESHAN_LINK);
+    }
   }
 
   // Run immediately if DOM is ready, otherwise wait
