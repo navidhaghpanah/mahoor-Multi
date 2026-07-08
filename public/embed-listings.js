@@ -195,7 +195,7 @@
     var frames = document.querySelectorAll('iframe');
     for (var i = 0; i < frames.length; i++) {
       var src = frames[i].getAttribute('src') || '';
-      if (src.indexOf('google.com/maps') !== -1 || src.indexOf('maps.google') !== -1) {
+      if (src.indexOf('google.com/maps') !== -1 || src.indexOf('maps.google') !== -1 || src.indexOf('openstreetmap.org') !== -1) {
         var wrap = document.createElement('div');
         wrap.style.cssText = 'border-radius:14px;overflow:hidden;border:1px solid rgba(212,175,55,0.25);direction:rtl;';
         wrap.innerHTML =
