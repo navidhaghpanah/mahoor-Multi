@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Home, PlusSquare, Share2, BarChart2, User, Sparkles, Phone } from "lucide-react";
+import { Home, PlusSquare, Share2, BarChart2, User, Sparkles, Phone, LogOut } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 
@@ -10,11 +10,12 @@ interface AppShellProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   onOpenAi: () => void;
+  onLogout: () => void;
   user: any;
   isInsider: boolean;
 }
 
-export function AppShell({ children, activeTab, onTabChange, onOpenAi, user, isInsider }: AppShellProps) {
+export function AppShell({ children, activeTab, onTabChange, onOpenAi, onLogout, user, isInsider }: AppShellProps) {
   // Insiders (advisors + manager) get the full panel.
   // Public visitors get Listings + Add Listing only (AI via the header button).
   const tabs = isInsider
@@ -87,6 +88,15 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user, isI
             <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
             <span className="font-medium text-sm">دستیار هوشمند AI</span>
           </button>
+          {user && (
+            <button
+              onClick={() => { if (confirm('از حساب کاربری خارج می‌شوید؟')) onLogout(); }}
+              className="w-full flex items-center justify-center gap-2 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 py-2 rounded-xl transition-colors text-xs font-medium mt-2"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              خروج از حساب
+            </button>
+          )}
           <p className="text-center text-[10px] text-gray-600 mt-3">
             &copy; {new Date().getFullYear()} &mdash; mahoorrlste.ir
           </p>
@@ -109,12 +119,23 @@ export function AppShell({ children, activeTab, onTabChange, onOpenAi, user, isI
             <p className="text-[9px] text-[#D4AF37]">محمودآباد</p>
           </div>
         </div>
-        <button
-          onClick={onOpenAi}
-          className="w-9 h-9 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-xl flex items-center justify-center text-[#D4AF37] hover:bg-[#D4AF37]/20 transition-colors"
-        >
-          <Sparkles className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          {user && (
+            <button
+              onClick={() => { if (confirm('از حساب کاربری خارج می‌شوید؟')) onLogout(); }}
+              className="w-9 h-9 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
+              title="خروج از حساب"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={onOpenAi}
+            className="w-9 h-9 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-xl flex items-center justify-center text-[#D4AF37] hover:bg-[#D4AF37]/20 transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}

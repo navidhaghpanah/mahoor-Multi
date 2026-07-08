@@ -89,6 +89,7 @@ export function ClientAppRouter() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenAi={() => setIsAiOpen(true)}
+        onLogout={handleLogout}
         user={user}
         isInsider={isInsider}
       >

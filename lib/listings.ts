@@ -19,6 +19,7 @@ export interface Listing {
   desc?: string;
   advisorName?: string;
   advisorPhone?: string;
+  submitterPhone?: string | null;
   status: "pending" | "approved";
   createdAt?: any;
 }

@@ -63,6 +63,7 @@ function rowToListing(ad: any, advisor?: any) {
     desc,
     advisorName: advisor?.fullName ?? 'کارشناس ماهور',
     advisorPhone: advisor?.phoneNumber ?? '',
+    submitterPhone: ad.submitterPhone ?? null,
     status: ad.isManagerApproved ? 'approved' : 'pending',
     createdAt: ad.timestamp,
   };

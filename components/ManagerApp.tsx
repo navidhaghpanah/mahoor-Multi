@@ -166,13 +166,16 @@ function PendingQueue({
                 }
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm truncate">{listing.title}</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-white font-semibold text-sm truncate">{listing.title}</p>
+                  <span className="flex-shrink-0 text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded-full">عمومی</span>
+                </div>
                 <p className="text-gray-400 text-xs mt-0.5 truncate">
                   {listing.location}
                   {listing.price ? ` · ${Number(listing.price).toLocaleString("fa-IR")} تومان` : ""}
                 </p>
                 <p className="text-gray-600 text-xs mt-0.5">
-                  مشاور: {listing.advisorName || listing.advisorPhone || "—"}
+                  ارسال‌کننده: <span dir="ltr">{listing.submitterPhone || listing.advisorPhone || "—"}</span>
                 </p>
               </div>
               <button

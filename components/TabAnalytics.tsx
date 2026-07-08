@@ -127,20 +127,23 @@ export function TabAnalytics({ user }: { user?: any }) {
                   >
                     {/* Thumbnail */}
                     <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#0C2C54] flex-shrink-0">
-                      {listing.imageUrl
-                        ? <img src={listing.imageUrl} alt={listing.title} className="w-full h-full object-cover" />
+                      {listing.id
+                        ? <img src={`/api/listing-image/${listing.id}`} alt={listing.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         : <div className="w-full h-full flex items-center justify-center"><Building2 className="w-6 h-6 text-gray-600" /></div>
                       }
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm truncate">{listing.title}</p>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-white font-semibold text-sm truncate">{listing.title}</p>
+                        <span className="flex-shrink-0 text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded-full">ارسال عمومی</span>
+                      </div>
                       <p className="text-gray-400 text-xs mt-0.5 truncate">
                         {listing.location} · {listing.price}
                       </p>
                       <p className="text-gray-500 text-xs mt-0.5">
-                        ثبت‌شده توسط: <span dir="ltr">{listing.advisorPhone || listing.phone}</span>
+                        ارسال‌کننده: <span dir="ltr">{listing.submitterPhone || listing.advisorPhone || listing.phone}</span>
                       </p>
                     </div>
 
