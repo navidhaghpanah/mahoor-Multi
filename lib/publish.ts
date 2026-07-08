@@ -9,6 +9,7 @@ import { postListingToTelegram } from './telegram';
 import { postListingToBale } from './bale';
 import { postListingToKenar } from './kenar';
 import { listingCode } from './format';
+import { watermarkDataUrl } from './watermark';
 
 export async function publishApprovedListing(adId: number): Promise<void> {
   try {
@@ -27,6 +28,10 @@ export async function publishApprovedListing(adId: number): Promise<void> {
       try { images = JSON.parse(ad.images); } catch { images = []; }
     }
     if (images.length === 0 && ad.imageUrl) images = [ad.imageUrl];
+
+    // Composite the Mahoor logo onto every photo before posting to channels
+    // (DB originals stay untouched; watermarkDataUrl falls back to the original on error)
+    images = await Promise.all(images.map((img) => watermarkDataUrl(img)));
 
     const payload = {
       title:        ad.title,
