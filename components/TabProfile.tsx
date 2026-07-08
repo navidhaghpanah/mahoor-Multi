@@ -194,8 +194,8 @@ export function TabProfile({ user, onLogout }: { user: any; onLogout: () => void
                   >
                     {/* Thumbnail */}
                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#1E293B] flex-shrink-0">
-                      {l.imageUrl
-                        ? <img src={l.imageUrl} alt={l.title} className="w-full h-full object-cover" />
+                      {l.id
+                        ? <img src={`/api/listing-image/${l.id}`} alt={l.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                         : <div className="w-full h-full flex items-center justify-center"><Building2 className="w-6 h-6 text-gray-600" /></div>
                       }
                     </div>
@@ -231,11 +231,11 @@ export function TabProfile({ user, onLogout }: { user: any; onLogout: () => void
 
       {/* Logout */}
       <button
-        onClick={onLogout}
-        className="flex items-center gap-2 text-red-400 hover:bg-red-500/10 px-6 py-3 rounded-xl transition-colors font-bold justify-center border border-red-500/20 hover:border-red-500/40"
+        onClick={() => { if (confirm('از حساب کاربری خارج می‌شوید؟')) onLogout(); }}
+        className="flex items-center gap-2 text-red-400 hover:bg-red-500/10 active:bg-red-500/20 px-6 py-3 rounded-xl transition-colors font-bold justify-center border border-red-500/20 hover:border-red-500/40 w-full"
       >
         <LogOut className="w-5 h-5" />
-        خروج از پنل
+        خروج از حساب
       </button>
     </div>
   );

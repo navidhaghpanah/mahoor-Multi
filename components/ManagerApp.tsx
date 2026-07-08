@@ -757,11 +757,11 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
             <span className="font-medium text-sm">دستیار هوشمند AI</span>
           </button>
           <button
-            onClick={onLogout}
+            onClick={() => { if (confirm('از حساب کاربری خارج می‌شوید؟')) onLogout(); }}
             className="w-full flex items-center justify-center gap-2 text-gray-600 hover:text-red-400 text-sm py-2 rounded-xl transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            <span>خروج از سیستم</span>
+            <span>خروج از حساب</span>
           </button>
           <p className="text-center text-[10px] text-gray-700 tracking-widest font-semibold select-none">NH</p>
         </div>
