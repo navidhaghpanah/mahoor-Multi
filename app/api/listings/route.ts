@@ -29,7 +29,12 @@ const DEAL_MAP: Record<string, string> = {
   'اجاره شبانه': 'daily-rent', 'daily-rent': 'daily-rent',
 };
 
-function rowToListing(ad: any, advisor?: any) {
+// Some submissions store the phone with Persian digits (e.g. ۰۹۱۲…) — normalize for comparison
+function normalizePhone(p: string | null | undefined): string {
+  return String(p ?? '').replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+}
+
+function rowToListing(ad: any, advisor?: any, advisorPhones?: Set<string>) {
   // Strip internal phone/source notes added by bot-flow from the public description
   const rawDesc = ad.description ?? '';
   const desc = rawDesc
@@ -64,6 +69,10 @@ function rowToListing(ad: any, advisor?: any) {
     advisorName: advisor?.fullName ?? 'کارشناس ماهور',
     advisorPhone: advisor?.phoneNumber ?? '',
     submitterPhone: ad.submitterPhone ?? null,
+    // Public submission = submitter phone doesn't belong to any registered advisor
+    isPublicSubmission: advisorPhones
+      ? !!ad.submitterPhone && !advisorPhones.has(normalizePhone(ad.submitterPhone))
+      : false,
     status: ad.isManagerApproved ? 'approved' : 'pending',
     createdAt: ad.timestamp,
   };
@@ -87,7 +96,10 @@ export async function GET(req: NextRequest) {
       .where(condition)
       .orderBy(desc(realEstateAds.timestamp));
 
-    const listings = rows.map((r: any) => rowToListing(r.real_estate_ads, r.users));
+    const allUsers = await db.select({ phone: users.phoneNumber }).from(users);
+    const advisorPhones = new Set(allUsers.map((u: any) => normalizePhone(u.phone)).filter(Boolean));
+
+    const listings = rows.map((r: any) => rowToListing(r.real_estate_ads, r.users, advisorPhones));
     const origin = req.headers.get('origin');
     return NextResponse.json({ listings }, { headers: corsHeaders(origin) });
   } catch (error: any) {

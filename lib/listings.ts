@@ -20,6 +20,7 @@ export interface Listing {
   advisorName?: string;
   advisorPhone?: string;
   submitterPhone?: string | null;
+  isPublicSubmission?: boolean;
   status: "pending" | "approved";
   createdAt?: any;
 }

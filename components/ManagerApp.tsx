@@ -120,6 +120,49 @@ function PendingQueue({
   onRefresh: () => void;
   loading: boolean;
 }) {
+  const advisorPending = pending.filter((l) => !l.isPublicSubmission);
+  const publicPending  = pending.filter((l) => l.isPublicSubmission);
+
+  const renderCard = (listing: Listing, isPublic: boolean) => (
+    <div
+      key={listing.id}
+      className="flex items-center gap-4 bg-[#1E293B]/60 border border-[#1E293B] hover:border-red-500/20 rounded-xl p-4 transition-colors"
+    >
+      <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#0C1A2E] flex-shrink-0">
+        {listing.id
+          ? <img src={`/api/listing-image/${listing.id}`} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          : <div className="w-full h-full flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-gray-700" />
+            </div>
+        }
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-white font-semibold text-sm truncate">{listing.title}</p>
+        <p className="text-gray-400 text-xs mt-0.5 truncate">
+          {listing.location}
+          {listing.price ? ` · ${Number(listing.price).toLocaleString("fa-IR")} تومان` : ""}
+        </p>
+        <p className="text-gray-600 text-xs mt-0.5">
+          {isPublic
+            ? <>ارسال‌کننده: <span dir="ltr">{listing.submitterPhone || "—"}</span> · انتشار با مشخصات حیدری</>
+            : <>مشاور: {listing.advisorName || listing.advisorPhone || "—"}</>
+          }
+        </p>
+      </div>
+      <button
+        onClick={() => listing.id && onApprove(listing.id)}
+        disabled={approvingId === listing.id}
+        className="flex-shrink-0 flex items-center gap-1.5 bg-green-600/15 hover:bg-green-600 border border-green-600/30 hover:border-green-600 text-green-400 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+      >
+        {approvingId === listing.id
+          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          : <CheckCircle className="w-3.5 h-3.5" />
+        }
+        تأیید
+      </button>
+    </div>
+  );
+
   return (
     <div className="bg-[#0C1A2E] border border-[#1E293B] rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
@@ -151,46 +194,29 @@ function PendingQueue({
           <p className="text-sm">هیچ آگهی در انتظار تأیید وجود ندارد</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {pending.map((listing) => (
-            <div
-              key={listing.id}
-              className="flex items-center gap-4 bg-[#1E293B]/60 border border-[#1E293B] hover:border-red-500/20 rounded-xl p-4 transition-colors"
-            >
-              <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#0C1A2E] flex-shrink-0">
-                {listing.id
-                  ? <img src={`/api/listing-image/${listing.id}`} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                  : <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="w-6 h-6 text-gray-700" />
-                    </div>
-                }
+        <div className="flex flex-col gap-6">
+          {advisorPending.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-gray-400 mb-3 flex items-center gap-2">
+                آگهی‌های مشاورین
+                <span className="bg-[#D4AF37]/15 text-[#D4AF37] px-2 py-0.5 rounded-full">{advisorPending.length}</span>
+              </p>
+              <div className="flex flex-col gap-3">
+                {advisorPending.map((l) => renderCard(l, false))}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className="text-white font-semibold text-sm truncate">{listing.title}</p>
-                  <span className="flex-shrink-0 text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded-full">عمومی</span>
-                </div>
-                <p className="text-gray-400 text-xs mt-0.5 truncate">
-                  {listing.location}
-                  {listing.price ? ` · ${Number(listing.price).toLocaleString("fa-IR")} تومان` : ""}
-                </p>
-                <p className="text-gray-600 text-xs mt-0.5">
-                  ارسال‌کننده: <span dir="ltr">{listing.submitterPhone || listing.advisorPhone || "—"}</span>
-                </p>
-              </div>
-              <button
-                onClick={() => listing.id && onApprove(listing.id)}
-                disabled={approvingId === listing.id}
-                className="flex-shrink-0 flex items-center gap-1.5 bg-green-600/15 hover:bg-green-600 border border-green-600/30 hover:border-green-600 text-green-400 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
-              >
-                {approvingId === listing.id
-                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  : <CheckCircle className="w-3.5 h-3.5" />
-                }
-                تأیید
-              </button>
             </div>
-          ))}
+          )}
+          {publicPending.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-blue-400 mb-3 flex items-center gap-2">
+                آگهی‌های ارسالی عمومی
+                <span className="bg-blue-500/15 text-blue-400 px-2 py-0.5 rounded-full">{publicPending.length}</span>
+              </p>
+              <div className="flex flex-col gap-3">
+                {publicPending.map((l) => renderCard(l, true))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
