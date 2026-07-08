@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import QRCode from "qrcode";
-import { X, Share2, Copy, CheckCircle2, MessageCircle, Send, ExternalLink, QrCode, Download } from "lucide-react";
-import type { Listing } from "../lib/listings";
+import { X, Share2, Copy, CheckCircle2, MessageCircle, Send, ExternalLink, QrCode, Download, Sparkles, Loader2, Link2 } from "lucide-react";
+import { updateExternalPublications, type Listing, type ExternalPublications, type PublishPlatform } from "../lib/listings";
 import { formatPrice, formatNumber, toPersianDigits } from "../lib/format";
 
 const DEAL_LABEL: Record<string, string> = {
@@ -135,6 +135,22 @@ export function SharePanel({ listing, onClose }: SharePanelProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [linkCopied, setLinkCopied] = useState(false);
 
+  // Manual publish tracking (divar / sheypoor / instagram)
+  const [pubs, setPubs] = useState<ExternalPublications>(listing.externalPublications ?? {});
+  const [pubLinks, setPubLinks] = useState<Record<PublishPlatform, string>>({
+    divar:     listing.externalPublications?.divar?.url ?? "",
+    sheypoor:  listing.externalPublications?.sheypoor?.url ?? "",
+    instagram: listing.externalPublications?.instagram?.url ?? "",
+  });
+  const [savingPub, setSavingPub] = useState<PublishPlatform | null>(null);
+
+  // AI caption generator
+  const [aiPlatform, setAiPlatform] = useState<TemplateKey>("telegram");
+  const [aiCaption, setAiCaption] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiCopied, setAiCopied] = useState(false);
+
   const caption   = buildCaption(listing);
   const fullText  = caption;
   const templates = buildTemplates(listing);
@@ -156,6 +172,75 @@ export function SharePanel({ listing, onClose }: SharePanelProps) {
       await navigator.clipboard.writeText(publicUrl);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
+    } catch { /* clipboard unavailable */ }
+  };
+
+  // Toggle publish status for a platform; when marking published, saves the pasted link too
+  const handleTogglePub = async (p: PublishPlatform) => {
+    if (!listing.id) return;
+    const next: ExternalPublications = { ...pubs };
+    if (next[p]) {
+      delete next[p];
+    } else {
+      next[p] = { url: pubLinks[p].trim() || undefined, at: new Date().toISOString() };
+    }
+    setSavingPub(p);
+    try {
+      await updateExternalPublications(listing.id, next);
+      setPubs(next);
+      listing.externalPublications = next; // keep the in-memory object in sync
+    } catch { alert("خطا در ذخیره وضعیت انتشار"); }
+    setSavingPub(null);
+  };
+
+  const handleSavePubLink = async (p: PublishPlatform) => {
+    if (!listing.id || !pubs[p]) return;
+    const next: ExternalPublications = { ...pubs, [p]: { ...pubs[p], url: pubLinks[p].trim() || undefined } };
+    setSavingPub(p);
+    try {
+      await updateExternalPublications(listing.id, next);
+      setPubs(next);
+      listing.externalPublications = next;
+    } catch { alert("خطا در ذخیره لینک"); }
+    setSavingPub(null);
+  };
+
+  const handleGenerateCaption = async () => {
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const res = await fetch("/api/caption", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          platform: aiPlatform,
+          listing: {
+            title: listing.title,
+            price: formatPrice(listing.price),
+            deal: DEAL_LABEL[listing.deal] ?? listing.deal,
+            location: listing.location,
+            size: listing.size,
+            buildingArea: listing.buildingArea,
+            beds: listing.beds,
+            desc: listing.desc,
+            url: aiPlatform === "divar" || aiPlatform === "sheypoor" ? undefined : publicUrl,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "خطا");
+      setAiCaption(data.text);
+    } catch (e: any) {
+      setAiError(e.message || "خطا در تولید کپشن");
+    }
+    setAiLoading(false);
+  };
+
+  const handleCopyAiCaption = async () => {
+    try {
+      await navigator.clipboard.writeText(aiCaption);
+      setAiCopied(true);
+      setTimeout(() => setAiCopied(false), 2000);
     } catch { /* clipboard unavailable */ }
   };
 
@@ -378,6 +463,140 @@ export function SharePanel({ listing, onClose }: SharePanelProps) {
                 ))}
               </div>
             </div>
+
+            {/* ── کپشن هوشمند AI ───────────────────────────────────── */}
+            <div className="border-t border-[#1E293B] px-5 pb-5">
+              <p className="text-[#D4AF37] text-xs font-bold pt-4 mb-3 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                کپشن هوشمند AI
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {TEMPLATE_LABELS.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => setAiPlatform(id)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${
+                      aiPlatform === id
+                        ? "bg-[#D4AF37] text-black"
+                        : "bg-[#1E293B] text-gray-300 hover:bg-[#243447]"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleGenerateCaption}
+                disabled={aiLoading}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37]/15 to-[#D4AF37]/5 hover:from-[#D4AF37]/25 hover:to-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+              >
+                {aiLoading
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Sparkles className="w-4 h-4" />}
+                {aiLoading ? "در حال نوشتن کپشن…" : "تولید کپشن با هوش مصنوعی"}
+              </button>
+              {aiError && (
+                <p className="text-red-400 text-[11px] mt-2 text-center">{aiError}</p>
+              )}
+              {aiCaption && (
+                <div className="mt-3 bg-[#030D1E] border border-[#D4AF37]/20 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] text-gray-500">
+                      کپشن {TEMPLATE_LABELS.find((t) => t.id === aiPlatform)?.label}
+                    </span>
+                    <button
+                      onClick={handleCopyAiCaption}
+                      className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-[#1E293B] hover:bg-[#243447] text-gray-300 transition-colors"
+                    >
+                      {aiCopied
+                        ? <><CheckCircle2 className="w-3 h-3 text-green-400" /> کپی شد ✅</>
+                        : <><Copy className="w-3 h-3" /> کپی</>}
+                    </button>
+                  </div>
+                  <textarea
+                    readOnly
+                    value={aiCaption}
+                    rows={7}
+                    dir="rtl"
+                    className="w-full bg-transparent text-[11px] text-gray-300 leading-relaxed resize-none focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* ── وضعیت انتشار ──────────────────────────────────────── */}
+            {listing.id && (
+              <div className="border-t border-[#1E293B] px-5 pb-6">
+                <p className="text-[#D4AF37] text-xs font-bold pt-4 mb-1 flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5" />
+                  وضعیت انتشار دستی
+                </p>
+                <p className="text-[9px] text-gray-600 mb-3">
+                  بعد از ثبت آگهی در هر پلتفرم، اینجا علامت بزنید و لینکش را ذخیره کنید
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  {([
+                    { p: "divar" as PublishPlatform,     label: "دیوار",      color: "red" },
+                    { p: "sheypoor" as PublishPlatform,  label: "شیپور",      color: "orange" },
+                    { p: "instagram" as PublishPlatform, label: "اینستاگرام", color: "pink" },
+                  ]).map(({ p, label }) => {
+                    const done = !!pubs[p];
+                    return (
+                      <div key={p} className={`rounded-xl border p-3 transition-colors ${done ? "bg-green-500/5 border-green-500/30" : "bg-[#030D1E] border-[#1E293B]"}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-white flex items-center gap-2">
+                            {done && <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />}
+                            {label}
+                          </span>
+                          <button
+                            onClick={() => handleTogglePub(p)}
+                            disabled={savingPub === p}
+                            className={`text-[11px] px-3 py-1.5 rounded-lg font-semibold transition-all disabled:opacity-50 ${
+                              done
+                                ? "bg-green-500/15 text-green-400 border border-green-500/30 hover:bg-green-500/25"
+                                : "bg-[#1E293B] text-gray-300 hover:bg-[#243447]"
+                            }`}
+                          >
+                            {savingPub === p
+                              ? <Loader2 className="w-3 h-3 animate-spin inline" />
+                              : done ? "منتشر شده ✓" : "علامت‌گذاری انتشار"}
+                          </button>
+                        </div>
+                        {done && (
+                          <div className="flex gap-1.5 mt-2">
+                            <input
+                              type="url"
+                              dir="ltr"
+                              placeholder={`لینک آگهی در ${label}…`}
+                              value={pubLinks[p]}
+                              onChange={(e) => setPubLinks((prev) => ({ ...prev, [p]: e.target.value }))}
+                              className="flex-1 bg-[#0A1929] border border-[#1E293B] rounded-lg px-2.5 py-1.5 text-[10px] text-gray-300 focus:outline-none focus:border-[#D4AF37]/40 placeholder:text-gray-600"
+                            />
+                            <button
+                              onClick={() => handleSavePubLink(p)}
+                              disabled={savingPub === p}
+                              className="px-3 py-1.5 rounded-lg bg-[#1E293B] hover:bg-[#243447] text-gray-300 text-[10px] font-semibold transition-colors disabled:opacity-50"
+                            >
+                              ذخیره
+                            </button>
+                            {pubs[p]?.url && (
+                              <a
+                                href={pubs[p]!.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1.5 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] flex items-center transition-colors hover:bg-[#D4AF37]/20"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>

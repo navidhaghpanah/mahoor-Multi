@@ -49,6 +49,8 @@ export const realEstateAds = pgTable('real_estate_ads', {
   publishToMahoor: boolean('publish_to_mahoor').default(true).notNull(),
   divarId: text('divar_id'),
   sheypoorId: text('sheypoor_id'),
+  // JSON: { divar?: {url,at}, sheypoor?: {url,at}, instagram?: {url,at} } — manual publish tracking
+  externalPublications: text('external_publications'),
   views: integer('views').default(0).notNull(),
   clicks: integer('clicks').default(0).notNull(),
   leads: integer('leads').default(0).notNull(),

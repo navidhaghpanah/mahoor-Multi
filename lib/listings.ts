@@ -1,5 +1,13 @@
 "use client";
 
+/* Manual-publish tracking: which external platforms this listing was posted on. */
+export type PublishPlatform = "divar" | "sheypoor" | "instagram";
+export interface ExternalPublication {
+  url?: string;
+  at?: string; // ISO date of when it was marked published
+}
+export type ExternalPublications = Partial<Record<PublishPlatform, ExternalPublication>>;
+
 export interface Listing {
   id?: string;
   code?: string;
@@ -21,6 +29,7 @@ export interface Listing {
   advisorPhone?: string;
   submitterPhone?: string | null;
   isPublicSubmission?: boolean;
+  externalPublications?: ExternalPublications;
   status: "pending" | "approved";
   createdAt?: any;
 }
@@ -47,6 +56,18 @@ export async function fetchPendingListings(): Promise<Listing[]> {
   } catch {
     return [];
   }
+}
+
+/* Save the manual-publish status/links of a listing (full object replace). */
+export async function updateExternalPublications(
+  id: string,
+  pubs: ExternalPublications
+): Promise<void> {
+  await fetch(`/api/listings/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ externalPublications: pubs }),
+  });
 }
 
 /* Approve a listing (manager action). */

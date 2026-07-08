@@ -69,6 +69,10 @@ function rowToListing(ad: any, advisor?: any, advisorPhones?: Set<string>) {
     advisorName: advisor?.fullName ?? 'کارشناس ماهور',
     advisorPhone: advisor?.phoneNumber ?? '',
     submitterPhone: ad.submitterPhone ?? null,
+    externalPublications: (() => {
+      try { return ad.externalPublications ? JSON.parse(ad.externalPublications) : {}; }
+      catch { return {}; }
+    })(),
     // Public submission = submitter phone doesn't belong to any registered advisor
     isPublicSubmission: advisorPhones
       ? !!ad.submitterPhone && !advisorPhones.has(normalizePhone(ad.submitterPhone))

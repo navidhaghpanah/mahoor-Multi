@@ -5,10 +5,10 @@ import {
   LayoutDashboard, Users, CheckCircle, Clock, Building2,
   RefreshCw, Loader2, TrendingUp, Eye, MousePointerClick,
   LogOut, Sparkles, Star, ArrowRight, AlertCircle,
-  Phone, ChevronLeft,
+  Phone, ChevronLeft, Share2, ExternalLink,
 } from "lucide-react";
 import Image from "next/image";
-import { fetchPendingListings, approveListing, type Listing } from "../lib/listings";
+import { fetchPendingListings, fetchListings, approveListing, type Listing, type PublishPlatform } from "../lib/listings";
 import { AiAssistant } from "./AiAssistant";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -219,6 +219,125 @@ function PendingQueue({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Publications Dashboard (manual publish tracking) ────────────────────────
+
+const PUB_PLATFORMS: { p: PublishPlatform; label: string }[] = [
+  { p: "divar",     label: "دیوار" },
+  { p: "sheypoor",  label: "شیپور" },
+  { p: "instagram", label: "اینستاگرام" },
+];
+
+function PublicationsTab() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading]   = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setListings(await fetchListings());
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const publishedCount = (p: PublishPlatform) =>
+    listings.filter((l) => l.externalPublications?.[p]).length;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">داشبورد انتشار دستی</h1>
+          <p className="text-gray-500 text-sm">وضعیت انتشار آگهی‌های تأییدشده در دیوار، شیپور و اینستاگرام</p>
+        </div>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="w-9 h-9 rounded-lg bg-[#1E293B] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </button>
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-4">
+        {PUB_PLATFORMS.map(({ p, label }) => (
+          <div key={p} className="bg-[#0C1A2E] border border-[#1E293B] rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-[#D4AF37]">
+              {publishedCount(p).toLocaleString("fa-IR")}
+              <span className="text-gray-500 text-sm font-normal"> / {listings.length.toLocaleString("fa-IR")}</span>
+            </p>
+            <p className="text-xs text-gray-400 mt-1">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Matrix */}
+      <div className="bg-[#0C1A2E] border border-[#1E293B] rounded-2xl p-4 md:p-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-7 h-7 text-[#D4AF37] animate-spin" />
+          </div>
+        ) : listings.length === 0 ? (
+          <p className="text-center text-gray-500 py-12 text-sm">آگهی تأییدشده‌ای وجود ندارد</p>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {listings.map((l) => (
+              <div
+                key={l.id}
+                className="flex flex-col sm:flex-row sm:items-center gap-3 bg-[#1E293B]/40 border border-[#1E293B] rounded-xl p-3"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-11 h-11 rounded-lg overflow-hidden bg-[#0C1A2E] flex-shrink-0">
+                    {l.id
+                      ? <img src={`/api/listing-image/${l.id}`} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                      : <div className="w-full h-full flex items-center justify-center"><Building2 className="w-5 h-5 text-gray-700" /></div>
+                    }
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{l.title}</p>
+                    <p className="text-gray-500 text-[11px] truncate">
+                      {l.code ?? ""}{l.location ? ` · ${l.location}` : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5 flex-shrink-0">
+                  {PUB_PLATFORMS.map(({ p, label }) => {
+                    const pub = l.externalPublications?.[p];
+                    const chip = (
+                      <span
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full border flex items-center gap-1 ${
+                          pub
+                            ? "bg-green-500/10 text-green-400 border-green-500/30"
+                            : "bg-[#1E293B] text-gray-600 border-[#1E293B]"
+                        }`}
+                      >
+                        {pub ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                        {label}
+                        {pub?.url && <ExternalLink className="w-2.5 h-2.5" />}
+                      </span>
+                    );
+                    return pub?.url ? (
+                      <a key={p} href={pub.url} target="_blank" rel="noopener noreferrer" title={pub.url}>
+                        {chip}
+                      </a>
+                    ) : (
+                      <span key={p}>{chip}</span>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="text-[11px] text-gray-600">
+        مشاورین از داخل پنل «اشتراک‌گذاری» هر آگهی، وضعیت انتشار و لینک را ثبت می‌کنند.
+      </p>
     </div>
   );
 }
@@ -619,7 +738,7 @@ function AdvisorsTab({
 // ─── Main Manager App ─────────────────────────────────────────────────────────
 
 export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void }) {
-  const [activeTab, setActiveTab]         = useState<"home" | "advisors">("home");
+  const [activeTab, setActiveTab]         = useState<"home" | "advisors" | "publications">("home");
   const [stats, setStats]                 = useState<ManagerStatsData | null>(null);
   const [pending, setPending]             = useState<Listing[]>([]);
   const [loadingStats, setLoadingStats]   = useState(true);
@@ -664,14 +783,15 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
     }
   };
 
-  const goToTab = (tab: "home" | "advisors") => {
+  const goToTab = (tab: "home" | "advisors" | "publications") => {
     setActiveTab(tab);
     setSelectedAdvisor(null);
   };
 
   const tabs = [
-    { id: "home" as const,    label: "داشبورد",  icon: LayoutDashboard },
-    { id: "advisors" as const, label: "مشاورین", icon: Users },
+    { id: "home" as const,         label: "داشبورد",  icon: LayoutDashboard },
+    { id: "advisors" as const,     label: "مشاورین",  icon: Users },
+    { id: "publications" as const, label: "انتشار",   icon: Share2 },
   ];
 
   const renderContent = () => {
@@ -706,6 +826,10 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
           onSelect={setSelectedAdvisor}
         />
       );
+    }
+
+    if (activeTab === "publications") {
+      return <PublicationsTab />;
     }
   };
 

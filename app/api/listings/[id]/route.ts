@@ -24,6 +24,12 @@ export async function PATCH(
     if (body.buildingArea !== undefined) updates.buildingArea = Number(body.buildingArea) || null;
     if (body.rooms !== undefined) updates.rooms = Number(body.rooms) || 0;
     if (body.submitterPhone !== undefined) updates.submitterPhone = body.submitterPhone;
+    if (body.externalPublications !== undefined) {
+      updates.externalPublications =
+        body.externalPublications && typeof body.externalPublications === 'object'
+          ? JSON.stringify(body.externalPublications)
+          : null;
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ ok: true });
