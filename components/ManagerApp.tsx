@@ -13,6 +13,11 @@ import { AiAssistant } from "./AiAssistant";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+// Public detail page for a listing (opened from manager panel lists)
+function listingPageUrl(id: number | string): string {
+  return `/p/MH-${("0000" + (parseInt(String(id), 10) || 0)).slice(-4)}`;
+}
+
 interface RecentListing {
   id: number;
   title: string;
@@ -290,7 +295,13 @@ function PublicationsTab() {
                 key={l.id}
                 className="flex flex-col sm:flex-row sm:items-center gap-3 bg-[#1E293B]/40 border border-[#1E293B] rounded-xl p-3"
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <a
+                  href={l.id ? listingPageUrl(l.id) : "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 flex-1 min-w-0 group"
+                  title="مشاهده صفحه آگهی"
+                >
                   <div className="w-11 h-11 rounded-lg overflow-hidden bg-[#0C1A2E] flex-shrink-0">
                     {l.id
                       ? <img src={`/api/listing-image/${l.id}`} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
@@ -298,12 +309,12 @@ function PublicationsTab() {
                     }
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white text-sm font-semibold truncate">{l.title}</p>
+                    <p className="text-white text-sm font-semibold truncate group-hover:text-[#D4AF37] transition-colors">{l.title}</p>
                     <p className="text-gray-500 text-[11px] truncate">
                       {l.code ?? ""}{l.location ? ` · ${l.location}` : ""}
                     </p>
                   </div>
-                </div>
+                </a>
                 <div className="flex gap-1.5 flex-shrink-0">
                   {PUB_PLATFORMS.map(({ p, label }) => {
                     const pub = l.externalPublications?.[p];
@@ -569,7 +580,9 @@ function AdvisorDetail({ advisor, onBack, managerPhone }: { advisor: AdvisorStat
             {advisor.recentListings.map((l) => (
               <div
                 key={l.id}
-                className="flex items-center gap-3 bg-[#1E293B]/50 rounded-xl p-3 border border-[#1E293B]"
+                onClick={() => { if (l.isManagerApproved) window.open(listingPageUrl(l.id), "_blank"); }}
+                className={`flex items-center gap-3 bg-[#1E293B]/50 rounded-xl p-3 border border-[#1E293B] ${l.isManagerApproved ? "cursor-pointer hover:border-[#D4AF37]/40 transition-colors" : ""}`}
+                title={l.isManagerApproved ? "مشاهده صفحه آگهی" : undefined}
               >
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#0C1A2E] flex-shrink-0">
                   {l.id
