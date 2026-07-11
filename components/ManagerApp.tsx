@@ -5,10 +5,10 @@ import {
   LayoutDashboard, Users, CheckCircle, Clock, Building2,
   RefreshCw, Loader2, TrendingUp, Eye, MousePointerClick,
   LogOut, Sparkles, Star, ArrowRight, AlertCircle,
-  Phone, ChevronLeft, Share2, ExternalLink,
+  Phone, ChevronLeft, Share2, ExternalLink, Trash2,
 } from "lucide-react";
 import Image from "next/image";
-import { fetchPendingListings, fetchListings, approveListing, type Listing, type PublishPlatform } from "../lib/listings";
+import { fetchPendingListings, fetchListings, approveListing, deleteListing, type Listing, type PublishPlatform } from "../lib/listings";
 import { AiAssistant } from "./AiAssistant";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -117,13 +117,15 @@ function KpiCard({
 // ─── Pending Approval Queue ───────────────────────────────────────────────────
 
 function PendingQueue({
-  pending, approvingId, onApprove, onRefresh, loading,
+  pending, approvingId, onApprove, onRefresh, loading, deletingId, onDelete,
 }: {
   pending: Listing[];
   approvingId: string | null;
   onApprove: (id: string) => void;
   onRefresh: () => void;
   loading: boolean;
+  deletingId: string | null;
+  onDelete: (id: string) => void;
 }) {
   const advisorPending = pending.filter((l) => !l.isPublicSubmission);
   const publicPending  = pending.filter((l) => l.isPublicSubmission);
@@ -154,17 +156,30 @@ function PendingQueue({
           }
         </p>
       </div>
-      <button
-        onClick={() => listing.id && onApprove(listing.id)}
-        disabled={approvingId === listing.id}
-        className="flex-shrink-0 flex items-center gap-1.5 bg-green-600/15 hover:bg-green-600 border border-green-600/30 hover:border-green-600 text-green-400 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
-      >
-        {approvingId === listing.id
-          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          : <CheckCircle className="w-3.5 h-3.5" />
-        }
-        تأیید
-      </button>
+      <div className="flex gap-1.5 flex-shrink-0">
+        <button
+          onClick={() => listing.id && onApprove(listing.id)}
+          disabled={approvingId === listing.id || deletingId === listing.id}
+          className="flex items-center gap-1.5 bg-green-600/15 hover:bg-green-600 border border-green-600/30 hover:border-green-600 text-green-400 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+        >
+          {approvingId === listing.id
+            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            : <CheckCircle className="w-3.5 h-3.5" />
+          }
+          تأیید
+        </button>
+        <button
+          onClick={() => listing.id && onDelete(listing.id)}
+          disabled={deletingId === listing.id || approvingId === listing.id}
+          title="حذف آگهی"
+          className="w-9 h-9 flex items-center justify-center bg-red-500/10 hover:bg-red-500 border border-red-500/25 hover:border-red-500 text-red-400 hover:text-white rounded-lg transition-all disabled:opacity-50"
+        >
+          {deletingId === listing.id
+            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            : <Trash2 className="w-3.5 h-3.5" />
+          }
+        </button>
+      </div>
     </div>
   );
 
@@ -239,12 +254,23 @@ const PUB_PLATFORMS: { p: PublishPlatform; label: string }[] = [
 function PublicationsTab() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading]   = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setListings(await fetchListings());
     setLoading(false);
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("این آگهی منتشرشده برای همیشه حذف می‌شود. مطمئن هستید؟")) return;
+    setDeletingId(id);
+    try {
+      await deleteListing(id);
+      setListings((prev) => prev.filter((l) => l.id !== id));
+    } catch { alert("خطا در حذف آگهی"); }
+    setDeletingId(null);
+  };
 
   useEffect(() => { load(); }, [load]);
 
@@ -356,7 +382,7 @@ function PublicationsTab() {
 // ─── Home / Dashboard Tab ─────────────────────────────────────────────────────
 
 function HomeTab({
-  stats, pending, approvingId, onApprove, onRefresh, loading,
+  stats, pending, approvingId, onApprove, onRefresh, loading, deletingId, onDelete,
 }: {
   stats: ManagerStatsData | null;
   pending: Listing[];
@@ -364,6 +390,8 @@ function HomeTab({
   onApprove: (id: string) => void;
   onRefresh: () => void;
   loading: boolean;
+  deletingId: string | null;
+  onDelete: (id: string) => void;
 }) {
   const t = stats?.totals;
 
@@ -412,6 +440,8 @@ function HomeTab({
         onApprove={onApprove}
         onRefresh={onRefresh}
         loading={loading}
+        deletingId={deletingId}
+        onDelete={onDelete}
       />
 
       {/* Advisor quick-summary */}
@@ -756,6 +786,7 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
   const [pending, setPending]             = useState<Listing[]>([]);
   const [loadingStats, setLoadingStats]   = useState(true);
   const [approvingId, setApprovingId]     = useState<string | null>(null);
+  const [deletingId, setDeletingId]       = useState<string | null>(null);
   const [selectedAdvisor, setSelectedAdvisor] = useState<AdvisorStats | null>(null);
   const [isAiOpen, setIsAiOpen]           = useState(false);
 
@@ -796,6 +827,30 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("این آگهی برای همیشه حذف می‌شود. مطمئن هستید؟")) return;
+    setDeletingId(id);
+    try {
+      await deleteListing(id);
+      setPending((prev) => prev.filter((l) => l.id !== id));
+      setStats((prev) =>
+        prev
+          ? {
+              ...prev,
+              totals: {
+                ...prev.totals,
+                totalPending: Math.max(0, prev.totals.totalPending - 1),
+              },
+            }
+          : null
+      );
+    } catch {
+      alert("خطا در حذف آگهی");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const goToTab = (tab: "home" | "advisors" | "publications") => {
     setActiveTab(tab);
     setSelectedAdvisor(null);
@@ -825,6 +880,8 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
           onApprove={handleApprove}
           onRefresh={loadAll}
           loading={loadingStats}
+          deletingId={deletingId}
+          onDelete={handleDelete}
         />
       );
     }

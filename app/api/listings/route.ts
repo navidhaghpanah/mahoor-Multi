@@ -188,7 +188,9 @@ export async function POST(req: NextRequest) {
       .returning();
 
     const newId = inserted[0].id;
-    if (isAdvisorSubmission) void publishApprovedListing(newId);
+    // deferPublish: the web form uploads photos one-by-one after creation and
+    // then triggers the channel post itself via PATCH {publishNow:true}
+    if (isAdvisorSubmission && body.deferPublish !== true) void publishApprovedListing(newId);
 
     return NextResponse.json({ id: String(newId) });
   } catch (error: any) {

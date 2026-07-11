@@ -103,7 +103,7 @@ export function subscribeToListings(cb: (listings: Listing[]) => void) {
 }
 
 export async function addListing(
-  listing: Omit<Listing, "id" | "createdAt">
+  listing: Omit<Listing, "id" | "createdAt"> & { deferPublish?: boolean }
 ): Promise<string> {
   const res = await fetch("/api/listings", {
     method: "POST",
@@ -113,6 +113,32 @@ export async function addListing(
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "خطا در ثبت آگهی");
   return data.id as string;
+}
+
+/* Append one photo to an existing listing (small request; retried once).
+ * Large multi-photo POSTs get dropped by flaky mobile uplinks, so the form
+ * creates the listing with the first photo and appends the rest one-by-one. */
+export async function appendListingImage(id: string, dataUrl: string): Promise<void> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`/api/listings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appendImage: dataUrl }),
+      });
+      if (res.ok) return;
+    } catch { /* retry */ }
+  }
+  throw new Error("خطا در آپلود عکس");
+}
+
+/* Trigger the channel post after all photos are uploaded (approved listings only). */
+export async function publishListingNow(id: string): Promise<void> {
+  await fetch(`/api/listings/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ publishNow: true }),
+  });
 }
 
 /*
@@ -133,7 +159,7 @@ export async function uploadImage(
       onProgress?.(40);
       const img = new Image();
       img.onload = () => {
-        const MAX = 1400;
+        const MAX = 1100; // smaller files — uploads must survive slow/flaky uplinks
         let { width, height } = img;
         if (width > MAX || height > MAX) {
           const ratio = Math.min(MAX / width, MAX / height);
@@ -145,7 +171,7 @@ export async function uploadImage(
         canvas.height = height;
         canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
         onProgress?.(90);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
         onProgress?.(100);
         resolve(dataUrl);
       };

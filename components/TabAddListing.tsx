@@ -6,7 +6,7 @@ import {
   Home, Building2, TreePine, Store, Send, CheckCircle2,
   MapPin, ImagePlus, X, Loader2, Map, Info,
 } from "lucide-react";
-import { addListing, uploadImage, geocodeAddress } from "../lib/listings";
+import { addListing, appendListingImage, publishListingNow, uploadImage, geocodeAddress } from "../lib/listings";
 import { toPersianDigits } from "../lib/format";
 import { MapModal } from "./MapModal";
 
@@ -128,8 +128,16 @@ export function TabAddListing({ user }: { user?: any }) {
           console.warn("Image conversion failed for one file, skipping");
         }
       }
+      if (images.length === 0) {
+        alert("پردازش عکس‌ها ناموفق بود — عکس دیگری انتخاب کنید.");
+        setLoading(false);
+        return;
+      }
 
-      await addListing({
+      // One big multi-photo request gets dropped on slow/flaky connections.
+      // Create the listing with the FIRST photo only, then append the rest
+      // one-by-one in small requests, then fire the channel post.
+      const newId = await addListing({
         title,
         deal,
         propType,
@@ -137,11 +145,22 @@ export function TabAddListing({ user }: { user?: any }) {
         buildingArea: parseInt(buildingArea) || 0,
         documents,
         beds: parseInt(beds) || 0, phone, location,
-        lat, lng, desc, images,
+        lat, lng, desc,
+        images: [images[0]],
         advisorName: user?.fullName ?? "کارشناس ماهور",
         advisorPhone: phone,
         status: "pending",
+        deferPublish: true,
       });
+
+      for (let i = 1; i < images.length; i++) {
+        setUploadProgress(Math.round((i / images.length) * 100));
+        await appendListingImage(newId, images[i]);
+      }
+      setUploadProgress(100);
+
+      // All photos are in — now let the server post to Telegram/Bale
+      await publishListingNow(newId);
 
       const msg =
         `🏠 *آگهی جدید - املاک ماهور*\n\n` +

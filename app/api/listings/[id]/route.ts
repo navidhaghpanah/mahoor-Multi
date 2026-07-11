@@ -13,6 +13,19 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
     const updates: Record<string, any> = {};
+
+    // Append a single image (small request — used by the web form to upload
+    // photos one by one instead of a single huge POST that flaky uplinks drop)
+    if (typeof body.appendImage === 'string' && body.appendImage.startsWith('data:image/')) {
+      const rows = await db.select({ images: realEstateAds.images, imageUrl: realEstateAds.imageUrl })
+        .from(realEstateAds).where(eq(realEstateAds.id, Number(id)));
+      if (!rows.length) return NextResponse.json({ error: 'not found' }, { status: 404 });
+      let imgs: string[] = [];
+      try { imgs = rows[0].images ? JSON.parse(rows[0].images) : []; } catch {}
+      if (imgs.length === 0 && rows[0].imageUrl) imgs = [rows[0].imageUrl];
+      imgs.push(body.appendImage);
+      updates.images = JSON.stringify(imgs);
+    }
     if (body.approve === true) updates.isManagerApproved = true;
     if (body.imageUrl !== undefined) updates.imageUrl = body.imageUrl;
     if (body.images !== undefined) updates.images = Array.isArray(body.images) ? JSON.stringify(body.images) : null;
@@ -32,14 +45,20 @@ export async function PATCH(
           : null;
     }
 
-    if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ ok: true });
+    if (Object.keys(updates).length > 0) {
+      await db.update(realEstateAds).set(updates).where(eq(realEstateAds.id, Number(id)));
     }
 
-    await db.update(realEstateAds).set(updates).where(eq(realEstateAds.id, Number(id)));
-
-    // Fire-and-forget channel post when a listing is (manager- or auto-)approved
-    if (body.approve === true) void publishApprovedListing(Number(id));
+    // Fire-and-forget channel post when a listing is (manager- or auto-)approved.
+    // publishNow: used by the web form after all photos are uploaded, so the
+    // channel post includes the full gallery (only fires if already approved).
+    if (body.approve === true) {
+      void publishApprovedListing(Number(id));
+    } else if (body.publishNow === true) {
+      const rows = await db.select({ approved: realEstateAds.isManagerApproved })
+        .from(realEstateAds).where(eq(realEstateAds.id, Number(id)));
+      if (rows[0]?.approved) void publishApprovedListing(Number(id));
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {
