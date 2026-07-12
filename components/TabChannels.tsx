@@ -1,8 +1,15 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ExternalLink, Copy, CheckCheck, Phone, MapPin, Clock } from "lucide-react";
+import { ExternalLink, Copy, CheckCheck, Phone, MapPin, Clock, Search } from "lucide-react";
 import { useState } from "react";
+
+// Google-search-only lookup — no scraping. We never fetch or display Divar/Sheypoor
+// content ourselves; the click just opens Google's own results page in a new tab.
+function buildDivarSheypoorSearchUrl(query: string): string {
+  const q = `${query} site:divar.ir OR site:sheypoor.com`;
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+}
 
 const CHANNELS = [
   {
@@ -75,6 +82,12 @@ const AGENTS = [
 
 export function TabChannels() {
   const [copied, setCopied] = useState<string | null>(null);
+  const [rivalQuery, setRivalQuery] = useState("ویلا محمودآباد");
+
+  const openRivalSearch = () => {
+    if (!rivalQuery.trim()) return;
+    window.open(buildDivarSheypoorSearchUrl(rivalQuery.trim()), "_blank", "noopener");
+  };
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -133,6 +146,36 @@ export function TabChannels() {
           مسیریابی در گوگل مپ
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
+      </div>
+
+      {/* Divar/Sheypoor rival search — Google results only, no scraping */}
+      <div className="bg-[#0C2C54]/40 border border-[#1E293B] rounded-2xl p-6">
+        <h2 className="font-bold text-white mb-1 text-lg flex items-center gap-2">
+          <Search className="w-5 h-5 text-[#D4AF37]" />
+          جستجوی آگهی‌های مشابه در دیوار و شیپور
+        </h2>
+        <p className="text-xs text-gray-500 mb-4">
+          نتایج گوگل برای مقایسه با آگهی‌های دیوار و شیپور را در تب جدید باز می‌کند —
+          داده‌ای از این سایت‌ها داخل اپ نمایش داده نمی‌شود.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={rivalQuery}
+            onChange={(e) => setRivalQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && openRivalSearch()}
+            placeholder="مثال: آپارتمان ۲ خواب محمودآباد"
+            className="flex-1 bg-[#030D1E] border border-[#1E293B] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 placeholder:text-gray-500"
+          />
+          <button
+            onClick={openRivalSearch}
+            className="flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#B8962E] text-black font-bold px-5 py-3 rounded-xl text-sm transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            جستجو در گوگل
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Social Channels Grid */}
