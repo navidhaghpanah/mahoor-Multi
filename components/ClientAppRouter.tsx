@@ -11,8 +11,7 @@ import { TabChannels } from "./TabChannels";
 import { TabProfile } from "./TabProfile";
 import { AiAssistant } from "./AiAssistant";
 import { ManagerApp } from "./ManagerApp";
-
-const SESSION_KEY = "mahoor_session";
+import { SESSION_KEY } from "../lib/session-key";
 
 export function ClientAppRouter() {
   const pathname = usePathname();

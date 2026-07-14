@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, clientIp } from "../../../lib/rate-limit";
 
 const CORS_ORIGINS = ['https://mahoorrlste.ir', 'http://mahoorrlste.ir'];
 function corsHeaders(origin: string | null) {
@@ -14,6 +15,10 @@ const SYSTEM_INSTRUCTION = `شما یک دستیار هوشمند و فوق‌ا
 
 export async function POST(req: NextRequest) {
   try {
+    if (!rateLimit(`gemini:${clientIp(req)}`, 10, 60_000)) {
+      return NextResponse.json({ text: "تعداد درخواست‌ها زیاد است. کمی صبر کنید." }, { status: 429 });
+    }
+
     const { prompt } = await req.json();
 
     if (!prompt?.trim()) {

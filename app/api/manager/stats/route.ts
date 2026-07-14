@@ -1,12 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../../../src/db/index';
 import { realEstateAds, users } from '../../../../src/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireManager } from '../../../../lib/session';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const auth = await requireManager(req);
+    if (!auth) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+
     const [allAdvisors, allListings] = await Promise.all([
       db
         .select({

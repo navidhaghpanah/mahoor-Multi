@@ -24,10 +24,18 @@ export async function GET(req: NextRequest) {
 
   const webhookUrl = `https://app.mahoorrlste.ir${cfg.webhookPath}`;
 
+  // Reuse WEBHOOK_SETUP_SECRET as Telegram's secret_token too: Telegram echoes
+  // it back on every webhook POST as X-Telegram-Bot-Api-Secret-Token, and the
+  // route handlers reject anything that doesn't match — closes the "anyone who
+  // guesses the URL can spoof updates" gap without a new env var to configure.
   const setRes = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url: webhookUrl, allowed_updates: cfg.allowedUpdates }),
+    body: JSON.stringify({
+      url: webhookUrl,
+      allowed_updates: cfg.allowedUpdates,
+      secret_token: process.env.WEBHOOK_SETUP_SECRET,
+    }),
   });
   const setJson = await setRes.json();
 

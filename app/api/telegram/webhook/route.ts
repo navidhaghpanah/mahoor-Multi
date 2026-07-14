@@ -17,6 +17,16 @@ async function send(chatId: number, text: string, keyboard?: any[][]) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Reject spoofed updates — only Telegram, calling with the secret_token
+    // this webhook was registered with, gets through.
+    const expectedSecret = process.env.WEBHOOK_SETUP_SECRET;
+    if (expectedSecret) {
+      const gotSecret = req.headers.get('x-telegram-bot-api-secret-token');
+      if (gotSecret !== expectedSecret) {
+        return NextResponse.json({ ok: true });
+      }
+    }
+
     const update = await req.json();
 
     let chatId: number | null = null;

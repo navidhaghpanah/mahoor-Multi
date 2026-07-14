@@ -8,7 +8,7 @@ import {
   Phone, ChevronLeft, Share2, ExternalLink, Trash2,
 } from "lucide-react";
 import Image from "next/image";
-import { fetchPendingListings, fetchListings, approveListing, deleteListing, type Listing, type PublishPlatform } from "../lib/listings";
+import { fetchPendingListings, fetchListings, fetchManagerStats, approveListing, deleteListing, type Listing, type PublishPlatform } from "../lib/listings";
 import { AiAssistant } from "./AiAssistant";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -793,7 +793,7 @@ export function ManagerApp({ user, onLogout }: { user: any; onLogout: () => void
   const loadAll = useCallback(async () => {
     setLoadingStats(true);
     const [statsRes, pendingList] = await Promise.all([
-      fetch("/api/manager/stats").then((r) => r.json()).catch(() => null),
+      fetchManagerStats(),
       fetchPendingListings(),
     ]);
     setStats(statsRes ?? null);

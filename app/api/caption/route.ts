@@ -2,6 +2,7 @@
 // Uses the same Gemini key as /api/gemini.
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, clientIp } from "../../../lib/rate-limit";
 
 const PLATFORM_GUIDE: Record<string, string> = {
   divar:
@@ -18,6 +19,10 @@ const PLATFORM_GUIDE: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!rateLimit(`caption:${clientIp(req)}`, 10, 60_000)) {
+      return NextResponse.json({ error: "تعداد درخواست‌ها زیاد است. کمی صبر کنید." }, { status: 429 });
+    }
+
     const { listing, platform } = await req.json();
     if (!listing?.title) {
       return NextResponse.json({ error: "listing required" }, { status: 400 });

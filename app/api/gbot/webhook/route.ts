@@ -4,6 +4,7 @@
 // app/api/telegram/webhook/route.ts (that one stays untouched).
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { rateLimit } from '../../../../lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,6 +93,18 @@ async function askGemini(chatId: number, userText: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
+    // Reject requests that don't carry the secret_token this webhook was
+    // registered with — closes the "anyone who guesses the URL can spoof
+    // Telegram updates" gap. Skipped only if WEBHOOK_SETUP_SECRET was never
+    // configured (keeps local/dev testing possible without it).
+    const expectedSecret = process.env.WEBHOOK_SETUP_SECRET;
+    if (expectedSecret) {
+      const gotSecret = req.headers.get('x-telegram-bot-api-secret-token');
+      if (gotSecret !== expectedSecret) {
+        return NextResponse.json({ ok: true }); // 200 so Telegram doesn't retry; just drop it
+      }
+    }
+
     const update = await req.json();
     const chatId: number | null = update?.message?.chat?.id ?? null;
     const text: string | null = update?.message?.text ?? null;
@@ -99,6 +112,8 @@ export async function POST(req: NextRequest) {
     if (chatId && text) {
       if (text.trim() === '/start') {
         await sendMessage(chatId, WELCOME);
+      } else if (!rateLimit(`gbot:${chatId}`, 15, 60_000)) {
+        await sendMessage(chatId, 'کمی آرام‌تر 🙂 چند لحظه صبر کن و دوباره بپرس.');
       } else {
         const answer = await askGemini(chatId, text);
         pushHistory(chatId, text, answer);

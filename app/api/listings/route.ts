@@ -4,6 +4,7 @@ import { realEstateAds, users } from '../../../src/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { publishApprovedListing } from '../../../lib/publish';
 import { listingCode, parseNumeric } from '../../../lib/format';
+import { rateLimit, clientIp } from '../../../lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +123,13 @@ const HAYDAR_PHONE = '09120996426';
 // Public (non-advisor) submissions stay pending for manager approval.
 export async function POST(req: NextRequest) {
   try {
+    if (!rateLimit(`create-listing:${clientIp(req)}`, 8, 10 * 60_000)) {
+      return NextResponse.json(
+        { error: 'تعداد درخواست‌ها زیاد است. چند دقیقه دیگر دوباره تلاش کنید.' },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
 
     const storedSubmitterPhone = String(body.advisorPhone || body.phone || '') || null;

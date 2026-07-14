@@ -1,5 +1,17 @@
 "use client";
 
+import { SESSION_KEY } from "./session-key";
+
+/* Attaches the signed session token (if the visitor is logged in) as a
+ * Bearer header so the server can authorize mutating requests. Safe to call
+ * with no session — returns an empty object and the server treats it as
+ * anonymous (rejected for manager-only / insider-only actions). */
+function authHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem(SESSION_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 /* Manual-publish tracking: which external platforms this listing was posted on. */
 export type PublishPlatform = "divar" | "sheypoor" | "instagram";
 export interface ExternalPublication {
@@ -66,16 +78,27 @@ export async function updateExternalPublications(
 ): Promise<void> {
   await fetch(`/api/listings/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ externalPublications: pubs }),
   });
+}
+
+/* Fetch the manager dashboard stats (manager-only; requires a session with isManager). */
+export async function fetchManagerStats(): Promise<any> {
+  try {
+    const res = await fetch("/api/manager/stats", { headers: authHeaders(), cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 /* Approve a listing (manager action). */
 export async function approveListing(id: string): Promise<void> {
   await fetch(`/api/listings/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ approve: true }),
   });
 }
@@ -123,7 +146,7 @@ export async function appendListingImage(id: string, dataUrl: string): Promise<v
     try {
       const res = await fetch(`/api/listings/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ appendImage: dataUrl }),
       });
       if (res.ok) return;
@@ -136,7 +159,7 @@ export async function appendListingImage(id: string, dataUrl: string): Promise<v
 export async function publishListingNow(id: string): Promise<void> {
   await fetch(`/api/listings/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ publishNow: true }),
   });
 }
@@ -190,7 +213,7 @@ export async function updateListingImage(_id: string, _imageUrl: string) {
 
 /* Delete a listing by id via the Neon-backed API route. */
 export async function deleteListing(id: string) {
-  await fetch("/api/listings/" + id, { method: "DELETE" });
+  await fetch("/api/listings/" + id, { method: "DELETE", headers: authHeaders() });
 }
 
 /* Geocode an address to lat/lng using Nominatim (OpenStreetMap) */

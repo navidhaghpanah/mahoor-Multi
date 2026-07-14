@@ -3,6 +3,26 @@ import { db } from '../../../../src/db/index';
 import { realEstateAds } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { publishApprovedListing } from '../../../../lib/publish';
+import { getAuthedUser } from '../../../../lib/session';
+
+// Approve/reject actions are manager-only; everything else (edit own listing,
+// append a photo, mark a manual-publish link) is allowed for the listing's
+// owner too — either the registered advisor it belongs to, or the phone that
+// originally submitted it (covers public, non-advisor submissions where
+// advisorId is masked to حیدری before the submitter finishes their upload).
+async function canMutate(
+  id: number,
+  auth: { userId: number | null; phone: string; isManager: boolean } | null
+): Promise<boolean> {
+  if (!auth) return false;
+  if (auth.isManager) return true;
+  const rows = await db
+    .select({ advisorId: realEstateAds.advisorId, submitterPhone: realEstateAds.submitterPhone })
+    .from(realEstateAds)
+    .where(eq(realEstateAds.id, id));
+  if (!rows.length) return false;
+  return rows[0].advisorId === auth.userId || rows[0].submitterPhone === auth.phone;
+}
 
 // PATCH /api/listings/:id  -> update fields (e.g. imageUrl) on a listing
 export async function PATCH(
@@ -11,7 +31,17 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+    const numId = Number(id);
     const body = await req.json();
+
+    const auth = await getAuthedUser(req);
+
+    if (body.approve === true) {
+      if (!auth?.isManager) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    } else if (!(await canMutate(numId, auth))) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    }
+
     const updates: Record<string, any> = {};
 
     // Append a single image (small request — used by the web form to upload
@@ -68,12 +98,19 @@ export async function PATCH(
 
 // DELETE /api/listings/:id
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    await db.delete(realEstateAds).where(eq(realEstateAds.id, Number(id)));
+    const numId = Number(id);
+
+    const auth = await getAuthedUser(req);
+    if (!(await canMutate(numId, auth))) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    }
+
+    await db.delete(realEstateAds).where(eq(realEstateAds.id, numId));
     return NextResponse.json({ ok: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
