@@ -35,8 +35,8 @@ export interface Listing {
   location: string;
   lat?: number;
   lng?: number;
-  imageUrl?: string;
-  images?: string[];
+  images?: string[]; // write-path only (POST body); GET responses never populate this
+  imageCount?: number; // read-path: how many photos exist, fetch pixels via /api/listing-image/{id}?i=N
   desc?: string;
   advisorName?: string;
   advisorPhone?: string;

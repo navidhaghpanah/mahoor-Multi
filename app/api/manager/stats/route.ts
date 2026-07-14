@@ -39,7 +39,6 @@ export async function GET(req: NextRequest) {
           timestamp: realEstateAds.timestamp,
           title: realEstateAds.title,
           location: realEstateAds.location,
-          imageUrl: realEstateAds.imageUrl,
           publishStatus: realEstateAds.publishStatus,
         })
         .from(realEstateAds)
@@ -85,7 +84,6 @@ export async function GET(req: NextRequest) {
           type: l.type,
           price: Number(l.price),
           isManagerApproved: l.isManagerApproved,
-          imageUrl: l.imageUrl,
           timestamp: l.timestamp?.toISOString() ?? null,
         })),
       };

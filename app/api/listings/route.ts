@@ -65,8 +65,11 @@ function rowToListing(ad: any, advisor?: any, advisorPhones?: Set<string>) {
     documents: ad.documents ?? '',
     phone: advisor?.phoneNumber ?? '',
     location: ad.location ?? '',
-    imageUrl: images[0] ?? undefined,
-    images,
+    // Photos are never inlined here — every client already renders images via
+    // the /api/listing-image/{id}?i=N proxy, so shipping full base64 in this
+    // JSON response was pure dead weight (and duplicated: imageUrl used to
+    // just repeat images[0]). imageCount is all any client actually reads.
+    imageCount: images.length,
     desc,
     advisorName: advisor?.fullName ?? 'کارشناس ماهور',
     advisorPhone: advisor?.phoneNumber ?? '',

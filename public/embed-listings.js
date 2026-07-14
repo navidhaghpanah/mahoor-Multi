@@ -43,7 +43,7 @@
 
   function buildCard(l) {
     // Build image gallery: main cover + scrollable thumbnail strip when multiple images exist
-    var imgCount = Array.isArray(l.images) && l.images.length > 0 ? l.images.length : (l.imageUrl ? 1 : 0);
+    var imgCount = typeof l.imageCount === 'number' ? l.imageCount : (Array.isArray(l.images) ? l.images.length : (l.imageUrl ? 1 : 0));
     var imgBase = 'https://app.mahoorrlste.ir/api/listing-image/' + encodeURIComponent(l.id);
     var mainImg = imgCount > 0
       ? '<div style="position:relative;">'

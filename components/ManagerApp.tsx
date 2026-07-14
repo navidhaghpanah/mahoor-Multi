@@ -25,7 +25,6 @@ interface RecentListing {
   type: string;
   price: number;
   isManagerApproved: boolean;
-  imageUrl: string | null;
   timestamp: string | null;
 }
 
