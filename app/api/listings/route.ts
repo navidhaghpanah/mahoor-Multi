@@ -5,6 +5,7 @@ import { eq, desc } from 'drizzle-orm';
 import { publishApprovedListing } from '../../../lib/publish';
 import { listingCode, parseNumeric } from '../../../lib/format';
 import { rateLimit, clientIp } from '../../../lib/rate-limit';
+import { isValidImageDataUrl, filterValidImages } from '../../../lib/image-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -166,8 +167,8 @@ export async function POST(req: NextRequest) {
     }
 
     const priceNum = parseNumeric(body.price);
-    const images: string[] = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
-    const coverImage = images[0] ?? body.imageUrl ?? null;
+    const images: string[] = filterValidImages(body.images);
+    const coverImage = images[0] ?? (isValidImageDataUrl(body.imageUrl) ? body.imageUrl : null);
 
     // Listings without at least one photo are not accepted
     if (!coverImage) {

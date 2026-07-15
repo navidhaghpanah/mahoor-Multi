@@ -4,6 +4,7 @@ import { realEstateAds } from '../../../../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { publishApprovedListing } from '../../../../lib/publish';
 import { getAuthedUser } from '../../../../lib/session';
+import { isValidImageDataUrl, filterValidImages } from '../../../../lib/image-validation';
 
 // Approve/reject actions are manager-only; everything else (edit own listing,
 // append a photo, mark a manual-publish link) is allowed for the listing's
@@ -46,7 +47,10 @@ export async function PATCH(
 
     // Append a single image (small request — used by the web form to upload
     // photos one by one instead of a single huge POST that flaky uplinks drop)
-    if (typeof body.appendImage === 'string' && body.appendImage.startsWith('data:image/')) {
+    if (typeof body.appendImage === 'string') {
+      if (!isValidImageDataUrl(body.appendImage)) {
+        return NextResponse.json({ error: 'invalid image data' }, { status: 400 });
+      }
       const rows = await db.select({ images: realEstateAds.images, imageUrl: realEstateAds.imageUrl })
         .from(realEstateAds).where(eq(realEstateAds.id, Number(id)));
       if (!rows.length) return NextResponse.json({ error: 'not found' }, { status: 404 });
@@ -57,8 +61,13 @@ export async function PATCH(
       updates.images = JSON.stringify(imgs);
     }
     if (body.approve === true) updates.isManagerApproved = true;
-    if (body.imageUrl !== undefined) updates.imageUrl = body.imageUrl;
-    if (body.images !== undefined) updates.images = Array.isArray(body.images) ? JSON.stringify(body.images) : null;
+    if (body.imageUrl !== undefined) {
+      updates.imageUrl = isValidImageDataUrl(body.imageUrl) ? body.imageUrl : null;
+    }
+    if (body.images !== undefined) {
+      const valid = filterValidImages(body.images);
+      updates.images = valid.length > 0 ? JSON.stringify(valid) : null;
+    }
     if (body.title !== undefined) updates.title = body.title;
     if (body.description !== undefined) updates.description = body.description;
     if (body.price !== undefined) updates.price = Number(body.price) || 0;
