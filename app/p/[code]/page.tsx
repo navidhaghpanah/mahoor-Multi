@@ -103,6 +103,9 @@ export async function generateMetadata({
   return {
     title:       `${ad.title} | ماهور`,
     description: desc,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       title:       ad.title,
       description: desc,
@@ -148,8 +151,32 @@ export default async function ListingPage({
   const dealLabel = DEAL_LABELS[ad.type] ?? ad.type;
   const displayCode = listingCode(ad.id); // Persian digits for display
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: ad.title,
+    description: desc || ad.title,
+    url: `${APP_URL}/p/${listingSlug(ad.id)}`,
+    ...(imgs.length ? { image: `${APP_URL}/api/listing-image/${ad.id}` } : {}),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: ad.location ?? undefined,
+      addressCountry: 'IR',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: ad.price,
+      priceCurrency: 'IRR',
+      availability: 'https://schema.org/InStock',
+    },
+  };
+
   return (
     <div className="min-h-screen bg-[#030D1E] text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Swipeable gallery — arrows / dots / swipe, all photos via watermark proxy */}
       <PublicGallery listingId={ad.id} count={imgs.length} title={ad.title} />

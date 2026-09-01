@@ -8,9 +8,15 @@ const vazir = Vazirmatn({
   display: 'swap',
 });
 
+const APP_URL = 'https://app.mahoorrlste.ir';
+
 export const metadata: Metadata = {
-  title: 'Mahoor Real Estate | املاک ماهور',
-  description: 'Luxury Real Estate Management PWA for Northern Iran',
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: 'مجموعه تخصصی املاک ماهور | خرید، فروش و اجاره ملک',
+    template: '%s | ماهور',
+  },
+  description: 'مجموعه تخصصی املاک ماهور — خرید، فروش، رهن و اجاره آپارتمان، ویلا، زمین و املاک تجاری در شمال ایران.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -19,7 +25,15 @@ export const metadata: Metadata = {
   },
   icons: {
     apple: '/icons/apple-icon-180.png',
-  }
+  },
+  openGraph: {
+    title: 'مجموعه تخصصی املاک ماهور',
+    description: 'خرید، فروش، رهن و اجاره آپارتمان، ویلا، زمین و املاک تجاری در شمال ایران.',
+    url: APP_URL,
+    siteName: 'مجموعه تخصصی املاک ماهور',
+    locale: 'fa_IR',
+    type: 'website',
+  },
 };
 
 export const viewport: Viewport = {
