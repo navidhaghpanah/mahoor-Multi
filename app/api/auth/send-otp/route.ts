@@ -32,10 +32,12 @@ export async function POST(req: NextRequest) {
 
     const code  = String(Math.floor(1000 + Math.random() * 9000));
     const token = signOtpToken(normalised, code);
-    void sendOtp(normalised, code);
+    const delivered = await sendOtp(normalised, code);
 
-    // Return code on screen for first login (user hasn't set PIN yet; they'll choose one next)
-    return NextResponse.json({ token, code });
+    // Only echo the code back when the SMS gateway is not configured (local/dev
+    // fallback) or actually failed to deliver — never in normal production use,
+    // otherwise anyone could authenticate as any phone number via this response.
+    return NextResponse.json({ token, code: delivered ? undefined : code });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
